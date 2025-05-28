@@ -3,19 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { FC, ReactNode } from "react";
+import { stripLocale } from "../lib/utils";
 
 interface MenuAsideItemProps {
   children: ReactNode;
   href: string;
 }
-
-const stripLocale = (path: string) => {
-  const parts = path.split("/").filter(Boolean);
-  if (parts[0]?.length === 2) {
-    parts.shift();
-  }
-  return "/" + parts.join("/");
-};
 
 const MenuAsideItem: FC<MenuAsideItemProps> = ({ children, href }) => {
   const pathname = usePathname();

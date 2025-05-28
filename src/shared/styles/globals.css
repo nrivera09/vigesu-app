@@ -14,6 +14,10 @@ html {
   padding-right: 15px;
 }
 
+summary::after {
+  display: none !important;
+}
+
 @plugin "daisyui/theme" {
   name: "dark";
   default: false;

@@ -71,6 +71,7 @@ export default function Home() {
                 <FormGroup>
                   <button
                     type="button"
+                    disabled={loading}
                     className="shadow-md btn btn-neutral btn-block "
                     onClick={handleLogin}
                   >
