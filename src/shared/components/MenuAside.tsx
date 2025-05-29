@@ -1,168 +1,146 @@
 "use client";
 
-import { SlDocs } from "react-icons/sl";
-import MenuAsideItem from "./MenuAsideItem";
-import { VscInspect } from "react-icons/vsc";
-import { TfiRulerPencil } from "react-icons/tfi";
-import { LuUsers } from "react-icons/lu";
-import { GrDocumentConfig } from "react-icons/gr";
-import { IoLayersOutline } from "react-icons/io5";
-import { IoIosLogOut } from "react-icons/io";
+import {
+  SlBookOpen,
+  SlDirections,
+  SlLayers,
+  SlLogin,
+  SlNote,
+  SlOptions,
+  SlPeople,
+  SlSettings,
+  SlUser,
+} from "react-icons/sl";
+import { TbPointFilled } from "react-icons/tb";
+import SidebarSection from "./SidebarSection";
 
 const MenuAside = () => {
   return (
-    <aside
-      className="w-[300px] h-full fixed bg-[#2a3042] hidden sm:hidden md:hidden lg:flex xl:flex justify-start items-center flex-col z-10 overflow-hidden "
-      style={{ boxShadow: "0 .75rem 1.5rem #12263f08" }}
-    >
-      <div className="logo min-h-[100px] items-center justify-center w-full flex">
-        <p className="font-bold text-[20px] text-white">VIGESU</p>
-      </div>
-      <nav className="w-full px-2">
-        <button className="btn w-full size-15 rounded-sm mb-2 gap-3 flex flex-row items-center justify-start">
-          <SlDocs className="size-6" />
-          Ordenes de trabajo
-        </button>
-        <button className="btn w-full size-15 rounded-sm mb-2 gap-3 flex flex-row items-center justify-start">
-          <VscInspect className="size-6" />
-          Inspección
-        </button>
-        <button className="btn w-full size-15 rounded-sm">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="2.5"
-            stroke="currentColor"
-            className="size-[1.2em]"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
+    <aside className="bg-[#191917] min-w-[300px] flex flex-row">
+      <div className="flex-1 h-full flex flex-col">
+        <div
+          className="title w-full h-[60px] flex items-center justify-between px-4 gap-3"
+          style={{ borderBottom: "1px solid #ffffff17" }}
+        >
+          <div className="flex flex-row items-center  gap-2">
+            <div className="avatar avatar-online">
+              <div className="w-10 rounded-full">
+                <img src="https://img.daisyui.com/images/profile/demo/gordon@192.webp" />
+              </div>
+            </div>
+            <div className="flex flex-col justify-center gap-[.5px]">
+              <h1 className="text-white text-sm font-light">
+                Neill Bryan Rivera Livia
+              </h1>
+              <span className="text-gray-500 text-xs">
+                bryan.riv09@live.com
+              </span>
+            </div>
+          </div>
+          <div>
+            <button className="btn btn-square btn-neutral bg-[#ffffff1f] shadow-none border-none">
+              <SlOptions className="text-lg" />
+            </button>
+          </div>
+        </div>
+        <div className="flex-1 flex flex-col  overflow-y-auto ">
+          <div className="dashboard-info p-5 flex flex-col gap-2 min-h-[78px]">
+            <div className="flex items-center justify-start gap-2">
+              <p className="text-white font-medium tracking-[1px] text-xl">
+                Dashboard
+              </p>
+              <p className="bg-red-400 text-white text-xs px-2 w-[23px] h-[14px] flex items-center justify-center rounded-full shadow-2xl">
+                <span className="relative top-[1px]">12</span>
+              </p>
+            </div>
+            <div className="flex flex-row gap-2 text-white text-sm font-light tracking-[.5px] items-center justify-start">
+              <div>
+                12,231 <span className="text-emerald-500 ">Inspections</span>
+              </div>
+              <TbPointFilled className="text-xs text-shadow-emerald-800" />
+
+              <div>
+                12,214 <span className="text-emerald-500">Orders</span>
+              </div>
+            </div>
+          </div>
+          <nav className="p-5 flex flex-1 flex-col ">
+            <SidebarSection
+              title="Orders"
+              links={[
+                {
+                  label: "Work orders",
+                  href: "/dashboard/work-orders",
+                  icon: <SlBookOpen />,
+                },
+                {
+                  label: "Inspections",
+                  href: "#",
+                  icon: <SlNote />,
+                },
+                {
+                  label: "Orders theme",
+                  href: "#",
+                  icon: <SlDirections />,
+                },
+              ]}
             />
-          </svg>
-          Like
-        </button>
-      </nav>
-      <nav className="overflow-y-auto w-full flex-1 max-w-full overflow-x-hidden !hidden">
-        <MenuAsideItem
-          sectionTitle="Órdenes"
-          buttonLabel="Órdenes de trabajo"
-          icon={<SlDocs />}
-          openMenu={true}
-          subItems={[
-            { label: "Todas las órdenes", href: "/dashboard/ordenes" },
-            { label: "Agregar nueva orden", href: "/dashboard/ordenes/nueva" },
-          ]}
-        />
-        <MenuAsideItem
-          buttonLabel="Inspecciones"
-          icon={<VscInspect />}
-          openMenu={false}
-          subItems={[
-            { label: "Todas las inspecciones", href: "/dashboard/ordenes" },
-            {
-              label: "Agregar nueva inspección",
-              href: "/dashboard/ordenes/nueva",
-            },
-          ]}
-        />
-        <MenuAsideItem
-          buttonLabel="Formatos"
-          icon={<TfiRulerPencil />}
-          openMenu={false}
-          subItems={[
-            { label: "Todas los formatos", href: "/dashboard/ordenes" },
-            {
-              label: "Agregar nuevo formato",
-              href: "/dashboard/ordenes/nueva",
-            },
-          ]}
-        />
-        <MenuAsideItem
-          className={"mt-10"}
-          sectionTitle="Inspecciones"
-          buttonLabel="Órdenes de trabajo"
-          icon={<SlDocs />}
-          openMenu={false}
-          subItems={[
-            {
-              label: "Configuración de la inspeccion",
-              href: "/dashboard/ordenes",
-            },
-            { label: "Agregar nueva orden", href: "/dashboard/ordenes/nueva" },
-          ]}
-        />
-        <MenuAsideItem
-          buttonLabel="Clientes"
-          icon={<LuUsers />}
-          openMenu={false}
-          subItems={[
-            {
-              label: "Configuración de la inspeccion",
-              href: "/dashboard/ordenes",
-            },
-            { label: "Agregar nueva orden", href: "/dashboard/ordenes/nueva" },
-          ]}
-        />
-        <MenuAsideItem
-          buttonLabel="Servicios"
-          icon={<GrDocumentConfig />}
-          openMenu={false}
-          subItems={[
-            {
-              label: "Configuración de la inspeccion",
-              href: "/dashboard/ordenes",
-            },
-            { label: "Agregar nueva orden", href: "/dashboard/ordenes/nueva" },
-          ]}
-        />
-        <MenuAsideItem
-          buttonLabel="Grupos"
-          icon={<IoLayersOutline />}
-          openMenu={false}
-          subItems={[
-            {
-              label: "Configuración de la inspeccion",
-              href: "/dashboard/ordenes",
-            },
-            { label: "Agregar nueva orden", href: "/dashboard/ordenes/nueva" },
-          ]}
-        />
-        <MenuAsideItem
-          buttonLabel="Usuarios"
-          icon={<SlDocs />}
-          openMenu={false}
-          subItems={[
-            {
-              label: "Configuración de la inspeccion",
-              href: "/dashboard/ordenes",
-            },
-            { label: "Agregar nueva orden", href: "/dashboard/ordenes/nueva" },
-          ]}
-        />
-        <MenuAsideItem
-          className="mt-10"
-          sectionTitle="Configuración"
-          buttonLabel="Configuración"
-          icon={<VscInspect />}
-          openMenu={false}
-          subItems={[
-            { label: "Todas las inspecciones", href: "/dashboard/ordenes" },
-            {
-              label: "Agregar nueva inspección",
-              href: "/dashboard/ordenes/nueva",
-            },
-          ]}
-        />
-      </nav>
-      <div className="min-h-[50px] flex items-center justify-start w-full !hidden">
-        <MenuAsideItem
-          buttonLabel="Cerrar sesion"
-          icon={<IoIosLogOut />}
-          openMenu={false}
-        />
+            <SidebarSection
+              title="Inspections"
+              links={[
+                {
+                  label: "Inspection configuration",
+                  href: "/dashboard/inspection-configuration",
+                  icon: <SlSettings />,
+                },
+                {
+                  label: "Clients",
+                  href: "#",
+                  icon: <SlPeople />,
+                },
+                {
+                  label: "Services",
+                  href: "#",
+                  icon: <SlPeople />,
+                },
+                {
+                  label: "Groups",
+                  href: "#",
+                  icon: <SlLayers />,
+                },
+                {
+                  label: "Users",
+                  href: "#",
+                  icon: <SlUser />,
+                },
+              ]}
+            />
+            <SidebarSection
+              title="Configuration"
+              links={[
+                {
+                  label: "Configuration",
+                  href: "#",
+                  icon: <SlSettings />,
+                },
+              ]}
+            />
+          </nav>
+        </div>
+        <div
+          className="sign-out min-h-[50px] px-4 flex items-row items-center justify-between"
+          style={{ borderTop: "1px solid #ffffff17" }}
+        >
+          <div className="flex items-center justify-center">
+            <button className="btn btn-square btn-neutral bg-transparent shadow-none border-none">
+              <SlLogin className="text-lg" />
+            </button>
+            <span className="text-white ">Sign Out</span>
+          </div>
+          <div>
+            <span className="text-sm text-gray-400">Version 0.0.1</span>
+          </div>
+        </div>
       </div>
     </aside>
   );

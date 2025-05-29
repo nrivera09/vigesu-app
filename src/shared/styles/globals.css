@@ -6,7 +6,9 @@
 }
 body,
 html {
-  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-size: 13px;
 }
 
 .container {

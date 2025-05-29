@@ -1,5 +1,4 @@
 "use client";
-import Breadcrumb from "@/shared/components/Breadcrumb";
 import MenuAside from "@/shared/components/MenuAside";
 import { stripLocalePage } from "@/shared/lib/utils";
 import { usePathname } from "next/navigation";
@@ -12,22 +11,17 @@ export default function DashboardLayout({
   const pathname = usePathname();
   return (
     <div
-      className={`${stripLocalePage(pathname)} app h-dvh w-full flex flex-row `}
+      className={`${stripLocalePage(
+        pathname
+      )} app h-dvh w-full flex flex-row bg-[#191917] `}
     >
       <MenuAside />
-      <main className="flex-1  flex h-full flex-col pl-0 sm:pl-0 md:pl-0 lg:pl-[300px]">
-        <header
-          style={{ boxShadow: "0 .75rem 1.5rem #12263f08" }}
-          className="  flex flex-row items-center justify-center bg-white w-full sticky top-0 left-0 w-full px-[18px]"
-        >
-          <div className="flex min-h-[70px] flex-row items-center justify-between w-full">
-            <div>Lorem.</div>
-            <div>Assumenda.</div>
+      <main className=" flex-1 rounded-2xl p-2 h-full">
+        <div className="bg-white rounded-xl  h-full shadow-2xl">
+          <div className="min-h-[53px] px-4 flex flex-row items-center justify-between !hidden">
+            <h1 className="font-bold text-xl">Welcome</h1>
           </div>
-        </header>
-        <div className="app bg-[#f8f8fb] p-[18px] min-h-full">
-          <Breadcrumb />
-          {children}
+          <div className="app p-4">{children}</div>
         </div>
       </main>
     </div>
