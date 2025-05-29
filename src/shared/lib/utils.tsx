@@ -13,3 +13,9 @@ export const stripLocalePage = (path: string) => {
   }
   return "page-" + parts.join("/");
 };
+
+export const capitalizeWords = (str: string) =>
+  str.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+
+export const segments = (str: string) =>
+  str.split("/").filter((seg) => seg && !["es", "en"].includes(seg));

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Jost } from "next/font/google";
+import { Poppins } from "next/font/google";
 import { ThemeSwitcher } from "@/features/theme/ThemeSwitcher";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
@@ -7,9 +7,10 @@ import { routing } from "@/i18n/routing";
 import "@/shared/styles/globals.css";
 import LanguageSwitcher from "@/features/locale/LanguageSwitcher";
 
-const jostSans = Jost({
+const jostSans = Poppins({
   subsets: ["latin"],
   display: "swap",
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"], // Add the required weight(s) here
 });
 
 export const metadata: Metadata = {
