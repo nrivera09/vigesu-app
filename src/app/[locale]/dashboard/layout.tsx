@@ -17,11 +17,35 @@ export default function DashboardLayout({
     >
       <MenuAside />
       <main className=" flex-1 rounded-2xl p-2 h-full">
-        <div className="bg-white rounded-xl  h-full shadow-2xl">
-          <div className="min-h-[53px] px-4 flex flex-row items-center justify-between !hidden">
-            <h1 className="font-bold text-xl">Welcome</h1>
+        <div className="bg-white rounded-xl  h-full shadow-2xl overflow-hidden">
+          <div className="app flex flex-col">
+            <div className="flex flex-col shadow-xl">
+              <div
+                className="header-info min-h-[54px] px-5 flex items-center justify-between"
+                style={{ borderBottom: "1px solid #e5e7eb" }}
+              >
+                <div>
+                  <h1 className="text-xl font-bold">Dashboard</h1>
+                </div>
+                <div>s</div>
+              </div>
+              <div
+                className="breadcrumbs text-md px-5 shadow-3xl"
+                style={{ borderBottom: "1px solid #e5e7eb" }}
+              >
+                <ul>
+                  <li>
+                    <a>Home</a>
+                  </li>
+                  <li>
+                    <a>Documents</a>
+                  </li>
+                  <li>Add Document</li>
+                </ul>
+              </div>
+            </div>
+            <div className="content h-dvh">{children}</div>
           </div>
-          <div className="app p-4">{children}</div>
         </div>
       </main>
     </div>

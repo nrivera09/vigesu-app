@@ -13,6 +13,7 @@ import {
 } from "react-icons/sl";
 import { TbPointFilled } from "react-icons/tb";
 import SidebarSection from "./SidebarSection";
+import Link from "next/link";
 
 const MenuAside = () => {
   return (
@@ -38,9 +39,37 @@ const MenuAside = () => {
             </div>
           </div>
           <div>
-            <button className="btn btn-square btn-neutral bg-[#ffffff1f] shadow-none border-none">
-              <SlOptions className="text-lg" />
-            </button>
+            <div className="dropdown dropdown-end">
+              <button
+                tabIndex={0}
+                role="button"
+                className="btn btn-square btn-neutral bg-[#ffffff1f] shadow-none border-none"
+              >
+                <SlOptions className="text-lg" />
+              </button>
+              <ul
+                tabIndex={0}
+                className="dropdown-content menu bg-zinc-800 rounded-box z-1 w-52  shadow-sm"
+                style={{ border: "1px solid #ffffff17" }}
+              >
+                <li>
+                  <Link
+                    href={`#`}
+                    className="text-white min-h-[40px] flex items-center justify-start  hover:text-white  hover:pl-5 transition-all"
+                  >
+                    Opcion 1
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href={`#`}
+                    className="text-white min-h-[40px] flex items-center justify-start  hover:text-white  hover:pl-5 transition-all"
+                  >
+                    Opcion 1
+                  </Link>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
         <div className="flex-1 flex flex-col  overflow-y-auto ">
