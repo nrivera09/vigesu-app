@@ -1,5 +1,4 @@
 "use client";
-import { ThemeSwitcher } from "@/features/theme/ThemeSwitcher";
 import FormGroup from "@/shared/components/FormGroup";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -72,7 +71,7 @@ export default function Home() {
                   <button
                     type="button"
                     disabled={loading}
-                    className="shadow-md btn btn-neutral btn-block "
+                    className="shadow-md btn btn-neutral btn-block min-h-[41px] text-[13px]"
                     onClick={handleLogin}
                   >
                     {loading && (

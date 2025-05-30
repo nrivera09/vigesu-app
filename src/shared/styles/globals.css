@@ -8,16 +8,24 @@ body,
 html {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  font-size: 13px;
+  font-size: 13px !important;
 }
 
 .container {
-  padding-left: 18px;
-  padding-right: 18px;
+  padding-inline: calc(var(--spacing) * 6);
 }
 
 summary::after {
   display: none !important;
+}
+
+.text-lg {
+  font-size: 13px !important;
+}
+
+table tr th,
+table tr td {
+  font-size: 13px;
 }
 
 @plugin "daisyui/theme" {
@@ -60,6 +68,7 @@ summary::after {
   default: false;
   prefersdark: false;
   color-scheme: "light";
+
   --color-base-100: oklch(100% 0 0);
   --color-base-200: oklch(97% 0 0);
   --color-base-300: oklch(92% 0 0);
@@ -88,4 +97,14 @@ summary::after {
   --border: 1px;
   --depth: 1;
   --noise: 0;
+}
+
+[data-theme] {
+  font-size: 13px;
+}
+
+input[type="text"],
+button[popovertarget="rdp-popover"],
+select {
+  /* background-color: #f8f8f8;*/
 }

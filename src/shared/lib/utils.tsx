@@ -19,3 +19,15 @@ export const capitalizeWords = (str: string) =>
 
 export const segments = (str: string) =>
   str.split("/").filter((seg) => seg && !["es", "en"].includes(seg));
+
+export const getLastPathSegmentFormatted = (pathname: string): string => {
+  const segments = pathname.split("/").filter(Boolean); // ["es", "dashboard", "work-orders"]
+  const lastSegment = segments[segments.length - 1]; // "work-orders"
+
+  if (!lastSegment) return "";
+
+  return lastSegment
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};

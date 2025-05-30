@@ -14,10 +14,42 @@ import {
 import { TbPointFilled } from "react-icons/tb";
 import SidebarSection from "./SidebarSection";
 import Link from "next/link";
+import { FC, useEffect } from "react";
+import { useSidebarStore } from "../stores/useSidebarStore";
+import { IoCloseOutline } from "react-icons/io5";
 
-const MenuAside = () => {
+interface MenuAsideProps {
+  className?: string;
+}
+
+const MenuAside: FC<MenuAsideProps> = ({ className }) => {
+  const isSidebarOpen = useSidebarStore((state) => state.isSidebarOpen);
+  const closeSidebar = useSidebarStore((state) => state.closeSidebar);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024 && isSidebarOpen) {
+        closeSidebar();
+      }
+    };
+
+    // Escuchar el resize
+    window.addEventListener("resize", handleResize);
+
+    // Ejecutar al montar (por si ya está abierta)
+    handleResize();
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [isSidebarOpen, closeSidebar]);
+
   return (
-    <aside className="bg-[#191917] min-w-[300px] flex flex-row">
+    <aside
+      className={`bg-[#191917] ${
+        !isSidebarOpen ? `min-w-[300px]` : `w-full`
+      } flex flex-row  ${className}`}
+    >
       <div className="flex-1 h-full flex flex-col">
         <div
           className="title w-full h-[60px] flex items-center justify-between px-4 gap-3"
@@ -38,7 +70,7 @@ const MenuAside = () => {
               </span>
             </div>
           </div>
-          <div>
+          <div className="flex flex-row gap-3">
             <div className="dropdown dropdown-end">
               <button
                 tabIndex={0}
@@ -70,6 +102,13 @@ const MenuAside = () => {
                 </li>
               </ul>
             </div>
+            <button
+              role="button"
+              onClick={closeSidebar}
+              className="btn btn-square btn-neutral bg-[#ffffff1f] shadow-none border-none flex lg:hidden"
+            >
+              <IoCloseOutline className="text-2xl " />
+            </button>
           </div>
         </div>
         <div className="flex-1 flex flex-col  overflow-y-auto ">
