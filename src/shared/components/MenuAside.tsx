@@ -56,7 +56,7 @@ const MenuAside: FC<MenuAsideProps> = ({ className }) => {
           style={{ borderBottom: "1px solid #ffffff17" }}
         >
           <div className="flex flex-row items-center  gap-2">
-            <div className="avatar avatar-online">
+            <div className="avatar avatar-online ">
               <div className="w-10 rounded-full">
                 <img src="https://img.daisyui.com/images/profile/demo/gordon@192.webp" />
               </div>
