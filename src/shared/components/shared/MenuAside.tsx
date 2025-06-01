@@ -15,7 +15,7 @@ import { TbPointFilled } from "react-icons/tb";
 import SidebarSection from "./SidebarSection";
 import Link from "next/link";
 import { FC, useEffect } from "react";
-import { useSidebarStore } from "../stores/useSidebarStore";
+import { useSidebarStore } from "../../stores/useSidebarStore";
 import { IoCloseOutline } from "react-icons/io5";
 
 interface MenuAsideProps {

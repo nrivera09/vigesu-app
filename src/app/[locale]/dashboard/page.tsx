@@ -1,4 +1,4 @@
-import BoxContent from "@/shared/components/BoxContent";
+import BoxContent from "@/shared/components/shared/BoxContent";
 import React from "react";
 
 const page = () => {

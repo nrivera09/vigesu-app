@@ -1,5 +1,5 @@
 "use client";
-import FormGroup from "@/shared/components/FormGroup";
+import FormGroup from "@/shared/components/shared/FormGroup";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";

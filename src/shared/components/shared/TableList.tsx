@@ -1,0 +1,128 @@
+"use client";
+import { useState } from "react";
+import { generateFakeTableData } from "@/shared/data/fakeTableData";
+import { FiTrash2, FiPrinter } from "react-icons/fi";
+import { FaRegEdit, FaRegFilePdf } from "react-icons/fa";
+
+const TableList = () => {
+  const allData = generateFakeTableData(50); // Puedes cambiar a 100 si deseas más
+  const rowsPerPage = 10;
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalPages = Math.ceil(allData.length / rowsPerPage);
+  const startIdx = (currentPage - 1) * rowsPerPage;
+  const currentRows = allData.slice(startIdx, startIdx + rowsPerPage);
+
+  const changePage = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  return (
+    <div className="overflow-x-auto space-y-4">
+      <table className="table table-fixed w-full">
+        <thead>
+          <tr>
+            <th className="w-[10%]">Sel</th>
+            <th className="w-[20%]">Client</th>
+            <th className="w-[20%]">Name</th>
+            <th className="w-[20%]">Status</th>
+            <th className="w-[30%]"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {currentRows.map((item) => (
+            <tr key={item.id} className="cursor-pointer odd:bg-base-200">
+              <th>
+                <input
+                  type="checkbox"
+                  defaultChecked={item.selected}
+                  className="checkbox"
+                />
+              </th>
+              <td className="truncate">{item.worker}</td>
+              <td className="truncate">{item.role}</td>
+              <td className="">
+                <div className="badge badge-soft badge-success">Success</div>
+              </td>
+              <td className="flex items-center gap-2">
+                <button className="btn min-w-[30px] min-h-[30px] p-2 rounded-md">
+                  <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
+                  <span className="hidden xl:block text-[12px] font-normal">
+                    Delete
+                  </span>
+                </button>
+                <button className="btn min-w-[30px] min-h-[30px] p-2 rounded-md">
+                  <FaRegEdit className="w-[20px] h-[20px] opacity-70" />
+                  <span className="hidden xl:block text-[12px] font-normal">
+                    Edit
+                  </span>
+                </button>
+                <button className="btn min-w-[30px] min-h-[30px] p-2 rounded-md">
+                  <FaRegFilePdf className="w-[20px] h-[20px] opacity-70" />
+                  <span className="hidden xl:block text-[12px] font-normal">
+                    Create PDF
+                  </span>
+                </button>
+                <button className="btn min-w-[30px] min-h-[30px] p-2 rounded-md">
+                  <FiPrinter className="w-[20px] h-[20px] opacity-70" />
+                  <span className="hidden xl:block text-[12px] font-normal">
+                    Print
+                  </span>
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Paginación */}
+      {/* Paginación con inicio y fin */}
+      <div className="join flex justify-center">
+        <button
+          className="join-item btn"
+          onClick={() => changePage(1)}
+          disabled={currentPage === 1}
+        >
+          ««
+        </button>
+        <button
+          className="join-item btn"
+          onClick={() => changePage(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          «
+        </button>
+        {[...Array(totalPages)].map((_, idx) => (
+          <button
+            key={idx}
+            className={`join-item btn ${
+              currentPage === idx + 1 ? "btn-active" : ""
+            }`}
+            onClick={() => changePage(idx + 1)}
+          >
+            {idx + 1}
+          </button>
+        ))}
+        <button
+          className="join-item btn"
+          onClick={() => changePage(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          »
+        </button>
+        <button
+          className="join-item btn"
+          onClick={() => changePage(totalPages)}
+          disabled={currentPage === totalPages}
+        >
+          »»
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default TableList;

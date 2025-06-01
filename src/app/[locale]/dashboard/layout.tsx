@@ -1,6 +1,7 @@
 "use client";
-import Breadcrumb from "@/shared/components/Breadcrumb";
-import MenuAside from "@/shared/components/MenuAside";
+import Search from "@/shared/components/pages/dashboard/inspection-configuration/Search";
+import Breadcrumb from "@/shared/components/shared/Breadcrumb";
+import MenuAside from "@/shared/components/shared/MenuAside";
 import { stripLocalePage } from "@/shared/lib/utils";
 import { useSidebarStore } from "@/shared/stores/useSidebarStore";
 import { usePathname } from "next/navigation";
@@ -30,25 +31,25 @@ export default function DashboardLayout({
       />
 
       <main className=" flex-1 rounded-2xl p-2 h-full overflow-hidden">
-        <div className="bg-white rounded-xl  h-full shadow-xl ">
+        <div className="bg-white rounded-xl  h-full shadow-xl overflow-hidden">
           <div
             className="app-header flex flex-row items-center justify-between px-6 min-h-[53px]"
             style={{ borderBottom: "1px solid rgb(0 0 0 / 11%)" }}
           >
             <Breadcrumb />
             <div className="flex flex-row gap-2">
-              <button className="btn bg-black rounded-full pr-3 py-6 hidden sm:flex">
+              <button className="btn bg-[#60285a] rounded-full pr-3 py-6 sm:flex items-center justify-center border-none">
                 <FaRegBell className="text-xl text-white" />
-                <span className="bg-gray-800 py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px]">
+                <span className="bg-[#7c3174] py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px]  ">
                   Messages
                 </span>
                 <div className="bubble bg-red-600 text-white rounded-full px-2 hidden sm:block">
                   12
                 </div>
               </button>
-              <button className="btn bg-black rounded-full pr-3 py-6 hidden sm:flex">
+              <button className="btn bg-[#60285a] rounded-full pr-3 py-6 sm:flex items-center justify-center border-none">
                 <BiSupport className="text-xl text-white" />
-                <span className="bg-gray-800 py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px]">
+                <span className="bg-[#7c3174] py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px]  ">
                   Support
                 </span>
               </button>

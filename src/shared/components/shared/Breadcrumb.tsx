@@ -2,7 +2,7 @@
 
 import React from "react";
 import { usePathname } from "next/navigation";
-import { capitalizeWords, segments } from "../lib/utils";
+import { capitalizeWords, segments } from "../../lib/utils";
 
 const Breadcrumb: React.FC = () => {
   const pathname = usePathname();

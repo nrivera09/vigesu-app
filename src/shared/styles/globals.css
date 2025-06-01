@@ -28,6 +28,12 @@ table tr td {
   font-size: 13px;
 }
 
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @plugin "daisyui/theme" {
   name: "dark";
   default: false;
