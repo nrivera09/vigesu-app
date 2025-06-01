@@ -4,7 +4,16 @@ import { generateFakeTableData } from "@/shared/data/fakeTableData";
 import { FiTrash2, FiPrinter } from "react-icons/fi";
 import { FaRegEdit, FaRegFilePdf } from "react-icons/fa";
 
-const TableList = () => {
+interface TableListProps {
+  objFilter: {
+    client: string;
+    status: string;
+    name: string;
+  };
+}
+
+const TableList = ({ objFilter }: TableListProps) => {
+  console.log("objFilter", objFilter);
   const allData = generateFakeTableData(50); // Puedes cambiar a 100 si deseas más
   const rowsPerPage = 10;
 
@@ -42,10 +51,22 @@ const TableList = () => {
                   className="checkbox"
                 />
               </th>
-              <td className="truncate">{item.worker}</td>
-              <td className="truncate">{item.role}</td>
+              <td className="truncate">{item.client}</td>
+              <td className="truncate">{item.name}</td>
               <td className="">
-                <div className="badge badge-soft badge-success">Success</div>
+                <div
+                  className={`badge badge-dash ${
+                    item.status === "success"
+                      ? "badge-success"
+                      : item.status === "warning"
+                      ? "badge-warning"
+                      : item.status === "error"
+                      ? "badge-error "
+                      : "badge-neutral"
+                  }`}
+                >
+                  {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                </div>
               </td>
               <td className="flex items-center gap-2">
                 <button className="btn min-w-[30px] min-h-[30px] p-2 rounded-md">

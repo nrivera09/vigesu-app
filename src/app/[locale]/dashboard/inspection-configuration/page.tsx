@@ -3,13 +3,23 @@ import TableList from "@/shared/components/shared/TableList";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React from "react";
+import React, { useState } from "react";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
 import { IoSearchOutline } from "react-icons/io5";
 
 const Page = () => {
   const pathname = usePathname();
   const pageTitle = usePageTitle();
+
+  const [objFilter, setObjFilter] = useState<{
+    client: string;
+    status: string;
+    name: string;
+  }>({
+    client: "",
+    status: "",
+    name: "",
+  });
 
   return (
     <>
@@ -42,7 +52,7 @@ const Page = () => {
             </button>
           </div>
         </div>
-        <div className="boddy-app overflow-y-auto pb-[70px]">
+        <div className="boddy-app overflow-y-auto pb-[100px]">
           <div className="container max-w-full mb-5">
             <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
               <legend className="fieldset-legend text-lg">
@@ -57,6 +67,10 @@ const Page = () => {
                     type="text"
                     className="input input-lg text-lg w-full"
                     placeholder="My awesome page"
+                    onChange={(e) =>
+                      setObjFilter({ ...objFilter, client: e.target.value })
+                    }
+                    value={objFilter.client}
                   />
                 </div>
                 <div className="flex flex-col">
@@ -66,6 +80,9 @@ const Page = () => {
                   <select
                     defaultValue="Pick a color"
                     className="select w-full text-lg input-lg"
+                    onChange={(e) =>
+                      setObjFilter({ ...objFilter, status: e.target.value })
+                    }
                   >
                     <option disabled={true}>Pick a color</option>
                     <option>Crimson</option>
@@ -81,6 +98,9 @@ const Page = () => {
                     type="text"
                     className="input input-lg text-lg w-full"
                     placeholder="My awesome page"
+                    onChange={(e) =>
+                      setObjFilter({ ...objFilter, name: e.target.value })
+                    }
                   />
                 </div>
                 <div className="flex flex-col">
@@ -98,7 +118,7 @@ const Page = () => {
             </fieldset>
           </div>
           <div className="container mt-0 max-w-full">
-            <TableList></TableList>
+            <TableList objFilter={objFilter}></TableList>
           </div>
         </div>
       </div>
