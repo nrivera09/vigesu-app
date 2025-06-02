@@ -32,7 +32,7 @@ export default function DashboardLayout({
       <main className=" flex-1 rounded-2xl p-2 h-full overflow-hidden">
         <div className="bg-white rounded-xl  h-full shadow-xl overflow-hidden">
           <div
-            className="app-header flex flex-row items-center justify-between px-6 min-h-[53px]"
+            className="app-header flex flex-row items-center justify-between px-6 min-h-[53px] gap-4"
             style={{ borderBottom: "1px solid rgb(0 0 0 / 11%)" }}
           >
             <Breadcrumb />

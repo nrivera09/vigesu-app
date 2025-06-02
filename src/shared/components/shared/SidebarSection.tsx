@@ -5,8 +5,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { SidebarSectionProps } from "@/shared/types/TGeneral";
+import { useSidebarStore } from "@/shared/stores/useSidebarStore";
 
 const SidebarSection: React.FC<SidebarSectionProps> = ({ title, links }) => {
+  const closeSidebar = useSidebarStore((state) => state.toggleSidebar);
   const pathname = usePathname();
   const cleanPath = pathname?.replace(/^\/(es|en|fr)(\/|$)/, "/");
 
@@ -35,9 +37,10 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({ title, links }) => {
               <li key={index}>
                 <Link
                   href={link.href}
+                  onClick={closeSidebar}
                   className={clsx(
                     "text-white font-light w-full flex items-center justify-start min-h-[40px] px-4 rounded-sm gap-3",
-                    "hover:bg-[#ffffff1f] hover:text-white hover:shadow-xl hover:pl-5 transition-all",
+                    "hover:bg-[#ffffff1f] hover:text-white hover:shadow-xl hover:pl-5 transition-all ",
                     {
                       "bg-[#ffffff1f] text-white": isActive,
                     }

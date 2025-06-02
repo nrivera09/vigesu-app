@@ -1,4 +1,3 @@
-"use client";
 import { useEffect, useState } from "react";
 import { generateFakeTableData } from "@/shared/data/fakeTableData";
 import { FiTrash2, FiPrinter } from "react-icons/fi";
@@ -75,7 +74,7 @@ const TableList = ({ objFilter }: TableListProps) => {
                   {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
                 </div>
               </td>
-              <td className="flex items-center gap-2">
+              <td className="flex items-center gap-2 justify-end">
                 <button className="btn min-w-[30px] min-h-[30px] p-2 rounded-md">
                   <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
                   <span className="hidden xl:block text-[12px] font-normal">

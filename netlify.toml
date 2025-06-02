@@ -2,4 +2,3 @@
   command = "npm run build"
   publish = ".next"
   environment = { NODE_VERSION = "18" }
-

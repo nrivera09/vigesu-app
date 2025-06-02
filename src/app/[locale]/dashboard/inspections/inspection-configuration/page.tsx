@@ -1,5 +1,6 @@
 "use client";
-import TableList from "@/shared/components/shared/TableList";
+import TableList from "@/shared/components/pages/dashboard/inspections/inspection-configuration/TableList";
+import BackButton from "@/shared/components/shared/BackButton";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -41,12 +42,10 @@ const Page = () => {
     <>
       <div className="gap-4 flex flex-col  min-h-full ">
         <div className="header-page flex flex-row items-center justify-between min-h-[70px] bg-base-200 px-6 gap-2">
-          <h1 className=" font-bold text-xl md:text-2xl lg:text-3xl">
-            {pageTitle}
-          </h1>
+          <BackButton />
           <div className="flex flex-row gap-2">
             <Link
-              href={`${pathname}/new`}
+              href={`${pathname}/create`}
               className="btn bg-black rounded-full pr-3 py-6  sm:flex border-none"
             >
               <FiPlus className="text-xl text-white" />

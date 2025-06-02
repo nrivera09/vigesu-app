@@ -10,7 +10,7 @@ import { useRouter, usePathname } from "next/navigation";
 const TableList = ({ objFilter }: TableListProps) => {
   const router = useRouter();
   const pathname = usePathname();
-  const [allData, setAllData] = useState(() => generateFakeTableData(100));
+  const [allData, setAllData] = useState(() => generateFakeTableData(6));
 
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);

@@ -1,5 +1,6 @@
 "use client";
-import TableList from "@/shared/components/pages/dashboard/word-orders/orders-theme/TableList";
+import TableList from "@/shared/components/pages/dashboard/orders/orders-theme/TableList";
+import BackButton from "@/shared/components/shared/BackButton";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -41,9 +42,7 @@ const Page = () => {
     <>
       <div className="gap-4 flex flex-col  min-h-full ">
         <div className="header-page flex flex-row items-center justify-between min-h-[70px] bg-base-200 px-6 gap-2">
-          <h1 className=" font-bold text-xl md:text-2xl lg:text-3xl">
-            {pageTitle}
-          </h1>
+          <BackButton />
           <div className="flex flex-row gap-2">
             <Link
               href={`${pathname}/new`}
@@ -70,6 +69,13 @@ const Page = () => {
         </div>
         <div className="boddy-app overflow-y-auto pb-[100px]">
           <div className="container max-w-full mb-5">
+            <div role="alert" className="alert alert-info alert-soft">
+              <span>
+                This is a list of the order formats available. If you need to
+                add a new format, this should be consulted with the developer,
+                since all the data must be configured and mapped.
+              </span>
+            </div>
             <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
               <legend className="fieldset-legend text-lg">
                 Search options

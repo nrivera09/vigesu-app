@@ -1,4 +1,5 @@
 "use client";
+import BackButton from "@/shared/components/shared/BackButton";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import React from "react";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
@@ -10,9 +11,7 @@ const Page = () => {
   return (
     <div className="gap-4 flex flex-col  min-h-full ">
       <div className="header-page flex flex-row items-center justify-between min-h-[70px] bg-base-200 px-6 gap-2">
-        <h1 className=" font-bold text-xl md:text-2xl lg:text-3xl">
-          {pageTitle}
-        </h1>
+        <BackButton />
         <div className="flex flex-row gap-2">
           <button className="btn bg-[#60285a] rounded-full pr-3 py-6 sm:flex items-center justify-center border-none">
             <FiPlus className="text-xl text-white" />
