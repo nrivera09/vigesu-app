@@ -1,14 +1,6 @@
 import { create } from "zustand";
+import { SidebarState } from "../types/TGeneral";
 
-// 1. Define la interfaz para el estado
-interface SidebarState {
-  isSidebarOpen: boolean;
-  openSidebar: () => void;
-  closeSidebar: () => void;
-  toggleSidebar: () => void;
-}
-
-// 2. Crea el store usando Zustand con tipado explícito
 export const useSidebarStore = create<SidebarState>((set) => ({
   isSidebarOpen: false,
 

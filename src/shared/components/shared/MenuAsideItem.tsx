@@ -1,22 +1,9 @@
 "use client";
 
-import React, { FC, ReactNode, useState, useEffect } from "react";
+import React, { FC, useState, useEffect } from "react";
 import Link from "next/link";
 import { PiCaretDownBold } from "react-icons/pi";
-
-interface SubMenuItem {
-  label: string;
-  href: string;
-}
-
-interface MenuAsideItemProps {
-  sectionTitle?: string;
-  buttonLabel: string;
-  icon: ReactNode;
-  openMenu: boolean; // control externo
-  subItems?: SubMenuItem[];
-  className?: string;
-}
+import { MenuAsideItemProps } from "@/shared/types/TGeneral";
 
 const MenuAsideItem: FC<MenuAsideItemProps> = ({
   sectionTitle,

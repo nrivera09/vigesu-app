@@ -1,10 +1,7 @@
+import { generalReactChildren } from "@/shared/types/TGeneral";
 import React, { FC } from "react";
 
-interface FormGroupProps {
-  children: React.ReactNode;
-}
-
-const formGroup: FC<FormGroupProps> = ({ children }) => {
+const formGroup: FC<generalReactChildren> = ({ children }) => {
   return (
     <div className="form-group w-full flex flex-col gap-1 ">{children}</div>
   );

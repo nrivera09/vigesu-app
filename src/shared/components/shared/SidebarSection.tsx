@@ -5,17 +5,7 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx"; // si no lo tienes, instálalo con: npm i clsx
-
-export interface SidebarLink {
-  label: string;
-  href: string;
-  icon?: React.ReactNode;
-}
-
-export interface SidebarSectionProps {
-  title: string;
-  links: SidebarLink[];
-}
+import { SidebarSectionProps } from "@/shared/types/TGeneral";
 
 const SidebarSection: React.FC<SidebarSectionProps> = ({ title, links }) => {
   const pathname = usePathname();

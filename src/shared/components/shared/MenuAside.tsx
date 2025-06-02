@@ -17,12 +17,9 @@ import Link from "next/link";
 import { FC, useEffect } from "react";
 import { useSidebarStore } from "../../stores/useSidebarStore";
 import { IoCloseOutline } from "react-icons/io5";
+import { generalReactClass } from "@/shared/types/TGeneral";
 
-interface MenuAsideProps {
-  className?: string;
-}
-
-const MenuAside: FC<MenuAsideProps> = ({ className }) => {
+const MenuAside: FC<generalReactClass> = ({ className }) => {
   const isSidebarOpen = useSidebarStore((state) => state.isSidebarOpen);
   const closeSidebar = useSidebarStore((state) => state.closeSidebar);
 
@@ -148,7 +145,7 @@ const MenuAside: FC<MenuAsideProps> = ({ className }) => {
                 },
                 {
                   label: "Orders theme",
-                  href: "#",
+                  href: "/dashboard/work-orders/orders-theme",
                   icon: <SlDirections />,
                 },
               ]}

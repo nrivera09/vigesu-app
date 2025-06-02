@@ -21,7 +21,7 @@ export default function Home() {
       <div className="login-form h-full flex flex-col items-center justify-center w-full md:w-[50%] py-5 fixed md:relative ">
         <div className="w-full h-[30px]  flex items-center justify-center">
           <div className="container flex flex-row items-center justify-between">
-            <p className="uppercase font-bold text-[20px]">VIGESU</p>
+            <p className="uppercase font-bold text-[20px]">visegu</p>
 
             {/**<ThemeSwitcher /> */}
           </div>

@@ -4,8 +4,12 @@ import { generateFakeTableData } from "@/shared/data/fakeTableData";
 import { FiTrash2, FiPrinter } from "react-icons/fi";
 import { FaRegEdit, FaRegFilePdf } from "react-icons/fa";
 import { TableListProps } from "@/shared/types/inspection-configuration/ITypes";
+import { VscOpenPreview } from "react-icons/vsc";
+import { useRouter, usePathname } from "next/navigation";
 
 const TableList = ({ objFilter }: TableListProps) => {
+  const router = useRouter();
+  const pathname = usePathname();
   const [allData, setAllData] = useState(() => generateFakeTableData(100));
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -41,63 +45,28 @@ const TableList = ({ objFilter }: TableListProps) => {
       <table className="table table-fixed w-full">
         <thead>
           <tr>
-            <th className="w-[10%]">Sel</th>
-            <th className="w-[20%]">Client</th>
-            <th className="w-[20%]">Name</th>
-            <th className="w-[20%]">Status</th>
+            <th className="w-[70%]">Technical report form</th>
             <th className="w-[30%]"></th>
           </tr>
         </thead>
         <tbody>
           {currentRows.map((item) => (
             <tr key={item.id} className="cursor-pointer odd:bg-base-200">
-              <th>
-                <input
-                  type="checkbox"
-                  defaultChecked={item.selected}
-                  className="checkbox"
-                />
-              </th>
               <td className="truncate">{item.client}</td>
-              <td className="truncate">{item.name}</td>
-              <td className="">
-                <div
-                  className={`badge badge-dash ${
-                    item.status === "success"
-                      ? "badge-success"
-                      : item.status === "warning"
-                      ? "badge-warning"
-                      : item.status === "error"
-                      ? "badge-error "
-                      : "badge-neutral"
-                  }`}
+              <td className="flex items-center justify-end gap-2">
+                <button
+                  className="btn min-w-[30px] min-h-[30px] p-2 rounded-md"
+                  onClick={() => router.push(`${pathname}/${item.client}`)}
                 >
-                  {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-                </div>
-              </td>
-              <td className="flex items-center gap-2">
+                  <VscOpenPreview className="w-[20px] h-[20px] opacity-70" />
+                  <span className="hidden xl:block text-[12px] font-normal">
+                    Preview
+                  </span>
+                </button>
                 <button className="btn min-w-[30px] min-h-[30px] p-2 rounded-md">
                   <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
                   <span className="hidden xl:block text-[12px] font-normal">
                     Delete
-                  </span>
-                </button>
-                <button className="btn min-w-[30px] min-h-[30px] p-2 rounded-md">
-                  <FaRegEdit className="w-[20px] h-[20px] opacity-70" />
-                  <span className="hidden xl:block text-[12px] font-normal">
-                    Edit
-                  </span>
-                </button>
-                <button className="btn min-w-[30px] min-h-[30px] p-2 rounded-md">
-                  <FaRegFilePdf className="w-[20px] h-[20px] opacity-70" />
-                  <span className="hidden xl:block text-[12px] font-normal">
-                    Create PDF
-                  </span>
-                </button>
-                <button className="btn min-w-[30px] min-h-[30px] p-2 rounded-md">
-                  <FiPrinter className="w-[20px] h-[20px] opacity-70" />
-                  <span className="hidden xl:block text-[12px] font-normal">
-                    Print
                   </span>
                 </button>
               </td>
