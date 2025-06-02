@@ -6,20 +6,36 @@ import { usePathname } from "next/navigation";
 import React, { useState } from "react";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
 import { IoSearchOutline } from "react-icons/io5";
+import { MdOutlineSettingsBackupRestore } from "react-icons/md";
 
 const Page = () => {
   const pathname = usePathname();
   const pageTitle = usePageTitle();
 
-  const [objFilter, setObjFilter] = useState<{
-    client: string;
-    status: string;
-    name: string;
-  }>({
+  const [objFilterForm, setObjFilterForm] = useState({
     client: "",
     status: "",
     name: "",
   });
+
+  const [objFilterApplied, setObjFilterApplied] = useState({
+    client: "",
+    status: "",
+    name: "",
+  });
+
+  const resetTableList = () => {
+    setObjFilterForm({
+      client: "",
+      status: "",
+      name: "",
+    });
+    setObjFilterApplied({
+      client: "",
+      status: "",
+      name: "",
+    });
+  };
 
   return (
     <>
@@ -68,9 +84,12 @@ const Page = () => {
                     className="input input-lg text-lg w-full"
                     placeholder="My awesome page"
                     onChange={(e) =>
-                      setObjFilter({ ...objFilter, client: e.target.value })
+                      setObjFilterForm({
+                        ...objFilterForm,
+                        client: e.target.value,
+                      })
                     }
-                    value={objFilter.client}
+                    value={objFilterForm.client}
                   />
                 </div>
                 <div className="flex flex-col">
@@ -81,7 +100,10 @@ const Page = () => {
                     defaultValue="Pick a color"
                     className="select w-full text-lg input-lg"
                     onChange={(e) =>
-                      setObjFilter({ ...objFilter, status: e.target.value })
+                      setObjFilterForm({
+                        ...objFilterForm,
+                        status: e.target.value,
+                      })
                     }
                   >
                     <option disabled={true}>Pick a color</option>
@@ -99,26 +121,41 @@ const Page = () => {
                     className="input input-lg text-lg w-full"
                     placeholder="My awesome page"
                     onChange={(e) =>
-                      setObjFilter({ ...objFilter, name: e.target.value })
+                      setObjFilterForm({
+                        ...objFilterForm,
+                        name: e.target.value,
+                      })
                     }
+                    value={objFilterForm.name}
                   />
                 </div>
                 <div className="flex flex-col">
                   <legend className="fieldset-legend text-lg font-normal hidden md:flex min-h-[32px]">
                     {" "}
                   </legend>
-                  <button className="btn bg-black rounded-full pr-3 py-6  sm:flex border-none">
-                    <IoSearchOutline className="text-xl text-white" />
-                    <span className=" py-1 px-4 text-white font-normal rounded-full  md:block text-[13px] ">
-                      Search
-                    </span>
-                  </button>
+                  <div className="flex flex-row items-center justify-center gap-2">
+                    <button
+                      className="btn bg-black rounded-full pr-3 py-6  sm:flex border-none flex-1"
+                      onClick={() => setObjFilterApplied(objFilterForm)}
+                    >
+                      <IoSearchOutline className="text-xl text-white" />
+                      <span className=" py-1 px-4 text-white font-normal rounded-full  md:block text-[13px] ">
+                        Search
+                      </span>
+                    </button>
+                    <button
+                      className="btn bg-black/50 rounded-full pr-3 py-6  sm:flex border-none w-[50px]"
+                      onClick={() => resetTableList()}
+                    >
+                      <MdOutlineSettingsBackupRestore className="text-2xl text-white" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </fieldset>
           </div>
           <div className="container mt-0 max-w-full">
-            <TableList objFilter={objFilter}></TableList>
+            <TableList objFilter={objFilterApplied} />
           </div>
         </div>
       </div>

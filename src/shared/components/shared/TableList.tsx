@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { generateFakeTableData } from "@/shared/data/fakeTableData";
 import { FiTrash2, FiPrinter } from "react-icons/fi";
 import { FaRegEdit, FaRegFilePdf } from "react-icons/fa";
@@ -13,21 +13,37 @@ interface TableListProps {
 }
 
 const TableList = ({ objFilter }: TableListProps) => {
-  console.log("objFilter", objFilter);
-  const allData = generateFakeTableData(50); // Puedes cambiar a 100 si deseas más
-  const rowsPerPage = 10;
+  const [allData, setAllData] = useState(() => generateFakeTableData(100)); // solo se genera 1 vez
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const totalPages = Math.ceil(allData.length / rowsPerPage);
+  // 🧠 Aplicar el filtro solo al hacer click en Search
+  const filteredData = allData.filter((item) => {
+    const matchClient = objFilter.client
+      ? item.client.toLowerCase().includes(objFilter.client.toLowerCase())
+      : true;
+    const matchName = objFilter.name
+      ? item.name.toLowerCase().includes(objFilter.name.toLowerCase())
+      : true;
+    const matchStatus = objFilter.status
+      ? item.status.toLowerCase() === objFilter.status.toLowerCase()
+      : true;
+    return matchClient && matchName && matchStatus;
+  });
+
+  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
   const startIdx = (currentPage - 1) * rowsPerPage;
-  const currentRows = allData.slice(startIdx, startIdx + rowsPerPage);
+  const currentRows = filteredData.slice(startIdx, startIdx + rowsPerPage);
 
   const changePage = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
+
+  // 🧠 Reiniciar página si cambia el filtro
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [objFilter, rowsPerPage]);
 
   return (
     <div className="overflow-x-auto space-y-4">
