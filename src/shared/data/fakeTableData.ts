@@ -6,6 +6,7 @@ export interface TableRow {
   selected: boolean;
   client: string;
   name: string;
+  workorder: number;
   status: "success" | "error" | "warning" | "info";
 }
 
@@ -15,6 +16,7 @@ export function generateFakeTableData(count = 20): TableRow[] {
     selected: Math.random() > 0.5,
     client: faker.person.firstName(),
     name: faker.person.lastName(),
+    workorder: Math.random(),
     status: faker.helpers.arrayElement(["success", "error", "warning", "info"]),
   }));
 }

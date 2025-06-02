@@ -19,6 +19,7 @@ import { useSidebarStore } from "../../stores/useSidebarStore";
 import { IoCloseOutline } from "react-icons/io5";
 import { generalReactClass } from "@/shared/types/TGeneral";
 import { usePathname } from "next/navigation";
+import { HiOutlineServer } from "react-icons/hi2";
 
 const MenuAside: FC<generalReactClass> = ({ className }) => {
   const isSidebarOpen = useSidebarStore((state) => state.isSidebarOpen);
@@ -48,35 +49,35 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
     },
     {
       label: "Clients",
-      href: "#",
+      href: "/dashboard/inspections/clients",
       icon: <SlPeople />,
     },
     {
       label: "Services",
-      href: "#",
-      icon: <SlPeople />,
+      href: "/dashboard/inspections/services",
+      icon: <HiOutlineServer />,
     },
     {
       label: "Groups",
-      href: "#",
+      href: "/dashboard/inspections/groups",
       icon: <SlLayers />,
     },
     {
       label: "Users",
-      href: "#",
+      href: "/dashboard/inspections/users",
       icon: <SlUser />,
     },
   ];
 
   const configurationLinks = [
     {
-      label: "Configuration",
+      label: "Configurations",
       href: "#",
       icon: <SlSettings />,
     },
     {
       label: "IC theme",
-      href: "/dashboard/inspections/inspection-configuration/ic-theme",
+      href: "/dashboard/configurations/ic-theme",
       icon: <SlDirections />,
     },
   ];

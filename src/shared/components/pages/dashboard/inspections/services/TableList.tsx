@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { generateFakeTableData } from "@/shared/data/fakeTableData";
 import { FiTrash2, FiPrinter } from "react-icons/fi";
 import { FaRegEdit, FaRegFilePdf } from "react-icons/fa";
-import { TableListProps } from "@/shared/types/order/ITypes";
+import { TableListProps } from "@/shared/types/inspection/ITypes";
+import { IoEyeOutline } from "react-icons/io5";
+import { MdOutlineRemoveRedEye } from "react-icons/md";
 
 const TableList = ({ objFilter }: TableListProps) => {
   const [allData, setAllData] = useState(() => generateFakeTableData(100));
@@ -14,13 +16,13 @@ const TableList = ({ objFilter }: TableListProps) => {
     const matchClient = objFilter.client
       ? item.client.toLowerCase().includes(objFilter.client.toLowerCase())
       : true;
-    const matchWorkorder = objFilter.workorder
-      ? item.workorder.toString().includes(objFilter.workorder.toString())
+    const matchName = objFilter.name
+      ? item.name.toLowerCase().includes(objFilter.name.toLowerCase())
       : true;
     const matchStatus = objFilter.status
       ? item.status.toLowerCase() === objFilter.status.toLowerCase()
       : true;
-    return matchClient && matchWorkorder && matchStatus;
+    return matchClient && matchName && matchStatus;
   });
 
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
@@ -37,30 +39,27 @@ const TableList = ({ objFilter }: TableListProps) => {
 
   return (
     <div className="overflow-x-auto space-y-4">
-      <table className="table w-full">
+      <table className="table table-fixed w-full">
         <thead>
           <tr>
-            <th className="w-[8%]">Sel</th>
-            <th className="w-[18%]">Client</th>
-            <th className="w-[18%]">Worker</th>
-            <th className="w-[18%]">Status</th>
-            <th className="w-[18%] text-center">Sync Quickbook</th>
-            <th className="w-[20%]"></th>
+            <th className="w-[10%]">Sel</th>
+            <th className="w-[45%]">Service</th>
+            <th className="w-[15%]">Status</th>
+            <th className="w-[30%]"></th>
           </tr>
         </thead>
         <tbody>
           {currentRows.map((item) => (
             <tr key={item.id} className="cursor-pointer odd:bg-base-200">
-              <td>
+              <th>
                 <input
                   type="checkbox"
                   defaultChecked={item.selected}
                   className="checkbox"
                 />
-              </td>
+              </th>
               <td className="truncate">{item.client}</td>
-              <td className="truncate">{item.name}</td>
-              <td>
+              <td className="">
                 <div
                   className={`badge badge-dash ${
                     item.status === "success"
@@ -75,28 +74,19 @@ const TableList = ({ objFilter }: TableListProps) => {
                   {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
                 </div>
               </td>
-              <td className=" flex items-center justify-center ">
-                <input
-                  type="checkbox"
-                  defaultChecked={item.selected}
-                  className="checkbox"
-                />
-              </td>
-              <td className=" text-end ">
-                <div className="flex w-full flex-row gap-2 items-center justify-end">
-                  <button className="btn min-w-[30px] min-h-[30px] p-2 rounded-md">
-                    <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
-                    <span className="hidden xl:block text-[12px] font-normal">
-                      Delete
-                    </span>
-                  </button>
-                  <button className="btn min-w-[30px] min-h-[30px] p-2 rounded-md">
-                    <FaRegEdit className="w-[20px] h-[20px] opacity-70" />
-                    <span className="hidden xl:block text-[12px] font-normal">
-                      Edit
-                    </span>
-                  </button>
-                </div>
+              <td className="flex items-center gap-2 justify-end">
+                <button className="btn min-w-[30px] min-h-[30px] p-2 rounded-md">
+                  <MdOutlineRemoveRedEye className="w-[20px] h-[20px] opacity-70" />
+                  <span className="hidden xl:block text-[12px] font-normal">
+                    Watch
+                  </span>
+                </button>
+                <button className="btn min-w-[30px] min-h-[30px] p-2 rounded-md">
+                  <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
+                  <span className="hidden xl:block text-[12px] font-normal">
+                    Delete
+                  </span>
+                </button>
               </td>
             </tr>
           ))}

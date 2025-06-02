@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { generateFakeTableData } from "@/shared/data/fakeTableData";
 import { FiTrash2, FiPrinter } from "react-icons/fi";
 import { FaRegEdit, FaRegFilePdf } from "react-icons/fa";
-import { TableListProps } from "@/shared/types/inspection-configuration/ITypes";
+import { TableListProps } from "@/shared/types/inspection/ITypes";
 import { VscOpenPreview } from "react-icons/vsc";
 import { useRouter, usePathname } from "next/navigation";
 

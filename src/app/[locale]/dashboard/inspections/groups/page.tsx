@@ -1,5 +1,5 @@
 "use client";
-import TableList from "@/shared/components/pages/dashboard/orders/TableList";
+import TableList from "@/shared/components/pages/dashboard/inspections/groups/TableList";
 import BackButton from "@/shared/components/shared/BackButton";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import Link from "next/link";
@@ -8,44 +8,33 @@ import React, { useState } from "react";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
 import { IoSearchOutline } from "react-icons/io5";
 import { MdOutlineSettingsBackupRestore } from "react-icons/md";
-import { DayPicker } from "react-day-picker";
 
 const Page = () => {
   const pathname = usePathname();
   const pageTitle = usePageTitle();
 
-  const [date, setDate] = useState<Date | undefined>();
-
   const [objFilterForm, setObjFilterForm] = useState({
     client: "",
     status: "",
-    workorder: "",
-    worker: "",
-    creationdate: undefined as Date | undefined,
+    name: "",
   });
 
   const [objFilterApplied, setObjFilterApplied] = useState({
     client: "",
     status: "",
-    workorder: "",
-    worker: "",
-    creationdate: undefined as Date | undefined,
+    name: "",
   });
 
   const resetTableList = () => {
     setObjFilterForm({
       client: "",
       status: "",
-      workorder: "",
-      worker: "",
-      creationdate: undefined,
+      name: "",
     });
     setObjFilterApplied({
       client: "",
       status: "",
-      workorder: "",
-      worker: "",
-      creationdate: undefined,
+      name: "",
     });
   };
 
@@ -56,21 +45,15 @@ const Page = () => {
           <BackButton />
           <div className="flex flex-row gap-2">
             <Link
-              href={`${pathname}/create`}
-              className="btn bg-black rounded-full pr-3 py-6  sm:flex border-none"
+              href={`${pathname}/new`}
+              className="btn bg-black rounded-full pr-3 py-6  sm:flex border-none !hidden"
             >
               <FiPlus className="text-xl text-white" />
               <span className="bg-gray-800 py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px]">
                 New
               </span>
             </Link>
-            <button className="btn bg-black rounded-full pr-3 py-6  sm:flex items-center justify-center border-none !hidden">
-              <IoSearchOutline className="text-xl text-white" />
-              <span className="bg-gray-800 py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px] ">
-                Search
-              </span>
-            </button>
-            <button className="btn bg-red-600 rounded-full pr-3 py-6 hidden sm:flex items-center justify-center border-none">
+            <button className="btn bg-red-600 rounded-full pr-3 py-6 hidden sm:flex items-center justify-center border-none !hidden">
               <FiTrash2 className="text-xl text-white" />
               <span className="bg-red-500 py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px] ">
                 Delete
@@ -84,10 +67,10 @@ const Page = () => {
               <legend className="fieldset-legend text-lg">
                 Search options
               </legend>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                <div className="flex flex-col">
+              <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="flex flex-col col-span-1 sm:col-span-1 md:col-span-2">
                   <legend className="fieldset-legend text-lg font-normal">
-                    Client
+                    Customer
                   </legend>
                   <input
                     type="text"
@@ -122,78 +105,14 @@ const Page = () => {
                     <option>Velvet</option>
                   </select>
                 </div>
-                <div className="flex flex-col">
-                  <legend className="fieldset-legend text-lg font-normal">
-                    Nro. Work order
-                  </legend>
-                  <input
-                    type="text"
-                    className="input input-lg text-lg w-full"
-                    placeholder="My awesome page"
-                    onChange={(e) =>
-                      setObjFilterForm({
-                        ...objFilterForm,
-                        workorder: e.target.value,
-                      })
-                    }
-                    value={objFilterForm.workorder}
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <legend className="fieldset-legend text-lg font-normal">
-                    Worker
-                  </legend>
-                  <input
-                    type="text"
-                    className="input input-lg text-lg w-full"
-                    placeholder="My awesome page"
-                    onChange={(e) =>
-                      setObjFilterForm({
-                        ...objFilterForm,
-                        worker: e.target.value,
-                      })
-                    }
-                    value={objFilterForm.worker}
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <legend className="fieldset-legend text-lg font-normal">
-                    Creation date
-                  </legend>
-                  <button
-                    popoverTarget="rdp-popover"
-                    className="input input-border input-lg text-lg w-full"
-                    style={{ anchorName: "--rdp" } as React.CSSProperties}
-                  >
-                    {date ? date.toLocaleDateString() : "Pick a date"}
-                  </button>
-                  <div
-                    popover="auto"
-                    id="rdp-popover"
-                    className="dropdown"
-                    style={{ positionAnchor: "--rdp" } as React.CSSProperties}
-                  >
-                    <DayPicker
-                      className="react-day-picker"
-                      mode="single"
-                      selected={date}
-                      onSelect={setDate}
-                    />
-                  </div>
-                </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col col-span-1 sm:col-span-1 md:col-span-1">
                   <legend className="fieldset-legend text-lg font-normal hidden md:flex min-h-[32px]">
                     {" "}
                   </legend>
                   <div className="flex flex-row items-center justify-center gap-2">
                     <button
                       className="btn bg-black rounded-full pr-3 py-6  sm:flex border-none flex-1"
-                      onClick={() =>
-                        setObjFilterApplied({
-                          ...objFilterForm,
-                          creationdate: date,
-                        })
-                      }
+                      onClick={() => setObjFilterApplied(objFilterForm)}
                     >
                       <IoSearchOutline className="text-xl text-white" />
                       <span className=" py-1 px-4 text-white font-normal rounded-full  md:block text-[13px] ">
@@ -212,13 +131,7 @@ const Page = () => {
             </fieldset>
           </div>
           <div className="container mt-0 max-w-full">
-            <TableList
-              objFilter={{
-                ...objFilterApplied,
-                workorder: Number(objFilterApplied.workorder), // ← conversión controlada
-                creationdate: objFilterApplied.creationdate ?? new Date(),
-              }}
-            />
+            <TableList objFilter={objFilterApplied} />
           </div>
         </div>
       </div>
