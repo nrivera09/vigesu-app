@@ -1,12 +1,8 @@
 "use client";
-import TableList from "@/shared/components/pages/dashboard/word-orders/orders-theme/TableList";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useState } from "react";
-import { FiPlus, FiTrash2 } from "react-icons/fi";
-import { IoSearchOutline } from "react-icons/io5";
-import { MdOutlineSettingsBackupRestore } from "react-icons/md";
+import { FiTrash2 } from "react-icons/fi";
 
 import { useParams } from "next/navigation";
 

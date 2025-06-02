@@ -1,5 +1,4 @@
 "use client";
-import TableList from "@/shared/components/shared/TableList";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import React from "react";
 import { FiPlus, FiTrash2 } from "react-icons/fi";

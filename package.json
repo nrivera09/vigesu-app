@@ -6,7 +6,11 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "find:dead": "ts-prune",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "lint:check": "eslint . --ext .ts,.tsx",
+    "dead:check": "ts-prune"
   },
   "dependencies": {
     "@faker-js/faker": "^9.8.0",
@@ -24,14 +28,18 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@netlify/next": "^1.4.9",
     "@tailwindcss/postcss": "^4.1.7",
     "@types/node": "^20.17.51",
     "@types/react": "^19.1.6",
     "@types/react-dom": "^19",
+    "@typescript-eslint/eslint-plugin": "^8.33.0",
+    "@typescript-eslint/parser": "^8.33.0",
     "daisyui": "^5.0.37",
-    "eslint": "^9",
+    "eslint": "^9.28.0",
     "eslint-config-next": "15.3.2",
     "tailwindcss": "^4.1.7",
+    "ts-prune": "^0.10.3",
     "typescript": "^5.8.3"
   }
 }

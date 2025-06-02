@@ -1,5 +1,4 @@
 "use client";
-import Search from "@/shared/components/pages/dashboard/inspection-configuration/Search";
 import Breadcrumb from "@/shared/components/shared/Breadcrumb";
 import MenuAside from "@/shared/components/shared/MenuAside";
 import { stripLocalePage } from "@/shared/lib/utils";

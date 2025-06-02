@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
-import { ThemeSwitcher } from "@/features/theme/ThemeSwitcher";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import "@/shared/styles/globals.css";
-import LanguageSwitcher from "@/features/locale/LanguageSwitcher";
 
 const jostSans = Poppins({
   subsets: ["latin"],
