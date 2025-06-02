@@ -2,7 +2,7 @@ import { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
-  ignoreDuringBuilds: true, // 👈 esto es lo importante
+  //ignoreDuringBuilds: true,
 };
 
 const withNextIntl = createNextIntlPlugin();
