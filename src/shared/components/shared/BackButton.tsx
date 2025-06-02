@@ -1,9 +1,13 @@
 "use client";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 
-const BackButton = () => {
+interface BackButtonProps {
+  title?: string;
+}
+
+const BackButton: FC<BackButtonProps> = ({ title }) => {
   const router = useRouter();
   const pathname = usePathname();
   const pageTitle = usePageTitle();
@@ -35,7 +39,9 @@ const BackButton = () => {
       <button onClick={handleBack} className="btn btn-sm">
         ←
       </button>
-      <h1 className="font-bold text-xl md:text-2xl lg:text-3xl">{pageTitle}</h1>
+      <h1 className="font-bold text-xl md:text-2xl lg:text-3xl">
+        {title || pageTitle}
+      </h1>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 "use client";
-import TableList from "@/shared/components/pages/dashboard/inspections/services/TableList";
+import TableList from "@/features/inspections/services/TableList";
 import BackButton from "@/shared/components/shared/BackButton";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import Link from "next/link";

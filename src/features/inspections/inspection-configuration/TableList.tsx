@@ -76,12 +76,6 @@ const TableList = ({ objFilter }: TableListProps) => {
               </td>
               <td className="flex items-center gap-2 justify-end">
                 <button className="btn min-w-[30px] min-h-[30px] p-2 rounded-md">
-                  <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
-                  <span className="hidden xl:block text-[12px] font-normal">
-                    Delete
-                  </span>
-                </button>
-                <button className="btn min-w-[30px] min-h-[30px] p-2 rounded-md">
                   <FaRegEdit className="w-[20px] h-[20px] opacity-70" />
                   <span className="hidden xl:block text-[12px] font-normal">
                     Edit
@@ -97,6 +91,12 @@ const TableList = ({ objFilter }: TableListProps) => {
                   <FiPrinter className="w-[20px] h-[20px] opacity-70" />
                   <span className="hidden xl:block text-[12px] font-normal">
                     Print
+                  </span>
+                </button>
+                <button className="btn min-w-[30px] min-h-[30px] p-2 rounded-md">
+                  <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
+                  <span className="hidden xl:block text-[12px] font-normal">
+                    Delete
                   </span>
                 </button>
               </td>
