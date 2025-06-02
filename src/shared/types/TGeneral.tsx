@@ -35,7 +35,6 @@ export interface SidebarSectionProps {
     href: string;
     icon: React.ReactNode;
   }[];
-  currentPath: string;
 }
 
 export interface SidebarState {

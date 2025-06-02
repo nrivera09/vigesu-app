@@ -1,4 +1,3 @@
-// components/MenuAside.tsx
 "use client";
 
 import {
@@ -25,6 +24,72 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
   const isSidebarOpen = useSidebarStore((state) => state.isSidebarOpen);
   const closeSidebar = useSidebarStore((state) => state.closeSidebar);
   const pathname = usePathname();
+  const cleanPath = pathname?.replace(/^\/(es|en|fr)(\/|$)/, "/");
+
+  // ✅ Todas tus rutas reales definidas abajo
+  const ordersLinks = [
+    {
+      label: "Work orders",
+      href: "/dashboard/orders/work-orders",
+      icon: <SlBookOpen />,
+    },
+    {
+      label: "Inspections",
+      href: "#",
+      icon: <SlNote />,
+    },
+  ];
+
+  const inspectionsLinks = [
+    {
+      label: "Inspection configuration",
+      href: "/dashboard/inspections/inspection-configuration",
+      icon: <SlSettings />,
+    },
+    {
+      label: "Clients",
+      href: "#",
+      icon: <SlPeople />,
+    },
+    {
+      label: "Services",
+      href: "#",
+      icon: <SlPeople />,
+    },
+    {
+      label: "Groups",
+      href: "#",
+      icon: <SlLayers />,
+    },
+    {
+      label: "Users",
+      href: "#",
+      icon: <SlUser />,
+    },
+  ];
+
+  const configurationLinks = [
+    {
+      label: "Configuration",
+      href: "#",
+      icon: <SlSettings />,
+    },
+    {
+      label: "IC theme",
+      href: "/dashboard/inspections/inspection-configuration/ic-theme",
+      icon: <SlDirections />,
+    },
+  ];
+
+  const allLinks = [...ordersLinks, ...inspectionsLinks, ...configurationLinks];
+
+  const activeHref =
+    allLinks
+      .filter(
+        (link) =>
+          cleanPath === link.href || cleanPath?.startsWith(link.href + "/")
+      )
+      .sort((a, b) => b.href.length - a.href.length)[0]?.href ?? undefined;
 
   useEffect(() => {
     const handleResize = () => {
@@ -127,66 +192,18 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
           <nav className="p-5 flex flex-1 flex-col">
             <SidebarSection
               title="Orders"
-              links={[
-                {
-                  label: "Work orders",
-                  href: "/dashboard/orders/work-orders",
-                  icon: <SlBookOpen />,
-                },
-                {
-                  label: "Inspections",
-                  href: "#",
-                  icon: <SlNote />,
-                },
-                {
-                  label: "Orders theme",
-                  href: "/dashboard/orders/work-orders/orders-theme",
-                  icon: <SlDirections />,
-                },
-              ]}
-              currentPath={pathname}
+              links={ordersLinks}
+              activeHref={activeHref}
             />
             <SidebarSection
               title="Inspections"
-              links={[
-                {
-                  label: "Inspection configuration",
-                  href: "/dashboard/inspections/inspection-configuration",
-                  icon: <SlSettings />,
-                },
-                {
-                  label: "Clients",
-                  href: "#",
-                  icon: <SlPeople />,
-                },
-                {
-                  label: "Services",
-                  href: "#",
-                  icon: <SlPeople />,
-                },
-                {
-                  label: "Groups",
-                  href: "#",
-                  icon: <SlLayers />,
-                },
-                {
-                  label: "Users",
-                  href: "#",
-                  icon: <SlUser />,
-                },
-              ]}
-              currentPath={pathname}
+              links={inspectionsLinks}
+              activeHref={activeHref}
             />
             <SidebarSection
               title="Configuration"
-              links={[
-                {
-                  label: "Configuration",
-                  href: "#",
-                  icon: <SlSettings />,
-                },
-              ]}
-              currentPath={pathname}
+              links={configurationLinks}
+              activeHref={activeHref}
             />
           </nav>
         </div>

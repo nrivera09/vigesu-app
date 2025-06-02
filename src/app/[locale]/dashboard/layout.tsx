@@ -1,4 +1,5 @@
 "use client";
+import LanguageSwitcher from "@/features/locale/LanguageSwitcher";
 import Breadcrumb from "@/shared/components/shared/Breadcrumb";
 import MenuAside from "@/shared/components/shared/MenuAside";
 import { stripLocalePage } from "@/shared/lib/utils";
@@ -37,6 +38,7 @@ export default function DashboardLayout({
           >
             <Breadcrumb />
             <div className="flex flex-row gap-2">
+              <LanguageSwitcher design="header-dashboard" />
               <button className="btn bg-[#60285a] rounded-full pr-3 py-6 sm:flex items-center justify-center border-none">
                 <FaRegBell className="text-xl text-white" />
                 <span className="bg-[#7c3174] py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px]  ">

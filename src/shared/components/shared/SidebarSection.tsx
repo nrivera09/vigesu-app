@@ -2,26 +2,20 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { SidebarSectionProps } from "@/shared/types/TGeneral";
 import { useSidebarStore } from "@/shared/stores/useSidebarStore";
 
-const SidebarSection: React.FC<SidebarSectionProps> = ({ title, links }) => {
+interface SidebarSectionWithActive extends SidebarSectionProps {
+  activeHref: string | undefined;
+}
+
+const SidebarSection: React.FC<SidebarSectionWithActive> = ({
+  title,
+  links,
+  activeHref,
+}) => {
   const closeSidebar = useSidebarStore((state) => state.toggleSidebar);
-  const pathname = usePathname();
-  const cleanPath = pathname?.replace(/^\/(es|en|fr)(\/|$)/, "/");
-
-  // Encuentra el href más específico que coincide, sin reordenar
-  let activeHref: string | undefined;
-
-  for (const link of links) {
-    if (cleanPath === link.href || cleanPath?.startsWith(link.href + "/")) {
-      if (!activeHref || link.href.length > activeHref.length) {
-        activeHref = link.href;
-      }
-    }
-  }
 
   return (
     <ul className="mb-5">
@@ -40,7 +34,7 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({ title, links }) => {
                   onClick={closeSidebar}
                   className={clsx(
                     "text-white font-light w-full flex items-center justify-start min-h-[40px] px-4 rounded-sm gap-3",
-                    "hover:bg-[#ffffff1f] hover:text-white hover:shadow-xl hover:pl-5 transition-all ",
+                    "hover:bg-[#ffffff1f] hover:text-white hover:shadow-xl hover:pl-5 transition-all",
                     {
                       "bg-[#ffffff1f] text-white": isActive,
                     }
