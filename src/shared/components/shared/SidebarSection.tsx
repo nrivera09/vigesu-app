@@ -1,17 +1,25 @@
-// shared/components/SidebarSection.tsx
 "use client";
 
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import clsx from "clsx"; // si no lo tienes, instálalo con: npm i clsx
+import clsx from "clsx";
 import { SidebarSectionProps } from "@/shared/types/TGeneral";
 
 const SidebarSection: React.FC<SidebarSectionProps> = ({ title, links }) => {
   const pathname = usePathname();
-
-  // Remueve prefijo de idioma (/es/, /en/, etc.)
   const cleanPath = pathname?.replace(/^\/(es|en|fr)(\/|$)/, "/");
+
+  // Encuentra el href más específico que coincide, sin reordenar
+  let activeHref: string | undefined;
+
+  for (const link of links) {
+    if (cleanPath === link.href || cleanPath?.startsWith(link.href + "/")) {
+      if (!activeHref || link.href.length > activeHref.length) {
+        activeHref = link.href;
+      }
+    }
+  }
 
   return (
     <ul className="mb-5">
@@ -21,7 +29,7 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({ title, links }) => {
         </p>
         <ul className="flex flex-col gap-1">
           {links.map((link, index) => {
-            const isActive = cleanPath === link.href;
+            const isActive = link.href === activeHref;
 
             return (
               <li key={index}>

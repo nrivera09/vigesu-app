@@ -30,7 +30,12 @@ export interface SidebarLink {
 
 export interface SidebarSectionProps {
   title: string;
-  links: SidebarLink[];
+  links: {
+    label: string;
+    href: string;
+    icon: React.ReactNode;
+  }[];
+  currentPath: string;
 }
 
 export interface SidebarState {

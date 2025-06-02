@@ -1,3 +1,4 @@
+// components/MenuAside.tsx
 "use client";
 
 import {
@@ -18,10 +19,12 @@ import { FC, useEffect } from "react";
 import { useSidebarStore } from "../../stores/useSidebarStore";
 import { IoCloseOutline } from "react-icons/io5";
 import { generalReactClass } from "@/shared/types/TGeneral";
+import { usePathname } from "next/navigation";
 
 const MenuAside: FC<generalReactClass> = ({ className }) => {
   const isSidebarOpen = useSidebarStore((state) => state.isSidebarOpen);
   const closeSidebar = useSidebarStore((state) => state.closeSidebar);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleResize = () => {
@@ -30,10 +33,7 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
       }
     };
 
-    // Escuchar el resize
     window.addEventListener("resize", handleResize);
-
-    // Ejecutar al montar (por si ya está abierta)
     handleResize();
 
     return () => {
@@ -48,12 +48,13 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
       } flex flex-row  ${className}`}
     >
       <div className="flex-1 h-full flex flex-col">
+        {/* HEADER */}
         <div
           className="title w-full h-[60px] flex items-center justify-between px-4 gap-3"
           style={{ borderBottom: "1px solid #ffffff17" }}
         >
-          <div className="flex flex-row items-center  gap-2">
-            <div className="avatar avatar-online ">
+          <div className="flex flex-row items-center gap-2">
+            <div className="avatar avatar-online">
               <div className="w-10 rounded-full">
                 <img src="https://img.daisyui.com/images/profile/demo/gordon@192.webp" />
               </div>
@@ -78,21 +79,13 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
               </button>
               <ul
                 tabIndex={0}
-                className="dropdown-content menu bg-zinc-800 rounded-box z-1 w-52  shadow-sm"
+                className="dropdown-content menu bg-zinc-800 rounded-box z-1 w-52 shadow-sm"
                 style={{ border: "1px solid #ffffff17" }}
               >
                 <li>
                   <Link
-                    href={`#`}
-                    className="text-white min-h-[40px] flex items-center justify-start  hover:text-white  hover:pl-5 transition-all"
-                  >
-                    Opcion 1
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href={`#`}
-                    className="text-white min-h-[40px] flex items-center justify-start  hover:text-white  hover:pl-5 transition-all"
+                    href="#"
+                    className="text-white min-h-[40px] flex items-center justify-start hover:text-white hover:pl-5 transition-all"
                   >
                     Opcion 1
                   </Link>
@@ -104,11 +97,13 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
               onClick={closeSidebar}
               className="btn btn-square btn-neutral bg-[#ffffff1f] shadow-none border-none flex lg:hidden"
             >
-              <IoCloseOutline className="text-2xl " />
+              <IoCloseOutline className="text-2xl" />
             </button>
           </div>
         </div>
-        <div className="flex-1 flex flex-col  overflow-y-auto ">
+
+        {/* BODY */}
+        <div className="flex-1 flex flex-col overflow-y-auto">
           <div className="dashboard-info p-5 flex flex-col gap-2 min-h-[78px]">
             <div className="flex items-center justify-start gap-2">
               <p className="text-white font-medium tracking-[1px] text-xl">
@@ -123,19 +118,19 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
                 12,231 <span className="text-emerald-500 ">Inspections</span>
               </div>
               <TbPointFilled className="text-xs text-shadow-emerald-800" />
-
               <div>
                 12,214 <span className="text-emerald-500">Orders</span>
               </div>
             </div>
           </div>
-          <nav className="p-5 flex flex-1 flex-col ">
+
+          <nav className="p-5 flex flex-1 flex-col">
             <SidebarSection
               title="Orders"
               links={[
                 {
                   label: "Work orders",
-                  href: "/dashboard/work-orders",
+                  href: "/dashboard/orders/work-orders",
                   icon: <SlBookOpen />,
                 },
                 {
@@ -145,17 +140,18 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
                 },
                 {
                   label: "Orders theme",
-                  href: "/dashboard/work-orders/orders-theme",
+                  href: "/dashboard/orders/work-orders/orders-theme",
                   icon: <SlDirections />,
                 },
               ]}
+              currentPath={pathname}
             />
             <SidebarSection
               title="Inspections"
               links={[
                 {
                   label: "Inspection configuration",
-                  href: "/dashboard/inspection-configuration",
+                  href: "/dashboard/inspections/inspection-configuration",
                   icon: <SlSettings />,
                 },
                 {
@@ -179,6 +175,7 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
                   icon: <SlUser />,
                 },
               ]}
+              currentPath={pathname}
             />
             <SidebarSection
               title="Configuration"
@@ -189,9 +186,12 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
                   icon: <SlSettings />,
                 },
               ]}
+              currentPath={pathname}
             />
           </nav>
         </div>
+
+        {/* FOOTER */}
         <div
           className="sign-out min-h-[50px] px-4 flex items-row items-center justify-between"
           style={{ borderTop: "1px solid #ffffff17" }}
@@ -200,7 +200,7 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
             <button className="btn btn-square btn-neutral bg-transparent shadow-none border-none">
               <SlLogin className="text-lg" />
             </button>
-            <span className="text-white ">Sign Out</span>
+            <span className="text-white">Sign Out</span>
           </div>
           <div>
             <span className="text-sm text-gray-400">Version 0.0.1</span>

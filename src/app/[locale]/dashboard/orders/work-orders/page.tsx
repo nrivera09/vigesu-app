@@ -35,11 +35,7 @@ const Page = () => {
           </button>
         </div>
       </div>
-      <div className="boddy-app overflow-y-auto pb-[100px]">
-        <div className="container mt-0 max-w-full">
-          <TableList></TableList>
-        </div>
-      </div>
+      <div className="boddy-app overflow-y-auto pb-[100px]">xx</div>
     </div>
   );
 };
