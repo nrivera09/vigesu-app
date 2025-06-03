@@ -7,7 +7,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 const workItemSchema = z.object({
-  code: z.string().min(1, "Required"),
+  code: z.string().optional(),
   description: z.string().min(1, "Required"),
   labor_time: z.string().min(1, "Required"),
   parts: z.string().optional(),
@@ -19,14 +19,14 @@ const orderSchema = z.object({
   order_title: z.string().min(1, "Required"),
   customer_order: z.string().min(1, "Required"),
   location_of_repair: z.string().min(1, "Required"),
-  time_start_service: z.string().min(1, "Required"),
-  equipment_order: z.string().optional(),
-  datate_of_repair: z.string().optional(),
+  time_start_service: z.string().optional(),
+  equipment_order: z.string().min(1, "Required"),
+  datate_of_repair: z.string().min(1, "Required"),
   time_finish_service: z.string().optional(),
-  license_plate: z.string().optional(),
+  license_plate: z.string().min(1, "Required"),
   po_number: z.string().optional(),
   vin_number: z.string().optional(),
-  mechanic_name: z.string().optional(),
+  mechanic_name: z.string().min(1, "Required"),
   tires: z.object({
     rif: z.string().optional(),
     rof: z.string().optional(),
@@ -51,6 +51,8 @@ const CreateOrder = () => {
   } = useForm<OrderForm>({
     resolver: zodResolver(orderSchema),
     defaultValues: {
+      order_title: "Work Order",
+      customer_header: `${COMPANY_INFO.name} Maintenance service ${COMPANY_INFO.phone} ${COMPANY_INFO.email}`,
       work_items: [],
       tires: {
         rif: "",
@@ -79,7 +81,7 @@ const CreateOrder = () => {
   };
 
   const inputClass = (hasError: boolean) =>
-    `input input-lg bg-[#f6f3f4] w-full text-center font-bold text-3xl transition-all border-1 ${
+    `input input-lg bg-[#f6f3f4] w-full text-center font-bold text-3xl transition-all border-1 text-lg font-normal ${
       hasError ? "border-red-500" : "border-gray-100"
     }`;
 
@@ -96,8 +98,9 @@ const CreateOrder = () => {
         <input
           {...register("customer_header")}
           type="text"
-          className={inputClass(!!errors.customer_header)}
-          value={`${COMPANY_INFO.name} Maintenance service ${COMPANY_INFO.phone} ${COMPANY_INFO.email}`}
+          className={`!text-2xl !font-bold ${inputClass(
+            !!errors.customer_header
+          )} `}
         />
       </div>
 
@@ -105,12 +108,13 @@ const CreateOrder = () => {
         <input
           {...register("order_title")}
           type="text"
-          className="input input-lg h-auto w-full border-none text-left font-bold text-7xl transition-all bg-[#f6f3f4]"
-          value="Work Order"
+          className={`!text-7xl !h-[60px] !text-left !font-bold ${inputClass(
+            !!errors.order_title
+          )} `}
         />
       </div>
 
-      <div className="grid grid-cols-3 gap-2 border-[#00000014] border-1 p-2 mb-6 rounded-md">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 border-[#00000014] border-1 p-2 mb-6 rounded-md">
         <div className="flex flex-row gap-2 items-center justify-center">
           <span className="font-bold">CUSTOMER</span>
           <input
@@ -124,7 +128,7 @@ const CreateOrder = () => {
           <input
             {...register("location_of_repair")}
             type="text"
-            className="input border-gray-100 input-lg bg-[#f6f3f4] w-full text-left text-lg font-normal"
+            className={inputClass(!!errors.location_of_repair)}
           />
         </div>
         <div className="flex flex-row gap-2 items-center justify-center">
@@ -132,26 +136,26 @@ const CreateOrder = () => {
           <input
             {...register("time_start_service")}
             type="time"
-            className="input border-gray-100 input-lg bg-[#f6f3f4] w-full text-left text-lg font-normal"
+            className={inputClass(!!errors.time_start_service)}
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 border-[#00000014] border-1 p-2 rounded-md mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 border-[#00000014] border-1 p-2 rounded-md mb-6">
         <div className="flex flex-row gap-2 items-center justify-center">
           <span className="font-bold">Equipment#</span>
           <input
             {...register("equipment_order")}
             type="text"
-            className="input border-gray-100 input-lg bg-[#f6f3f4] w-full text-left text-lg font-normal"
+            className={inputClass(!!errors.equipment_order)}
           />
         </div>
         <div className="flex flex-row gap-2 items-center justify-center">
           <span className="font-bold">Date of Repair</span>
           <input
             {...register("datate_of_repair")}
-            type="datetime-local"
-            className="input border-gray-100 input-lg bg-[#f6f3f4] w-full text-left text-lg font-normal"
+            type="date"
+            className={inputClass(!!errors.datate_of_repair)}
           />
         </div>
         <div className="flex flex-row gap-2 items-center justify-center">
@@ -159,18 +163,18 @@ const CreateOrder = () => {
           <input
             {...register("time_finish_service")}
             type="time"
-            className="input border-gray-100 input-lg bg-[#f6f3f4] w-full text-left text-lg font-normal"
+            className={inputClass(!!errors.time_finish_service)}
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 border-[#00000014] border-1 p-2 rounded-md mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 border-[#00000014] border-1 p-2 rounded-md mb-6">
         <div className="flex flex-row gap-2 items-center justify-center">
           <span className="font-bold">LICENSE PLATE#</span>
           <input
             {...register("license_plate")}
             type="text"
-            className="input border-gray-100 input-lg bg-[#f6f3f4] w-full text-left text-lg font-normal"
+            className={inputClass(!!errors.license_plate)}
           />
         </div>
         <div className="flex flex-row gap-2 items-center justify-center">
@@ -178,18 +182,18 @@ const CreateOrder = () => {
           <input
             {...register("po_number")}
             type="text"
-            className="input border-gray-100 input-lg bg-[#f6f3f4] w-full text-left text-lg font-normal"
+            className={inputClass(!!errors.po_number)}
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 border-[#00000014] border-1 p-2 rounded-md mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 border-[#00000014] border-1 p-2 rounded-md mb-6">
         <div className="flex flex-row gap-2 items-center justify-center">
           <span className="font-bold">VIN#</span>
           <input
             {...register("vin_number")}
             type="text"
-            className="input border-gray-100 input-lg bg-[#f6f3f4] w-full text-left text-lg font-normal"
+            className={inputClass(!!errors.vin_number)}
           />
         </div>
         <div className="flex flex-row gap-2 items-center justify-center">
@@ -197,7 +201,7 @@ const CreateOrder = () => {
           <input
             {...register("mechanic_name")}
             type="text"
-            className="input border-gray-100 input-lg bg-[#f6f3f4] w-full text-left text-lg font-normal"
+            className={inputClass(!!errors.mechanic_name)}
           />
         </div>
       </div>
@@ -223,35 +227,39 @@ const CreateOrder = () => {
                   <input
                     {...register(`work_items.${index}.code`)}
                     type="text"
-                    className="input border-gray-100 input-lg bg-[#f6f3f4] w-full text-center text-lg font-normal"
+                    className={inputClass(!!errors.work_items?.[index]?.code)}
                   />
                 </th>
                 <td className="text-center">
                   <input
                     {...register(`work_items.${index}.description`)}
                     type="text"
-                    className="input border-gray-100 input-lg bg-[#f6f3f4] w-full text-center text-lg font-normal"
+                    className={inputClass(
+                      !!errors.work_items?.[index]?.description
+                    )}
                   />
                 </td>
                 <td className="text-center">
                   <input
                     {...register(`work_items.${index}.labor_time`)}
                     type="time"
-                    className="input border-gray-100 input-lg bg-[#f6f3f4] w-full text-center text-lg font-normal"
+                    className={inputClass(
+                      !!errors.work_items?.[index]?.labor_time
+                    )}
                   />
                 </td>
                 <td className="text-center">
                   <input
                     {...register(`work_items.${index}.parts`)}
                     type="text"
-                    className="input border-gray-100 input-lg bg-[#f6f3f4] w-full text-center text-lg font-normal"
+                    className={inputClass(!!errors.work_items?.[index]?.parts)}
                   />
                 </td>
                 <td className="text-center">
                   <input
                     {...register(`work_items.${index}.total`)}
                     type="text"
-                    className="input border-gray-100 input-lg bg-[#f6f3f4] w-full text-center text-lg font-normal"
+                    className={inputClass(!!errors.work_items?.[index]?.total)}
                   />
                 </td>
                 <td className="text-center">
@@ -271,7 +279,7 @@ const CreateOrder = () => {
           <button
             type="button"
             onClick={handleAddRow}
-            className="btn input-lg text-lg font-normal bg-dark text-white border-none rounded-full"
+            className="btn input-lg text-lg font-normal bg-black text-white border-none rounded-full"
           >
             Add row
           </button>
@@ -280,7 +288,7 @@ const CreateOrder = () => {
 
       <div>
         <p className="font-bold mb-2">Tires Tread Deep</p>
-        <div className="grid grid-cols-4 gap-2 gap-y-4 border-[#00000014] border-1 p-2 mb-6 rounded-md">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 gap-y-4 border-[#00000014] border-1 p-2 mb-6 rounded-md">
           {(
             ["rif", "rof", "rir", "ror", "lif", "lof", "lir", "lor"] as const
           ).map((key) => (
