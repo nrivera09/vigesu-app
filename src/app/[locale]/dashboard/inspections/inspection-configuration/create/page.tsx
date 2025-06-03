@@ -14,7 +14,7 @@ const Page = () => {
       <div className="header-page flex flex-row items-center justify-between min-h-[70px] bg-base-200 px-6 gap-2">
         <BackButton />
       </div>
-      <div className="boddy-app overflow-y-auto pb-[100px]">
+      <div className="boddy-app overflow-y-auto ">
         <div className="container max-w-full mb-5">
           Lorem ipsum dolor sit amet consectetur adipisicing elit.
           Necessitatibus et aut corrupti in neque, nulla veniam, repudiandae

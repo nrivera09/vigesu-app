@@ -62,9 +62,9 @@ export default function DashboardLayout({
               </button>
             </div>
           </div>
-          <div className="app flex flex-col overflow-y-auto">
+          <div className="app flex flex-col overflow-y-auto h-[93%]">
             <div className="content h-dvh">
-              <div className="app-main">{children}</div>
+              <div className="app-main pb-[30px]">{children}</div>
             </div>
           </div>
         </div>

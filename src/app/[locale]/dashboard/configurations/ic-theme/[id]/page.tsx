@@ -55,7 +55,7 @@ const Page = () => {
             </button>
           </div>
         </div>
-        <div className="boddy-app overflow-y-auto pb-[100px]">
+        <div className="boddy-app overflow-y-auto ">
           <div className="container mt-0 max-w-full">
             <PDFViewer file="work-order.pdf" />
           </div>

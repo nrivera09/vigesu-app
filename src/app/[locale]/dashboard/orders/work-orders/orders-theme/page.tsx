@@ -61,7 +61,7 @@ const Page = () => {
             </button>
           </div>
         </div>
-        <div className="boddy-app overflow-y-auto pb-[100px]">
+        <div className="boddy-app overflow-y-auto ">
           <div className="container max-w-full mb-5">
             <div role="alert" className="alert alert-info alert-soft mb-4">
               <span className="text-lg">

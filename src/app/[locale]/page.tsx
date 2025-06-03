@@ -43,7 +43,7 @@ export default function Home() {
                   <input
                     type="text"
                     placeholder="Type here"
-                    className="input w-full"
+                    className="input input-lg text-lg w-full"
                   />
                 </FormGroup>
                 <FormGroup>
@@ -51,7 +51,7 @@ export default function Home() {
                   <input
                     type="password"
                     placeholder="Type here"
-                    className="input w-full"
+                    className="input input-lg text-lg w-full"
                   />
                 </FormGroup>
                 <div className="flex flex-row items-center justify-between gap-2">

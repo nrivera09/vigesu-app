@@ -67,7 +67,7 @@ const Page = () => {
             </button>
           </div>
         </div>
-        <div className="boddy-app overflow-y-auto pb-[100px]">
+        <div className="boddy-app overflow-y-auto ">
           <div className="container max-w-full mb-5">
             <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
               <legend className="fieldset-legend text-lg">
