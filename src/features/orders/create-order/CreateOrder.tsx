@@ -16,6 +16,7 @@ const workItemSchema = z.object({
 
 const orderSchema = z.object({
   customer_header: z.string().min(1, "Required"),
+  order_title: z.string().min(1, "Required"),
   customer_order: z.string().min(1, "Required"),
   location_of_repair: z.string().min(1, "Required"),
   time_start_service: z.string().min(1, "Required"),
@@ -102,6 +103,7 @@ const CreateOrder = () => {
 
       <div className="my-3 rounded-md">
         <input
+          {...register("order_title")}
           type="text"
           className="input input-lg h-auto w-full border-none text-left font-bold text-7xl transition-all bg-[#f6f3f4]"
           value="Work Order"
