@@ -85,7 +85,14 @@ const CreateOrder = () => {
   });
 
   const onSubmit = (data: OrderForm) => {
-    console.log("\ud83d\udce6 Formulario enviado:", data);
+    const imagesData = files.map((file) => ({ nombre: file.name }));
+
+    const payload = {
+      ...data,
+      createWorkOrderImages: imagesData,
+    };
+
+    console.log("📦 Formulario enviado:", payload);
   };
 
   const handleAddRow = () => {
