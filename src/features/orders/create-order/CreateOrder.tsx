@@ -1,15 +1,16 @@
 "use client";
 import { COMPANY_INFO } from "@/config/constants";
-import React from "react";
+import React, { useState } from "react";
 import { FiTrash2 } from "react-icons/fi";
 import { z } from "zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import ImageUploader from "./ImageUploader";
 
 const workItemSchema = z.object({
   description: z.string().min(1, "Required"),
-  parts: z.string().optional(),
-  cantidad: z.string().optional(),
+  parts: z.string().min(1, "Required"),
+  quantity: z.string().min(1, "Required"),
 });
 
 const orderSchema = z.object({
@@ -43,6 +44,15 @@ const orderSchema = z.object({
 type OrderForm = z.infer<typeof orderSchema>;
 
 const CreateOrder = () => {
+  const [newItem, setNewItem] = useState({
+    description: "",
+    parts: "",
+    quantity: "",
+  });
+  const [newItemError, setNewItemError] = useState<string | null>(null);
+
+  const [files, setFiles] = useState<File[]>([]);
+
   const {
     register,
     control,
@@ -79,7 +89,21 @@ const CreateOrder = () => {
   };
 
   const handleAddRow = () => {
-    append({ description: "", parts: "", cantidad: "" });
+    const result = workItemSchema.safeParse(newItem);
+    if (!result.success) {
+      setNewItemError(result.error.issues[0]?.message || "Invalid input");
+      return;
+    }
+    append(result.data);
+    setNewItem({ description: "", parts: "", quantity: "" });
+    setNewItemError(null);
+  };
+
+  const handleNewItemChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setNewItem((prev) => ({ ...prev, [name]: value }));
   };
 
   const inputClass = (hasError: boolean) =>
@@ -201,37 +225,53 @@ const CreateOrder = () => {
         </div>
       </div>
 
-      <div className="rounded-box border-[#00000014] border-1 mb-6 p-4 gap-4 flex flex-col">
+      <div className="rounded-box border-[#00000014] border-1 mb-6 p-3 gap-4 flex flex-col">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <div className="flex flex-row gap-2 items-center justify-center">
             <span className="font-semibold w-[30%] break-words ">Parts</span>
             <input
-              {...register("customer_order")}
+              name="parts"
+              value={newItem.parts}
+              onChange={handleNewItemChange}
+              className={inputClass(
+                !!newItemError && newItem.parts.trim() === ""
+              )}
               type="text"
-              className={inputClass(!!errors.customer_order)}
             />
           </div>
           <div className="flex flex-row gap-2 items-center justify-center">
             <span className="font-semibold w-[30%] break-words ">Quantity</span>
             <input
-              {...register("location_of_repair")}
-              type="text"
-              className={inputClass(!!errors.location_of_repair)}
+              name="quantity"
+              value={newItem.quantity}
+              onChange={handleNewItemChange}
+              className={inputClass(
+                !!newItemError && newItem.quantity.trim() === ""
+              )}
+              type="number"
             />
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-1 gap-2">
           <div className="flex flex-col gap-2 items-left justify-center">
-            <span className="font-semibold w-[30%] break-words ">Quantity</span>
+            <span className="font-semibold w-[30%] break-words ">
+              Work description
+            </span>
             <textarea
-              className={`!text-left p-2 ${inputClass(!!errors.mechanic_name)}`}
-              placeholder="Bio"
+              name="description"
+              value={newItem.description}
+              onChange={handleNewItemChange}
+              className={`!text-left p-2 ${inputClass(
+                !!newItemError && newItem.description.trim() === ""
+              )}`}
+              rows={3}
+              placeholder="Write work description..."
             ></textarea>
 
             <button
               type="button"
               onClick={handleAddRow}
-              className="btn min-w-[30px] min-h-[39px] p-2 rounded-md"
+              className="btn min-w-[30px] min-h-[39px] p-2 rounded-md mt-3"
             >
               Add row
             </button>
@@ -248,7 +288,7 @@ const CreateOrder = () => {
                   PARTS
                 </th>
                 <th className=" text-center w-[15%] text-white font-medium">
-                  CANTIDAD
+                  QUANTITY
                 </th>
                 <th className=" text-center w-[5%] text-white font-medium"></th>
               </tr>
@@ -258,29 +298,30 @@ const CreateOrder = () => {
                 <tr key={field.id} className="border-b-[#00000014]">
                   <td className="text-center">
                     <input
-                      {...register(`work_items.${index}.description`)}
-                      type="text"
-                      className={inputClass(
-                        !!errors.work_items?.[index]?.description
-                      )}
-                    />
-                  </td>
-                  <td className="text-center">
-                    <input
                       {...register(`work_items.${index}.parts`)}
                       type="text"
-                      className={inputClass(
-                        !!errors.work_items?.[index]?.parts
-                      )}
+                      readOnly
+                      className={`${inputClass(
+                        false
+                      )} bg-white border-none focus:outline-none focus:ring-0 focus:border-none`}
                     />
                   </td>
                   <td className="text-center">
                     <input
-                      {...register(`work_items.${index}.cantidad`)}
+                      {...register(`work_items.${index}.quantity`)}
                       type="text"
-                      className={inputClass(
-                        !!errors.work_items?.[index]?.cantidad
-                      )}
+                      className={`${inputClass(
+                        false
+                      )} bg-white border-none focus:outline-none focus:ring-0 focus:border-none`}
+                    />
+                  </td>
+                  <td className="text-center">
+                    <input
+                      {...register(`work_items.${index}.description`)}
+                      type="text"
+                      className={`${inputClass(
+                        false
+                      )} bg-white border-none focus:outline-none focus:ring-0 focus:border-none`}
                     />
                   </td>
                   <td className="text-center">
@@ -332,6 +373,17 @@ const CreateOrder = () => {
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="overflow-hidden">
+        <ImageUploader
+          onFilesChange={(files) => setFiles(files)}
+          accept={{
+            "image/*": [],
+            "application/pdf": [],
+            "application/msword": [],
+          }}
+        />
       </div>
 
       <div className="pt-4">
