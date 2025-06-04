@@ -7,16 +7,12 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 const workItemSchema = z.object({
-  code: z.string().optional(),
   description: z.string().min(1, "Required"),
-  labor_time: z.string().min(1, "Required"),
   parts: z.string().optional(),
-  total: z.string().optional(),
+  cantidad: z.string().optional(),
 });
 
 const orderSchema = z.object({
-  customer_header: z.string().min(1, "Required"),
-  order_title: z.string().min(1, "Required"),
   customer_order: z.string().min(1, "Required"),
   location_of_repair: z.string().min(1, "Required"),
   time_start_service: z.string().optional(),
@@ -36,6 +32,10 @@ const orderSchema = z.object({
     lof: z.string().optional(),
     lir: z.string().optional(),
     lor: z.string().optional(),
+    cif: z.string().optional(),
+    cof: z.string().optional(),
+    cir: z.string().optional(),
+    co: z.string().optional(),
   }),
   work_items: z.array(workItemSchema).min(1, "Add at least one row"),
 });
@@ -51,8 +51,6 @@ const CreateOrder = () => {
   } = useForm<OrderForm>({
     resolver: zodResolver(orderSchema),
     defaultValues: {
-      order_title: "Work Order",
-      customer_header: `${COMPANY_INFO.name} Maintenance service ${COMPANY_INFO.phone} ${COMPANY_INFO.email}`,
       work_items: [],
       tires: {
         rif: "",
@@ -63,6 +61,10 @@ const CreateOrder = () => {
         lof: "",
         lir: "",
         lor: "",
+        cif: "",
+        cof: "",
+        cir: "",
+        co: "",
       },
     },
   });
@@ -77,7 +79,7 @@ const CreateOrder = () => {
   };
 
   const handleAddRow = () => {
-    append({ code: "", description: "", labor_time: "", parts: "", total: "" });
+    append({ description: "", parts: "", cantidad: "" });
   };
 
   const inputClass = (hasError: boolean) =>
@@ -94,207 +96,205 @@ const CreateOrder = () => {
         </span>
       </div>
 
-      <div className="rounded-md">
-        <input
-          {...register("customer_header")}
-          type="text"
-          className={`!text-2xl !font-bold ${inputClass(
-            !!errors.customer_header
-          )} `}
-        />
-      </div>
-
-      <div className="my-3 rounded-md">
-        <input
-          {...register("order_title")}
-          type="text"
-          className={`!text-7xl !h-[60px] !text-left !font-bold ${inputClass(
-            !!errors.order_title
-          )} `}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 border-[#00000014] border-1 p-2 mb-6 rounded-md">
-        <div className="flex flex-row gap-2 items-center justify-center">
-          <span className="font-semibold w-[30%] break-words">CUSTOMER</span>
-          <input
-            {...register("customer_order")}
-            type="text"
-            className={inputClass(!!errors.customer_order)}
-          />
+      <div className=" border-[#00000014] border-1 p-2 mb-6 rounded-md flex flex-col gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <div className="flex flex-row gap-2 items-center justify-center">
+            <span className="font-semibold w-[30%] break-words ">Customer</span>
+            <input
+              {...register("customer_order")}
+              type="text"
+              className={inputClass(!!errors.customer_order)}
+            />
+          </div>
+          <div className="flex flex-row gap-2 items-center justify-center">
+            <span className="font-semibold w-[30%] break-words ">
+              Location of repair
+            </span>
+            <input
+              {...register("location_of_repair")}
+              type="text"
+              className={inputClass(!!errors.location_of_repair)}
+            />
+          </div>
+          <div className="flex flex-row gap-2 items-center justify-center">
+            <span className="font-semibold w-[30%] break-words ">
+              Time start service
+            </span>
+            <input
+              {...register("time_start_service")}
+              type="time"
+              className={inputClass(!!errors.time_start_service)}
+            />
+          </div>
         </div>
-        <div className="flex flex-row gap-2 items-center justify-center">
-          <span className="font-semibold w-[30%] break-words">
-            LOCATION OF REPAIR
-          </span>
-          <input
-            {...register("location_of_repair")}
-            type="text"
-            className={inputClass(!!errors.location_of_repair)}
-          />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <div className="flex flex-row gap-2 items-center justify-center">
+            <span className="font-semibold w-[30%] break-words ">
+              Equipment#
+            </span>
+            <input
+              {...register("equipment_order")}
+              type="text"
+              className={inputClass(!!errors.equipment_order)}
+            />
+          </div>
+          <div className="flex flex-row gap-2 items-center justify-center">
+            <span className="font-semibold w-[30%] break-words ">
+              Date of Repair
+            </span>
+            <input
+              {...register("datate_of_repair")}
+              type="date"
+              className={inputClass(!!errors.datate_of_repair)}
+            />
+          </div>
+          <div className="flex flex-row gap-2 items-center justify-center">
+            <span className="font-semibold w-[30%] break-words ">
+              Time finish service
+            </span>
+            <input
+              {...register("time_finish_service")}
+              type="time"
+              className={inputClass(!!errors.time_finish_service)}
+            />
+          </div>
         </div>
-        <div className="flex flex-row gap-2 items-center justify-center">
-          <span className="font-semibold w-[30%] break-words">
-            TIME START SERVICE
-          </span>
-          <input
-            {...register("time_start_service")}
-            type="time"
-            className={inputClass(!!errors.time_start_service)}
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <div className="flex flex-row gap-2 items-center justify-center">
+            <span className="font-semibold w-[30%] break-words ">
+              License plate #
+            </span>
+            <input
+              {...register("license_plate")}
+              type="text"
+              className={inputClass(!!errors.license_plate)}
+            />
+          </div>
+          <div className="flex flex-row gap-2 items-center justify-center">
+            <span className="font-semibold w-[30%] break-words ">PO#</span>
+            <input
+              {...register("po_number")}
+              type="text"
+              className={inputClass(!!errors.po_number)}
+            />
+          </div>
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 border-[#00000014] border-1 p-2 rounded-md mb-6">
-        <div className="flex flex-row gap-2 items-center justify-center">
-          <span className="font-semibold w-[30%] break-words">Equipment#</span>
-          <input
-            {...register("equipment_order")}
-            type="text"
-            className={inputClass(!!errors.equipment_order)}
-          />
-        </div>
-        <div className="flex flex-row gap-2 items-center justify-center">
-          <span className="font-semibold w-[30%] break-words">
-            Date of Repair
-          </span>
-          <input
-            {...register("datate_of_repair")}
-            type="date"
-            className={inputClass(!!errors.datate_of_repair)}
-          />
-        </div>
-        <div className="flex flex-row gap-2 items-center justify-center">
-          <span className="font-semibold w-[30%] break-words">
-            Time Finish Service
-          </span>
-          <input
-            {...register("time_finish_service")}
-            type="time"
-            className={inputClass(!!errors.time_finish_service)}
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 border-[#00000014] border-1 p-2 rounded-md mb-6">
-        <div className="flex flex-row gap-2 items-center justify-center">
-          <span className="font-semibold w-[30%] break-words">
-            LICENSE PLATE#
-          </span>
-          <input
-            {...register("license_plate")}
-            type="text"
-            className={inputClass(!!errors.license_plate)}
-          />
-        </div>
-        <div className="flex flex-row gap-2 items-center justify-center">
-          <span className="font-semibold w-[30%] break-words">PO#</span>
-          <input
-            {...register("po_number")}
-            type="text"
-            className={inputClass(!!errors.po_number)}
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 border-[#00000014] border-1 p-2 rounded-md mb-6">
-        <div className="flex flex-row gap-2 items-center justify-center">
-          <span className="font-semibold w-[30%] break-words">VIN#</span>
-          <input
-            {...register("vin_number")}
-            type="text"
-            className={inputClass(!!errors.vin_number)}
-          />
-        </div>
-        <div className="flex flex-row gap-2 items-center justify-center">
-          <span className="font-semibold w-[30%] break-words">
-            MECHANIC NAME
-          </span>
-          <input
-            {...register("mechanic_name")}
-            type="text"
-            className={inputClass(!!errors.mechanic_name)}
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <div className="flex flex-row gap-2 items-center justify-center">
+            <span className="font-semibold w-[30%] break-words ">VIN#</span>
+            <input
+              {...register("vin_number")}
+              type="text"
+              className={inputClass(!!errors.vin_number)}
+            />
+          </div>
+          <div className="flex flex-row gap-2 items-center justify-center">
+            <span className="font-semibold w-[30%] break-words ">
+              Mechanic name
+            </span>
+            <input
+              {...register("mechanic_name")}
+              type="text"
+              className={inputClass(!!errors.mechanic_name)}
+            />
+          </div>
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-box border-[#00000014] border-1 mb-6">
-        <table className="table w-full">
-          <thead>
-            <tr className="border-b-[#00000014]">
-              <th className="text-black text-center w-[10%]">CODE</th>
-              <th className="text-black text-center w-[40%]">
-                WORK DESCRIPTION
-              </th>
-              <th className="text-black text-center w-[10%]">LABOR TIME</th>
-              <th className="text-black text-center w-[15%]">PARTS</th>
-              <th className="text-black text-center w-[15%]">TOTAL</th>
-              <th className="text-black text-center w-[5%]"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {fields.map((field, index) => (
-              <tr key={field.id} className="border-b-[#00000014]">
-                <th className="text-center">
-                  <input
-                    {...register(`work_items.${index}.code`)}
-                    type="text"
-                    className={inputClass(!!errors.work_items?.[index]?.code)}
-                  />
+      <div className="rounded-box border-[#00000014] border-1 mb-6 p-4 gap-4 flex flex-col">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <div className="flex flex-row gap-2 items-center justify-center">
+            <span className="font-semibold w-[30%] break-words ">Parts</span>
+            <input
+              {...register("customer_order")}
+              type="text"
+              className={inputClass(!!errors.customer_order)}
+            />
+          </div>
+          <div className="flex flex-row gap-2 items-center justify-center">
+            <span className="font-semibold w-[30%] break-words ">Quantity</span>
+            <input
+              {...register("location_of_repair")}
+              type="text"
+              className={inputClass(!!errors.location_of_repair)}
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-2">
+          <div className="flex flex-col gap-2 items-left justify-center">
+            <span className="font-semibold w-[30%] break-words ">Quantity</span>
+            <textarea
+              className={`!text-left p-2 ${inputClass(!!errors.mechanic_name)}`}
+              placeholder="Bio"
+            ></textarea>
+
+            <button
+              type="button"
+              onClick={handleAddRow}
+              className="btn min-w-[30px] min-h-[39px] p-2 rounded-md"
+            >
+              Add row
+            </button>
+          </div>
+        </div>
+        <div className="overflow-x-auto rounded-box border-[#00000014] border-1 ">
+          <table className="table w-full">
+            <thead className="bg-[#191917]">
+              <tr className="border-b-[#00000014]">
+                <th className=" text-center w-[40%] text-white font-medium">
+                  WORK DESCRIPTION
                 </th>
-                <td className="text-center">
-                  <input
-                    {...register(`work_items.${index}.description`)}
-                    type="text"
-                    className={inputClass(
-                      !!errors.work_items?.[index]?.description
-                    )}
-                  />
-                </td>
-                <td className="text-center">
-                  <input
-                    {...register(`work_items.${index}.labor_time`)}
-                    type="time"
-                    className={inputClass(
-                      !!errors.work_items?.[index]?.labor_time
-                    )}
-                  />
-                </td>
-                <td className="text-center">
-                  <input
-                    {...register(`work_items.${index}.parts`)}
-                    type="text"
-                    className={inputClass(!!errors.work_items?.[index]?.parts)}
-                  />
-                </td>
-                <td className="text-center">
-                  <input
-                    {...register(`work_items.${index}.total`)}
-                    type="text"
-                    className={inputClass(!!errors.work_items?.[index]?.total)}
-                  />
-                </td>
-                <td className="text-center">
-                  <button
-                    onClick={() => remove(index)}
-                    className="btn min-w-[30px] min-h-[30px] p-2 rounded-md"
-                  >
-                    <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
-                  </button>
-                </td>
+                <th className=" text-center w-[15%] text-white font-medium">
+                  PARTS
+                </th>
+                <th className=" text-center w-[15%] text-white font-medium">
+                  CANTIDAD
+                </th>
+                <th className=" text-center w-[5%] text-white font-medium"></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-
-        <div className="flex flex-row items-center justify-end p-4">
-          <button
-            type="button"
-            onClick={handleAddRow}
-            className="btn input-lg text-lg font-normal bg-black text-white border-none rounded-full"
-          >
-            Add row
-          </button>
+            </thead>
+            <tbody>
+              {fields.map((field, index) => (
+                <tr key={field.id} className="border-b-[#00000014]">
+                  <td className="text-center">
+                    <input
+                      {...register(`work_items.${index}.description`)}
+                      type="text"
+                      className={inputClass(
+                        !!errors.work_items?.[index]?.description
+                      )}
+                    />
+                  </td>
+                  <td className="text-center">
+                    <input
+                      {...register(`work_items.${index}.parts`)}
+                      type="text"
+                      className={inputClass(
+                        !!errors.work_items?.[index]?.parts
+                      )}
+                    />
+                  </td>
+                  <td className="text-center">
+                    <input
+                      {...register(`work_items.${index}.cantidad`)}
+                      type="text"
+                      className={inputClass(
+                        !!errors.work_items?.[index]?.cantidad
+                      )}
+                    />
+                  </td>
+                  <td className="text-center">
+                    <button
+                      onClick={() => remove(index)}
+                      className="btn min-w-[30px] min-h-[30px] p-2 rounded-md"
+                    >
+                      <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -302,13 +302,26 @@ const CreateOrder = () => {
         <p className="font-bold mb-2">Tires Tread Deep</p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 gap-y-4 border-[#00000014] border-1 p-2 mb-6 rounded-md">
           {(
-            ["rif", "rof", "rir", "ror", "lif", "lof", "lir", "lor"] as const
+            [
+              "rif",
+              "rof",
+              "rir",
+              "ror",
+              "lif",
+              "lof",
+              "lir",
+              "lor",
+              "cif",
+              "cof",
+              "cir",
+              "co",
+            ] as const
           ).map((key) => (
             <div
               key={key}
               className="flex flex-row gap-2 items-center justify-center"
             >
-              <span className="font-semibold w-[30%] break-words">
+              <span className="font-semibold w-[30%] break-words ">
                 {key.toUpperCase()}
               </span>
               <input
