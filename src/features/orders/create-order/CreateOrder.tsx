@@ -81,7 +81,7 @@ const CreateOrder = () => {
   };
 
   const inputClass = (hasError: boolean) =>
-    `input input-lg bg-[#f6f3f4] w-full text-center font-bold text-3xl transition-all border-1 text-lg font-normal ${
+    `flex-1 input input-lg bg-[#f6f3f4] w-full text-center font-bold text-3xl transition-all border-1 text-lg font-normal ${
       hasError ? "border-red-500" : "border-gray-100"
     }`;
 
@@ -116,7 +116,7 @@ const CreateOrder = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2 border-[#00000014] border-1 p-2 mb-6 rounded-md">
         <div className="flex flex-row gap-2 items-center justify-center">
-          <span className="font-bold">CUSTOMER</span>
+          <span className="font-semibold w-[30%] break-words">CUSTOMER</span>
           <input
             {...register("customer_order")}
             type="text"
@@ -124,7 +124,9 @@ const CreateOrder = () => {
           />
         </div>
         <div className="flex flex-row gap-2 items-center justify-center">
-          <span className="font-bold">LOCATION OF REPAIR</span>
+          <span className="font-semibold w-[30%] break-words">
+            LOCATION OF REPAIR
+          </span>
           <input
             {...register("location_of_repair")}
             type="text"
@@ -132,7 +134,9 @@ const CreateOrder = () => {
           />
         </div>
         <div className="flex flex-row gap-2 items-center justify-center">
-          <span className="font-bold">TIME START SERVICE</span>
+          <span className="font-semibold w-[30%] break-words">
+            TIME START SERVICE
+          </span>
           <input
             {...register("time_start_service")}
             type="time"
@@ -143,7 +147,7 @@ const CreateOrder = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2 border-[#00000014] border-1 p-2 rounded-md mb-6">
         <div className="flex flex-row gap-2 items-center justify-center">
-          <span className="font-bold">Equipment#</span>
+          <span className="font-semibold w-[30%] break-words">Equipment#</span>
           <input
             {...register("equipment_order")}
             type="text"
@@ -151,7 +155,9 @@ const CreateOrder = () => {
           />
         </div>
         <div className="flex flex-row gap-2 items-center justify-center">
-          <span className="font-bold">Date of Repair</span>
+          <span className="font-semibold w-[30%] break-words">
+            Date of Repair
+          </span>
           <input
             {...register("datate_of_repair")}
             type="date"
@@ -159,7 +165,9 @@ const CreateOrder = () => {
           />
         </div>
         <div className="flex flex-row gap-2 items-center justify-center">
-          <span className="font-bold">Time Finish Service</span>
+          <span className="font-semibold w-[30%] break-words">
+            Time Finish Service
+          </span>
           <input
             {...register("time_finish_service")}
             type="time"
@@ -170,7 +178,9 @@ const CreateOrder = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 border-[#00000014] border-1 p-2 rounded-md mb-6">
         <div className="flex flex-row gap-2 items-center justify-center">
-          <span className="font-bold">LICENSE PLATE#</span>
+          <span className="font-semibold w-[30%] break-words">
+            LICENSE PLATE#
+          </span>
           <input
             {...register("license_plate")}
             type="text"
@@ -178,7 +188,7 @@ const CreateOrder = () => {
           />
         </div>
         <div className="flex flex-row gap-2 items-center justify-center">
-          <span className="font-bold">PO#</span>
+          <span className="font-semibold w-[30%] break-words">PO#</span>
           <input
             {...register("po_number")}
             type="text"
@@ -189,7 +199,7 @@ const CreateOrder = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 border-[#00000014] border-1 p-2 rounded-md mb-6">
         <div className="flex flex-row gap-2 items-center justify-center">
-          <span className="font-bold">VIN#</span>
+          <span className="font-semibold w-[30%] break-words">VIN#</span>
           <input
             {...register("vin_number")}
             type="text"
@@ -197,7 +207,9 @@ const CreateOrder = () => {
           />
         </div>
         <div className="flex flex-row gap-2 items-center justify-center">
-          <span className="font-bold">MECHANIC NAME</span>
+          <span className="font-semibold w-[30%] break-words">
+            MECHANIC NAME
+          </span>
           <input
             {...register("mechanic_name")}
             type="text"
@@ -296,7 +308,9 @@ const CreateOrder = () => {
               key={key}
               className="flex flex-row gap-2 items-center justify-center"
             >
-              <span className="font-bold">{key.toUpperCase()}</span>
+              <span className="font-semibold w-[30%] break-words">
+                {key.toUpperCase()}
+              </span>
               <input
                 {...register(`tires.${key}` as const)}
                 type="text"
@@ -307,7 +321,7 @@ const CreateOrder = () => {
         </div>
       </div>
 
-      <div className="pt-8">
+      <div className="pt-4">
         <button
           type="submit"
           className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto"
