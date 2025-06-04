@@ -6,151 +6,73 @@ import { z } from "zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-const workItemSchema = z.object({
-  code: z.string().optional(),
-  description: z.string().min(1, "Required"),
-  labor_time: z.string().min(1, "Required"),
-  parts: z.string().optional(),
-  total: z.string().optional(),
-});
-
-const orderSchema = z.object({
-  customer_header: z.string().min(1, "Required"),
-  order_title: z.string().min(1, "Required"),
-  customer_order: z.string().min(1, "Required"),
-  location_of_repair: z.string().min(1, "Required"),
-  time_start_service: z.string().optional(),
-  equipment_order: z.string().min(1, "Required"),
-  datate_of_repair: z.string().min(1, "Required"),
-  time_finish_service: z.string().optional(),
-  license_plate: z.string().min(1, "Required"),
-  po_number: z.string().optional(),
-  vin_number: z.string().optional(),
-  mechanic_name: z.string().min(1, "Required"),
-  tires: z.object({
-    rif: z.string().optional(),
-    rof: z.string().optional(),
-    rir: z.string().optional(),
-    ror: z.string().optional(),
-    lif: z.string().optional(),
-    lof: z.string().optional(),
-    lir: z.string().optional(),
-    lor: z.string().optional(),
-  }),
-  work_items: z.array(workItemSchema).min(1, "Add at least one row"),
-});
-
-type OrderForm = z.infer<typeof orderSchema>;
-
 interface CreateOrderProps {
   changeTitle?: (newTitle: string) => void;
 }
 
 const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
-  const {
-    register,
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<OrderForm>({
-    resolver: zodResolver(orderSchema),
-    defaultValues: {
-      order_title: "Work Order",
-      customer_header: `${COMPANY_INFO.name} Maintenance service ${COMPANY_INFO.phone} ${COMPANY_INFO.email}`,
-      work_items: [],
-      tires: {
-        rif: "",
-        rof: "",
-        rir: "",
-        ror: "",
-        lif: "",
-        lof: "",
-        lir: "",
-        lor: "",
-      },
-    },
-  });
-
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "work_items",
-  });
-
-  const onSubmit = (data: OrderForm) => {
-    console.log("\ud83d\udce6 Formulario enviado:", data);
-  };
-
-  const handleAddRow = () => {
-    append({ code: "", description: "", labor_time: "", parts: "", total: "" });
-  };
-
   const inputClass = (hasError: boolean) =>
     `flex-1 input input-lg bg-[#f6f3f4] w-full text-center font-bold text-3xl transition-all border-1 text-lg font-normal ${
       hasError ? "border-red-500" : "border-gray-100"
     }`;
 
+  const labelClass = () => `font-medium w-[30%] break-words`;
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5  p-2 mb-2 rounded-md">
-        <div className="flex flex-row gap-2 items-center justify-center col-span-2">
-          <span className="font-semibold w-[30%] md:w-[20%] break-words ">
-            CLIENT
-          </span>
-          <input
-            {...register("customer_order")}
-            type="text"
-            className={inputClass(!!errors.customer_order)}
-          />
+    <form>
+      <div className="rounded-box border-[#00000014] border-1 mb-6 p-3 gap-0 flex flex-col">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5  p-2 mb-0 rounded-md">
+          <div className="flex flex-row gap-2 items-center justify-center col-span-1">
+            <span className={labelClass()}>Client</span>
+            <input type="text" className={inputClass(false)} />
+          </div>
+          <div className="flex flex-row gap-2 items-center justify-center col-span-1">
+            <span className={labelClass()}>Status</span>
+            <select
+              defaultValue="Pick a color"
+              className={` ${inputClass(false)}  appearance-auto`}
+            >
+              <option disabled={true}>Pick a color</option>
+              <option>Crimson</option>
+              <option>Amber</option>
+              <option>Velvet</option>
+            </select>
+          </div>
         </div>
-        <div className="flex flex-row gap-2 items-center justify-center col-span-1">
-          <span className="font-semibold w-[30%] md:w-[20%] break-words">
-            STATUS
-          </span>
-          <select
-            defaultValue="Pick a color"
-            className={` ${inputClass(
-              !!errors.customer_order
-            )}  appearance-auto`}
-          >
-            <option disabled={true}>Pick a color</option>
-            <option>Crimson</option>
-            <option>Amber</option>
-            <option>Velvet</option>
-          </select>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5  p-2 mb-0 rounded-md">
+          <div className="flex flex-row gap-2 items-center justify-center col-span-1">
+            <span className={labelClass()}>Name</span>
+            <input type="text" className={inputClass(false)} />
+          </div>
+          <div className="flex flex-row gap-2 items-center justify-center col-span-1">
+            <span className={labelClass()}>Theme</span>
+            <select
+              defaultValue="Pick a color"
+              className={` ${inputClass(false)}  appearance-auto`}
+            >
+              <option disabled={true}>Pick a color</option>
+              <option>Crimson</option>
+              <option>Amber</option>
+              <option>Velvet</option>
+            </select>
+          </div>
         </div>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5  p-2 mb-6 rounded-md">
-        <div className="flex flex-row gap-2 items-center justify-center col-span-2">
-          <span className="font-semibold w-[30%] md:w-[20%] break-words ">
-            NAME
-          </span>
-          <input
-            {...register("customer_order", {
-              onChange: (e) => {
-                if (changeTitle) {
-                  changeTitle(e.target.value);
-                }
-              },
-            })}
-            type="text"
-            className={inputClass(!!errors.customer_order)}
-          />
-        </div>
-        <div className="flex flex-row gap-2 items-center justify-center col-span-1">
-          <span className="font-semibold w-[30%] md:w-[20%] break-words">
-            THEME
-          </span>
-          <select
-            defaultValue="Pick a color"
-            className={` ${inputClass(
-              !!errors.customer_order
-            )}  appearance-auto`}
-          >
-            <option disabled={true}>Pick a color</option>
-            <option>Crimson</option>
-            <option>Amber</option>
-            <option>Velvet</option>
-          </select>
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-2 mt-3 p-2">
+          <div className="flex flex-col gap-2 items-left justify-center">
+            <span className={`${labelClass()} !w-full`}>Description</span>
+            <textarea
+              className={`!text-left p-2 ${inputClass(false)}`}
+              rows={3}
+              placeholder="Write work description..."
+            ></textarea>
+
+            <button
+              type="button"
+              className="btn min-w-[30px] min-h-[39px] p-2 rounded-md mt-3"
+            >
+              Add group
+            </button>
+          </div>
         </div>
       </div>
 
