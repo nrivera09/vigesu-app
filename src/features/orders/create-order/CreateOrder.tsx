@@ -90,6 +90,7 @@ const CreateOrder = () => {
     const payload = {
       ...data,
       createWorkOrderImages: imagesData,
+      customerId: 0,
     };
 
     console.log("📦 Formulario enviado:", payload);
@@ -118,6 +119,8 @@ const CreateOrder = () => {
       hasError ? "border-red-500" : "border-gray-100"
     }`;
 
+  const labelClass = () => `font-medium w-[30%] break-words`;
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div role="alert" className="alert alert-info alert-soft mb-5 text-lg">
@@ -130,7 +133,7 @@ const CreateOrder = () => {
       <div className=" border-[#00000014] border-1 p-2 mb-6 rounded-md flex flex-col gap-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className="font-semibold w-[30%] break-words ">Customer</span>
+            <span className={labelClass()}>Customer</span>
             <input
               {...register("customer_order")}
               type="text"
@@ -138,9 +141,7 @@ const CreateOrder = () => {
             />
           </div>
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className="font-semibold w-[30%] break-words ">
-              Location of repair
-            </span>
+            <span className={labelClass()}>Location of repair</span>
             <input
               {...register("location_of_repair")}
               type="text"
@@ -148,9 +149,7 @@ const CreateOrder = () => {
             />
           </div>
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className="font-semibold w-[30%] break-words ">
-              Time start service
-            </span>
+            <span className={labelClass()}>Time start service</span>
             <input
               {...register("time_start_service")}
               type="time"
@@ -160,9 +159,7 @@ const CreateOrder = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className="font-semibold w-[30%] break-words ">
-              Equipment#
-            </span>
+            <span className={labelClass()}>Equipment#</span>
             <input
               {...register("equipment_order")}
               type="text"
@@ -170,9 +167,7 @@ const CreateOrder = () => {
             />
           </div>
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className="font-semibold w-[30%] break-words ">
-              Date of Repair
-            </span>
+            <span className={labelClass()}>Date of Repair</span>
             <input
               {...register("datate_of_repair")}
               type="date"
@@ -180,9 +175,7 @@ const CreateOrder = () => {
             />
           </div>
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className="font-semibold w-[30%] break-words ">
-              Time finish service
-            </span>
+            <span className={labelClass()}>Time finish service</span>
             <input
               {...register("time_finish_service")}
               type="time"
@@ -192,9 +185,7 @@ const CreateOrder = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className="font-semibold w-[30%] break-words ">
-              License plate #
-            </span>
+            <span className={labelClass()}>License plate #</span>
             <input
               {...register("license_plate")}
               type="text"
@@ -202,7 +193,7 @@ const CreateOrder = () => {
             />
           </div>
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className="font-semibold w-[30%] break-words ">PO#</span>
+            <span className={labelClass()}>PO#</span>
             <input
               {...register("po_number")}
               type="text"
@@ -212,7 +203,7 @@ const CreateOrder = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className="font-semibold w-[30%] break-words ">VIN#</span>
+            <span className={labelClass()}>VIN#</span>
             <input
               {...register("vin_number")}
               type="text"
@@ -220,9 +211,7 @@ const CreateOrder = () => {
             />
           </div>
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className="font-semibold w-[30%] break-words ">
-              Mechanic name
-            </span>
+            <span className={labelClass()}>Mechanic name</span>
             <input
               {...register("mechanic_name")}
               type="text"
@@ -235,7 +224,7 @@ const CreateOrder = () => {
       <div className="rounded-box border-[#00000014] border-1 mb-6 p-3 gap-4 flex flex-col">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className="font-semibold w-[30%] break-words ">Parts</span>
+            <span className={labelClass()}>Parts</span>
             <input
               name="parts"
               value={newItem.parts}
@@ -247,7 +236,7 @@ const CreateOrder = () => {
             />
           </div>
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className="font-semibold w-[30%] break-words ">Quantity</span>
+            <span className={labelClass()}>Quantity</span>
             <input
               name="quantity"
               value={newItem.quantity}
@@ -261,9 +250,7 @@ const CreateOrder = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-1 gap-2">
           <div className="flex flex-col gap-2 items-left justify-center">
-            <span className="font-semibold w-[30%] break-words ">
-              Work description
-            </span>
+            <span className={`${labelClass()} !w-full`}>Work description</span>
             <textarea
               name="description"
               value={newItem.description}
@@ -369,9 +356,7 @@ const CreateOrder = () => {
               key={key}
               className="flex flex-row gap-2 items-center justify-center"
             >
-              <span className="font-semibold w-[30%] break-words ">
-                {key.toUpperCase()}
-              </span>
+              <span className={labelClass()}>{key.toUpperCase()}</span>
               <input
                 {...register(`tires.${key}` as const)}
                 type="text"
