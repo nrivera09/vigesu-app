@@ -5,6 +5,7 @@ import { FiTrash2 } from "react-icons/fi";
 import { z } from "zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import FormChassi from "../types-pdf/FormChassi/FormChassi";
 
 interface CreateOrderProps {
   changeTitle?: (newTitle: string) => void;
@@ -75,6 +76,8 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
           </div>
         </div>
       </div>
+
+      <FormChassi></FormChassi>
 
       <div className="pt-4">
         <button
