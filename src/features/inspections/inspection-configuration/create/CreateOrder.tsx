@@ -12,6 +12,7 @@ interface CreateOrderProps {
 }
 
 const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
+  const [theme, setTheme] = useState<string>("");
   const inputClass = (hasError: boolean) =>
     `flex-1 input input-lg bg-[#f6f3f4] w-full text-center font-bold text-3xl transition-all border-1 text-lg font-normal ${
       hasError ? "border-red-500" : "border-gray-100"
@@ -49,12 +50,13 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
             <span className={labelClass()}>Theme</span>
             <select
               defaultValue="Pick a color"
+              onChange={(e) => setTheme(e.target.value)}
               className={` ${inputClass(false)}  appearance-auto`}
             >
               <option disabled={true}>Pick a color</option>
               <option>Crimson</option>
               <option>Amber</option>
-              <option>Velvet</option>
+              <option>Chassis</option>
             </select>
           </div>
         </div>
@@ -69,7 +71,7 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
 
             <button
               type="button"
-              className="btn min-w-[30px] min-h-[39px] p-2 rounded-md mt-3"
+              className="!hidden btn min-w-[30px] min-h-[39px] p-2 rounded-md mt-3"
             >
               Add group
             </button>
@@ -77,12 +79,15 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
         </div>
       </div>
 
-      <FormChassi></FormChassi>
+      <div className="rounded-box border-[#00000014] border-1 mb-6 p-3 gap-0 flex flex-col">
+        {theme == "Chassis" && <FormChassi></FormChassi>}
+      </div>
 
       <div className="pt-4">
         <button
           type="submit"
-          className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto"
+          disabled
+          className="disabled:cursor-not-allowed disabled:!text-black btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto"
         >
           <span className="py-1 px-2 text-white font-normal rounded-full md:block text-[13px]">
             Save
