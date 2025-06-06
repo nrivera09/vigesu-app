@@ -1,8 +1,17 @@
 import React, { useState } from "react";
 import { FiTrash2 } from "react-icons/fi";
+import InspectionModal from "./InspectionModal";
+import { AnswerNode } from "./AnswerTree";
 
 const FormChassi = () => {
-  const [openModal, setOpenModal] = useState<boolean>(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [questions, setQuestions] = useState<
+    { question: string; answers: AnswerNode[] }[]
+  >([]);
+
+  const handleSave = (question: string, answers: AnswerNode[]) => {
+    setQuestions((prev) => [...prev, { question, answers }]);
+  };
 
   const inputClass = (hasError: boolean) =>
     `flex-1 input input-lg bg-[#f6f3f4] w-full text-center font-bold text-3xl transition-all border-1 text-lg font-normal ${
@@ -88,15 +97,29 @@ const FormChassi = () => {
                   <th className=" text-center w-[10%] text-white font-medium"></th>
                 </tr>
               </thead>
-              <tbody></tbody>
+              <tbody>
+                {questions.map((q, index) => (
+                  <tr key={index}>
+                    <td className="text-center">{q.question}</td>
+                    <td className="text-center">
+                      <select className="select select-bordered w-full max-w-xs">
+                        {q.answers.map((a) => (
+                          <option key={a.id}>{a.label}</option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="text-center">—</td>
+                    <td></td>
+                  </tr>
+                ))}
+              </tbody>
             </table>
           </div>
         </div>
       </div>
-      <dialog id="my_modal_4" className="modal" open={openModal}>
-        <div className="modal-box w-11/12 max-w-5xl">
-          <h3 className="font-bold text-lg">Hello!</h3>
-          <p className="py-4">Click the button below to close</p>
+      <dialog id="my_modal_4" className="modal">
+        <div className="modal-box w-11/12 max-w-full">
+          {/** aqui formularios */}
           <div className="modal-action">
             <button
               type="button"
@@ -108,6 +131,12 @@ const FormChassi = () => {
           </div>
         </div>
       </dialog>
+      {openModal && (
+        <InspectionModal
+          onClose={() => setOpenModal(false)}
+          onSave={handleSave}
+        />
+      )}
     </>
   );
 };
