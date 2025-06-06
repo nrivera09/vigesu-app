@@ -1,6 +1,12 @@
 // types.ts
 import { z } from "zod";
 
+export type SubResponse = {
+  value: string;
+  color: string;
+  subresponses?: SubResponse[];
+};
+
 export const SubResponseSchema: z.ZodType<SubResponse> = z.lazy(() =>
   z.object({
     value: z.string().min(1, "Respuesta requerida"),
@@ -34,6 +40,5 @@ export const FullFormSchema = z.object({
   body_order: z.array(QuestionSchema),
 });
 
-export type SubResponse = z.infer<typeof SubResponseSchema>;
 export type Question = z.infer<typeof QuestionSchema>;
 export type FullForm = z.infer<typeof FullFormSchema>;
