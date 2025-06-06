@@ -21,6 +21,9 @@ const FormChassi = () => {
   const labelClass = () => `font-medium w-[30%] break-words`;
   return (
     <>
+      <h2 className="font-bold text-xl md:text-2xl lg:text-3xl text-center mb-5">
+        Periodic chassi and trailer inspection
+      </h2>
       <div className="rounded-box border-[#00000014] border-1 mb-6 p-3 gap-0 flex flex-col">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5  p-2 mb-0 rounded-md">
           <div className="flex flex-row gap-2 items-center justify-center col-span-1">
@@ -102,11 +105,9 @@ const FormChassi = () => {
                   <tr key={index}>
                     <td className="text-center">{q.question}</td>
                     <td className="text-center">
-                      <select className="select select-bordered w-full max-w-xs">
-                        {q.answers.map((a) => (
-                          <option key={a.id}>{a.label}</option>
-                        ))}
-                      </select>
+                      <span className="text-sm font-medium">
+                        {q.answers.map((a) => a.label).join(", ")}
+                      </span>
                     </td>
                     <td className="text-center">—</td>
                     <td></td>

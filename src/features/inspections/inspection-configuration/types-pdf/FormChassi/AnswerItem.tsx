@@ -55,47 +55,47 @@ const AnswerItem: React.FC<Props> = ({
   };
 
   return (
-    <div className="flex flex-col border p-3 rounded-md bg-white shadow-sm mb-3">
+    <div className="flex flex-col p-3 rounded-box border-[#00000014] border-1 mb-3">
       <div className="flex items-center gap-2">
         <input
           type="text"
           value={node.label}
           onChange={(e) => updateField("label", e.target.value)}
           placeholder="Respuesta"
-          className="input input-sm flex-1"
+          className="flex-1 input input-lg bg-[#f6f3f4] w-full text-left  transition-all border-1 text-lg font-normal border-gray-100 "
         />
 
         <button
           type="button"
           onClick={addSubAnswer}
-          className="btn btn-sm btn-circle"
+          className="btn min-w-[30px] min-h-[30px] p-2 rounded-md"
         >
-          <IoMdAdd />
+          <IoMdAdd className="w-[20px] h-[20px] opacity-70" />
         </button>
         <button
           type="button"
           onClick={onDelete}
-          className="btn btn-sm btn-circle"
+          className="btn min-w-[30px] min-h-[30px] p-2 rounded-md"
         >
-          <FiTrash2 />
+          <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
         </button>
         {level === 1 && (
           <input
             type="color"
             value={node.color}
             onChange={(e) => updateField("color", e.target.value)}
-            className="w-6 h-6"
+            className="btn min-w-[30px] min-h-[30px] p-2 rounded-md"
             title="Selecciona color"
           />
         )}
 
         {level > 1 && (
-          <label className="flex items-center gap-1 text-sm ml-2">
+          <label className="label text-sm">
             <input
               type="checkbox"
               checked={node.useParts ?? false}
+              className="checkbox"
               onChange={(e) => updateField("useParts", e.target.checked)}
-              className="checkbox checkbox-sm"
             />
             Usar Partes?
           </label>
@@ -103,7 +103,7 @@ const AnswerItem: React.FC<Props> = ({
       </div>
 
       {(node.children ?? []).length > 0 && (
-        <div className="ml-5 mt-3">
+        <div className="ml-0 mt-3">
           {(node.children ?? []).map((child, index) => (
             <AnswerItem
               key={child.id}

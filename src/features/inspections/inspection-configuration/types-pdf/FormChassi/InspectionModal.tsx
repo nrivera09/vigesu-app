@@ -45,12 +45,11 @@ const InspectionModal: React.FC<Props> = ({ onClose, onSave }) => {
   return (
     <dialog open className="modal">
       <div className="modal-box w-11/12 max-w-5xl">
-        <h3 className="font-bold text-lg mb-3">Nueva Inspección</h3>
         <div className="mb-3">
-          <label className="font-semibold mb-1 block">Pregunta</label>
+          <label className="font-semibold mb-1 block text-lg">Question</label>
           <input
             type="text"
-            className="input input-bordered w-full"
+            className="flex-1 input input-lg bg-[#f6f3f4] w-full text-center  transition-all border-1 text-lg font-normal border-gray-100"
             placeholder="Escribe la pregunta"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
@@ -58,13 +57,9 @@ const InspectionModal: React.FC<Props> = ({ onClose, onSave }) => {
         </div>
 
         <div className="mb-3">
-          <div className="flex justify-between items-center mb-1">
+          <div className="flex justify-between items-center mb-5">
             <span className="font-semibold">Respuestas</span>
-            <button
-              type="button"
-              className="btn btn-sm btn-success"
-              onClick={addAnswer}
-            >
+            <button type="button" className="btn  " onClick={addAnswer}>
               Agregar Respuesta
             </button>
           </div>

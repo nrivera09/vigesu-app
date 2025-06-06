@@ -39,7 +39,7 @@ export default function DashboardLayout({
             <Breadcrumb />
             <div className="flex flex-row gap-2">
               <LanguageSwitcher design="header-dashboard" />
-              <button className="btn bg-[#60285a] rounded-full pr-3 py-6 sm:flex items-center justify-center border-none">
+              <button className="!hidden btn bg-[#60285a] rounded-full pr-3 py-6 sm:flex items-center justify-center border-none">
                 <FaRegBell className="text-xl text-white" />
                 <span className="bg-[#7c3174] py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px]  ">
                   Messages

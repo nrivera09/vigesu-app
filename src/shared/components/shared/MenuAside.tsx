@@ -48,16 +48,6 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
       icon: <SlSettings />,
     },
     {
-      label: "Clients",
-      href: "/dashboard/inspections/clients",
-      icon: <SlPeople />,
-    },
-    {
-      label: "Services",
-      href: "/dashboard/inspections/services",
-      icon: <HiOutlineServer />,
-    },
-    {
       label: "Groups",
       href: "/dashboard/inspections/groups",
       icon: <SlLayers />,
@@ -192,12 +182,12 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
 
           <nav className="p-5 flex flex-1 flex-col">
             <SidebarSection
-              title="Orders"
+              title="Documents"
               links={ordersLinks}
               activeHref={activeHref}
             />
             <SidebarSection
-              title="Inspections"
+              title="Catalogs"
               links={inspectionsLinks}
               activeHref={activeHref}
             />
