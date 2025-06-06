@@ -56,7 +56,7 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
               <option disabled={true}>Pick a color</option>
               <option>Crimson</option>
               <option>Amber</option>
-              <option>Chassis</option>
+              <option>Periodic chassi and trailer inspection</option>
             </select>
           </div>
         </div>
@@ -79,9 +79,9 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
         </div>
       </div>
 
-      <div className="rounded-box border-[#00000014] border-1 mb-6 p-3 gap-0 flex flex-col">
-        {theme == "Chassis" && <FormChassi></FormChassi>}
-      </div>
+      {theme == "Periodic chassi and trailer inspection" && (
+        <FormChassi></FormChassi>
+      )}
 
       <div className="pt-4">
         <button

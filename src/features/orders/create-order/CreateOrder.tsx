@@ -335,7 +335,7 @@ const CreateOrder = () => {
 
       <div>
         <p className="font-bold mb-2">Tires Tread Deep</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 gap-y-4 border-[#00000014] border-1 p-2 mb-6 rounded-md">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 gap-y-4 border-[#00000014] border-1 p-3 mb-6 rounded-md">
           {(
             [
               "rif",
