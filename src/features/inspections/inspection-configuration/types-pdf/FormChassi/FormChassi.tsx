@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FiTrash2 } from "react-icons/fi";
 import InspectionModal from "./InspectionModal";
 import { AnswerNode } from "./AnswerTree";
+import { IoAddCircleOutline } from "react-icons/io5";
 
 const FormChassi = () => {
   const [openModal, setOpenModal] = useState(false);
@@ -82,6 +83,7 @@ const FormChassi = () => {
             onClick={() => setOpenModal(!openModal)}
             className="btn min-w-[30px] min-h-[39px] p-2 rounded-md "
           >
+            <IoAddCircleOutline className="text-2xl" />
             Add row
           </button>
           <div className="overflow-x-auto rounded-box border-[#00000014] border-1 ">
@@ -89,13 +91,13 @@ const FormChassi = () => {
               <thead className="bg-[#191917]">
                 <tr className="border-b-[#00000014]">
                   <th className=" text-center w-[40%] text-white font-medium">
-                    INSPECTION ITEM
+                    Inspection time
                   </th>
                   <th className=" text-center w-[15%] text-white font-medium">
-                    OK
+                    Ok
                   </th>
                   <th className=" text-center w-[40%] text-white font-medium">
-                    REPAIR / REPLACE ITEMS
+                    Repair / Replace items
                   </th>
                   <th className=" text-center w-[10%] text-white font-medium"></th>
                 </tr>

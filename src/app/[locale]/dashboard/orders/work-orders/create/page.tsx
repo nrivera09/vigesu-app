@@ -2,7 +2,7 @@ import CreateOrder from "@/features/orders/create-order/CreateOrder";
 import BackButton from "@/shared/components/shared/BackButton";
 import React from "react";
 
-const page = () => {
+const Page = () => {
   return (
     <>
       <div className="header-page flex flex-row items-center justify-between min-h-[70px] bg-base-200 px-6 gap-2">
@@ -17,4 +17,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

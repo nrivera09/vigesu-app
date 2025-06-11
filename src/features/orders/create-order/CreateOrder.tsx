@@ -6,6 +6,8 @@ import { z } from "zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ImageUploader from "./ImageUploader";
+import { TbArrowDownToArc } from "react-icons/tb";
+import { IoAddCircleOutline } from "react-icons/io5";
 
 const workItemSchema = z.object({
   description: z.string().min(1, "Required"),
@@ -52,6 +54,22 @@ const CreateOrder = () => {
   const [newItemError, setNewItemError] = useState<string | null>(null);
 
   const [files, setFiles] = useState<File[]>([]);
+
+  const getTodayLocalDate = (): string => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const getCurrentTime = (): string => {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const seconds = String(now.getSeconds()).padStart(2, "0");
+    return `${hours}:${minutes}:${seconds}`;
+  };
 
   const {
     register,
@@ -153,6 +171,7 @@ const CreateOrder = () => {
             <input
               {...register("time_start_service")}
               type="time"
+              defaultValue={getCurrentTime()}
               className={inputClass(!!errors.time_start_service)}
             />
           </div>
@@ -171,6 +190,7 @@ const CreateOrder = () => {
             <input
               {...register("datate_of_repair")}
               type="date"
+              defaultValue={getTodayLocalDate()}
               className={inputClass(!!errors.datate_of_repair)}
             />
           </div>
@@ -224,7 +244,7 @@ const CreateOrder = () => {
       <div className="rounded-box border-[#00000014] border-1 mb-6 p-3 gap-4 flex flex-col">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className={labelClass()}>Parts</span>
+            <span className={labelClass()}>Service/Parts</span>
             <input
               name="parts"
               value={newItem.parts}
@@ -267,6 +287,7 @@ const CreateOrder = () => {
               onClick={handleAddRow}
               className="btn min-w-[30px] min-h-[39px] p-2 rounded-md mt-3"
             >
+              <IoAddCircleOutline className="text-2xl" />
               Add row
             </button>
           </div>
@@ -276,13 +297,13 @@ const CreateOrder = () => {
             <thead className="bg-[#191917]">
               <tr className="border-b-[#00000014]">
                 <th className=" text-center w-[40%] text-white font-medium">
-                  WORK DESCRIPTION
+                  Work description
                 </th>
                 <th className=" text-center w-[15%] text-white font-medium">
-                  PARTS
+                  Service/parts
                 </th>
                 <th className=" text-center w-[15%] text-white font-medium">
-                  QUANTITY
+                  Quantity
                 </th>
                 <th className=" text-center w-[5%] text-white font-medium"></th>
               </tr>

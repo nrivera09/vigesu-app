@@ -2,12 +2,14 @@
 import React from "react";
 import { FiTrash2 } from "react-icons/fi";
 import { IoMdAdd } from "react-icons/io";
+import { IoPrintOutline } from "react-icons/io5";
 
 export interface AnswerNode {
   id: string;
   label: string;
   color: string;
   useParts?: boolean;
+  usePrint?: boolean;
   children?: AnswerNode[];
 }
 
@@ -37,6 +39,7 @@ const AnswerItem: React.FC<Props> = ({
       label: "",
       color: "#60a5fa",
       useParts: false,
+      usePrint: false,
       children: [],
     };
     updateField("children", [...(node.children || []), newChild]);
@@ -90,7 +93,7 @@ const AnswerItem: React.FC<Props> = ({
         )}
 
         {level > 1 && (
-          <label className="label text-sm">
+          <label className="label text-sm text-black/80">
             <input
               type="checkbox"
               checked={node.useParts ?? false}
@@ -98,6 +101,17 @@ const AnswerItem: React.FC<Props> = ({
               onChange={(e) => updateField("useParts", e.target.checked)}
             />
             Usar Partes?
+          </label>
+        )}
+        {level > 1 && (
+          <label className="label text-sm ">
+            <input
+              type="checkbox"
+              checked={node.usePrint ?? false}
+              className="checkbox"
+              onChange={(e) => updateField("usePrint", e.target.checked)}
+            />
+            <IoPrintOutline className="text-3xl text-black/50" />
           </label>
         )}
       </div>

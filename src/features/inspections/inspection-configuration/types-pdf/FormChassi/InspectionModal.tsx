@@ -39,6 +39,7 @@ const InspectionModal: React.FC<Props> = ({ onClose, onSave }) => {
   const handleSubmit = () => {
     if (!question.trim()) return alert("Pregunta obligatoria");
     onSave(question, answers);
+    console.log("ok: ", question, answers);
     onClose();
   };
 
