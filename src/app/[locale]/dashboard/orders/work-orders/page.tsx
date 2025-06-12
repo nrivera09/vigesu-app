@@ -9,6 +9,10 @@ import { FiPlus, FiTrash2 } from "react-icons/fi";
 import { IoSearchOutline } from "react-icons/io5";
 import { MdOutlineSettingsBackupRestore } from "react-icons/md";
 import { DayPicker } from "react-day-picker";
+import {
+  WorkOrderStatus,
+  WorkOrderStatusLabel,
+} from "@/features/orders/models/workOrder.types";
 
 const Page = () => {
   const pathname = usePathname();
@@ -107,7 +111,7 @@ const Page = () => {
                     Status
                   </legend>
                   <select
-                    defaultValue="Pick a color"
+                    defaultValue=""
                     className="select w-full text-lg input-lg"
                     onChange={(e) =>
                       setObjFilterForm({
@@ -116,10 +120,17 @@ const Page = () => {
                       })
                     }
                   >
-                    <option disabled={true}>Pick a color</option>
-                    <option>Crimson</option>
-                    <option>Amber</option>
-                    <option>Velvet</option>
+                    <option disabled={true} value="">
+                      Pick a status
+                    </option>
+
+                    {Object.entries(WorkOrderStatusLabel).map(
+                      ([key, label]) => (
+                        <option key={key} value={key}>
+                          {label}
+                        </option>
+                      )
+                    )}
                   </select>
                 </div>
                 <div className="flex flex-col">
@@ -215,7 +226,7 @@ const Page = () => {
             <TableList
               objFilter={{
                 ...objFilterApplied,
-                workorder: Number(objFilterApplied.workorder), // ← conversión controlada
+                workorder: Number(objFilterApplied.workorder),
                 creationdate: objFilterApplied.creationdate ?? new Date(),
               }}
             />

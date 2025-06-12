@@ -3,6 +3,7 @@ import { generateFakeTableData } from "@/shared/data/fakeTableData";
 import { FiTrash2, FiPrinter } from "react-icons/fi";
 import { FaRegEdit, FaRegFilePdf } from "react-icons/fa";
 import { TableListProps } from "@/shared/types/inspection/ITypes";
+import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
 
 const TableList = ({ objFilter }: TableListProps) => {
   const [allData, setAllData] = useState(() => generateFakeTableData(100));
@@ -75,30 +76,31 @@ const TableList = ({ objFilter }: TableListProps) => {
                 </div>
               </td>
               <td className="flex items-center gap-2 justify-end">
-                <button className="btn min-w-[30px] min-h-[30px] p-2 rounded-md">
-                  <FaRegEdit className="w-[20px] h-[20px] opacity-70" />
-                  <span className="hidden xl:block text-[12px] font-normal">
-                    Edit
-                  </span>
-                </button>
-                <button className="btn min-w-[30px] min-h-[30px] p-2 rounded-md">
-                  <FaRegFilePdf className="w-[20px] h-[20px] opacity-70" />
-                  <span className="hidden xl:block text-[12px] font-normal">
-                    Create PDF
-                  </span>
-                </button>
-                <button className="btn min-w-[30px] min-h-[30px] p-2 rounded-md">
-                  <FiPrinter className="w-[20px] h-[20px] opacity-70" />
-                  <span className="hidden xl:block text-[12px] font-normal">
-                    Print
-                  </span>
-                </button>
-                <button className="btn min-w-[30px] min-h-[30px] p-2 rounded-md">
-                  <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
-                  <span className="hidden xl:block text-[12px] font-normal">
-                    Delete
-                  </span>
-                </button>
+                <ActionButton
+                  icon={<FaRegEdit className="w-[20px] h-[20px] opacity-70" />}
+                  label="Edit"
+                  onClick={() => console.log("Edit clicked")}
+                />
+
+                <ActionButton
+                  icon={
+                    <FaRegFilePdf className="w-[20px] h-[20px] opacity-70" />
+                  }
+                  label="Create PDF"
+                  onClick={() => console.log("Create PDF clicked")}
+                />
+
+                <ActionButton
+                  icon={<FiPrinter className="w-[20px] h-[20px] opacity-70" />}
+                  label="Print"
+                  onClick={() => console.log("Print clicked")}
+                />
+
+                <ActionButton
+                  icon={<FiTrash2 className="w-[20px] h-[20px] opacity-70" />}
+                  label="Delete"
+                  onClick={() => console.log("Delete clicked")}
+                />
               </td>
             </tr>
           ))}

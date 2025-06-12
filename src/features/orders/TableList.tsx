@@ -1,25 +1,43 @@
 import { useEffect, useState } from "react";
-import { generateFakeTableData } from "@/shared/data/fakeTableData";
+import { getWorkOrders } from "./api/workOrdersApi";
+import { WorkOrder, WorkOrderStatus } from "./models/workOrder.types";
 import { FiTrash2, FiPrinter } from "react-icons/fi";
 import { FaRegEdit, FaRegFilePdf } from "react-icons/fa";
 import { TableListProps } from "@/shared/types/order/ITypes";
+import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
 
 const TableList = ({ objFilter }: TableListProps) => {
-  const [allData, setAllData] = useState(() => generateFakeTableData(100));
-
+  const [allData, setAllData] = useState<WorkOrder[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await getWorkOrders();
+        setAllData(response.items);
+      } catch (error) {
+        console.error("Error fetching work orders:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const filteredData = allData.filter((item) => {
     const matchClient = objFilter.client
-      ? item.client.toLowerCase().includes(objFilter.client.toLowerCase())
+      ? item.customerName.toLowerCase().includes(objFilter.client.toLowerCase())
       : true;
     const matchWorkorder = objFilter.workorder
-      ? item.workorder.toString().includes(objFilter.workorder.toString())
+      ? item.workOrderNumber.toString().includes(objFilter.workorder.toString())
       : true;
     const matchStatus = objFilter.status
-      ? item.status.toLowerCase() === objFilter.status.toLowerCase()
+      ? item.statusWorkOrder.toString() === objFilter.status
       : true;
+
     return matchClient && matchWorkorder && matchStatus;
   });
 
@@ -29,6 +47,19 @@ const TableList = ({ objFilter }: TableListProps) => {
 
   const changePage = (page: number) => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
+  };
+
+  const getWorkOrderStatusLabel = (status: WorkOrderStatus): string => {
+    switch (status) {
+      case WorkOrderStatus.Create:
+        return "Create";
+      case WorkOrderStatus.Disabled:
+        return "Disabled";
+      case WorkOrderStatus.SyncQuickbook:
+        return "Sync Quickbook";
+      default:
+        return "Unknown";
+    }
   };
 
   useEffect(() => {
@@ -49,62 +80,56 @@ const TableList = ({ objFilter }: TableListProps) => {
           </tr>
         </thead>
         <tbody>
-          {currentRows.map((item) => (
-            <tr key={item.id} className="cursor-pointer odd:bg-base-200">
-              <td>
-                <input
-                  type="checkbox"
-                  defaultChecked={item.selected}
-                  className="checkbox"
-                />
-              </td>
-              <td className="truncate">{item.client}</td>
-              <td className="truncate">{item.name}</td>
-              <td>
-                <div
-                  className={`badge badge-dash ${
-                    item.status === "success"
-                      ? "badge-success"
-                      : item.status === "warning"
-                      ? "badge-warning"
-                      : item.status === "error"
-                      ? "badge-error "
-                      : "badge-neutral"
-                  }`}
-                >
-                  {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-                </div>
-              </td>
-              <td className=" flex items-center justify-center ">
-                <input
-                  type="checkbox"
-                  defaultChecked={item.selected}
-                  className="checkbox"
-                />
-              </td>
-              <td className=" text-end ">
-                <div className="flex w-full flex-row gap-2 items-center justify-end">
-                  <button className="btn min-w-[30px] min-h-[30px] p-2 rounded-md">
-                    <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
-                    <span className="hidden xl:block text-[12px] font-normal">
-                      Delete
-                    </span>
-                  </button>
-                  <button className="btn min-w-[30px] min-h-[30px] p-2 rounded-md">
-                    <FaRegEdit className="w-[20px] h-[20px] opacity-70" />
-                    <span className="hidden xl:block text-[12px] font-normal">
-                      Edit
-                    </span>
-                  </button>
-                </div>
+          {loading ? (
+            <tr>
+              <td colSpan={6} className="text-center py-10">
+                <span className="loading loading-spinner loading-lg"></span>
+                <div className="mt-2 font-medium">Cargando datos...</div>
               </td>
             </tr>
-          ))}
+          ) : (
+            currentRows.map((item) => (
+              <tr
+                key={item.workOrderId}
+                className="cursor-pointer odd:bg-base-200"
+              >
+                <td>
+                  <input type="checkbox" className="checkbox" />
+                </td>
+                <td className="truncate">{item.customerName}</td>
+                <td className="truncate">{item.employeeName}</td>
+                <td>
+                  <div className="badge badge-neutral">
+                    {getWorkOrderStatusLabel(item.statusWorkOrder)}
+                  </div>
+                </td>
+                <td className="flex items-center justify-center">
+                  <input type="checkbox" className="checkbox" />
+                </td>
+                <td className="text-end">
+                  <div className="flex w-full flex-row gap-2 items-center justify-end">
+                    <ActionButton
+                      icon={
+                        <FaRegEdit className="w-[20px] h-[20px] opacity-70" />
+                      }
+                      label="Edit"
+                      onClick={() => console.log("Edit clicked")}
+                    />
+                    <ActionButton
+                      icon={
+                        <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
+                      }
+                      label="Delete"
+                      onClick={() => console.log("Delete clicked")}
+                    />
+                  </div>
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
 
-      {/* Paginación */}
-      {/* Paginación con inicio y fin */}
       <div className="join flex justify-center py-4">
         <button
           className="join-item btn font-normal"

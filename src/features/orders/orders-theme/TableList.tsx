@@ -6,6 +6,7 @@ import { FaRegEdit, FaRegFilePdf } from "react-icons/fa";
 import { TableListProps } from "@/shared/types/inspection/ITypes";
 import { VscOpenPreview } from "react-icons/vsc";
 import { useRouter, usePathname } from "next/navigation";
+import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
 
 const TableList = ({ objFilter }: TableListProps) => {
   const router = useRouter();
@@ -54,21 +55,18 @@ const TableList = ({ objFilter }: TableListProps) => {
             <tr key={item.id} className="cursor-pointer odd:bg-base-200">
               <td className="truncate">{item.client}</td>
               <td className="flex items-center justify-end gap-2">
-                <button
-                  className="btn min-w-[30px] min-h-[30px] p-2 rounded-md"
+                <ActionButton
+                  icon={
+                    <VscOpenPreview className="w-[20px] h-[20px] opacity-70" />
+                  }
+                  label="Preview"
                   onClick={() => router.push(`${pathname}/${item.client}`)}
-                >
-                  <VscOpenPreview className="w-[20px] h-[20px] opacity-70" />
-                  <span className="hidden xl:block text-[12px] font-normal">
-                    Preview
-                  </span>
-                </button>
-                <button className="btn min-w-[30px] min-h-[30px] p-2 rounded-md">
-                  <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
-                  <span className="hidden xl:block text-[12px] font-normal">
-                    Delete
-                  </span>
-                </button>
+                />
+                <ActionButton
+                  icon={<FiTrash2 className="w-[20px] h-[20px] opacity-70" />}
+                  label="Delete"
+                  onClick={() => console.log("Delete clicked")}
+                />
               </td>
             </tr>
           ))}

@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import ImageUploader from "./ImageUploader";
 import { TbArrowDownToArc } from "react-icons/tb";
 import { IoAddCircleOutline } from "react-icons/io5";
+import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
 
 const workItemSchema = z.object({
   description: z.string().min(1, "Required"),
@@ -340,12 +341,13 @@ const CreateOrder = () => {
                     />
                   </td>
                   <td className="text-center">
-                    <button
+                    <ActionButton
+                      icon={
+                        <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
+                      }
+                      label="Delete"
                       onClick={() => remove(index)}
-                      className="btn min-w-[30px] min-h-[30px] p-2 rounded-md"
-                    >
-                      <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
-                    </button>
+                    />
                   </td>
                 </tr>
               ))}

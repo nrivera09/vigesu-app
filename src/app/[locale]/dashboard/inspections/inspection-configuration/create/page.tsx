@@ -1,5 +1,6 @@
 "use client";
 import CreateOrder from "@/features/inspections/inspection-configuration/create/CreateOrder";
+import AlertInfo from "@/shared/components/shared/AlertInfo";
 import BackButton from "@/shared/components/shared/BackButton";
 import React, { useState } from "react";
 
@@ -15,6 +16,10 @@ const Page = () => {
       </div>
       <div className="body-app overflow-y-auto pt-[20px]">
         <div className="container max-w-full mb-5">
+          <AlertInfo>
+            All the grey spaces are editable, meaning you can write on them and
+            add the required data.
+          </AlertInfo>
           <CreateOrder changeTitle={changeTitle} />
         </div>
       </div>
