@@ -5,6 +5,8 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import "@/shared/styles/globals.css";
 
+import { Toaster } from "sonner";
+
 const jostSans = Poppins({
   subsets: ["latin"],
   display: "swap",
@@ -37,6 +39,7 @@ export default async function RootLayout({
           <LanguageSwitcher />
           */}
           {children}
+          <Toaster richColors position="bottom-center" />
         </NextIntlClientProvider>
       </body>
     </html>

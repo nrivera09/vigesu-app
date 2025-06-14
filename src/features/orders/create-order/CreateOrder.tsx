@@ -1,6 +1,7 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { COMPANY_INFO } from "@/config/constants";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { FiTrash2 } from "react-icons/fi";
 import { z } from "zod";
 import { useForm, useFieldArray } from "react-hook-form";
@@ -9,6 +10,12 @@ import ImageUploader from "./ImageUploader";
 import { TbArrowDownToArc } from "react-icons/tb";
 import { IoAddCircleOutline } from "react-icons/io5";
 import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
+import { mapOrderFormToApiPayload } from "@/shared/utils/orderMapper";
+import { axiosInstance } from "@/shared/utils/axiosInstance";
+import { debounce } from "lodash";
+import clsx from "clsx";
+import { MdEdit } from "react-icons/md";
+import { toast } from "sonner";
 
 const workItemSchema = z.object({
   description: z.string().min(1, "Required"),
@@ -41,12 +48,46 @@ const orderSchema = z.object({
     cir: z.string().optional(),
     co: z.string().optional(),
   }),
-  work_items: z.array(workItemSchema).min(1, "Add at least one row"),
+  work_items: z.array(workItemSchema),
 });
 
-type OrderForm = z.infer<typeof orderSchema>;
+interface CustomerOption {
+  id: number;
+  name: string;
+}
+
+interface MechanicOption {
+  id: number;
+  name: string;
+}
+
+interface ItemOption {
+  id: number;
+  name: string;
+}
+
+export type OrderForm = z.infer<typeof orderSchema>;
 
 const CreateOrder = () => {
+  const router = useRouter();
+  const [selectedCustomer, setSelectedCustomer] =
+    useState<CustomerOption | null>(null);
+  const [selectedMechanic, setSelectedMechanic] =
+    useState<MechanicOption | null>(null);
+  const [selectedItem, setSelectedItem] = useState<ItemOption | null>(null);
+
+  const [customerOptions, setCustomerOptions] = useState<CustomerOption[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const [mechanicOptions, setMechanicOptions] = useState<MechanicOption[]>([]);
+  const [showMechanicDropdown, setShowMechanicDropdown] = useState(false);
+  const mechanicInputRef = useRef<HTMLInputElement>(null);
+
+  const [itemOptions, setItemOptions] = useState<ItemOption[]>([]);
+  const [showItemDropdown, setShowItemDropdown] = useState(false);
+  const itemInputRef = useRef<HTMLInputElement>(null);
+
   const [newItem, setNewItem] = useState({
     description: "",
     parts: "",
@@ -55,6 +96,95 @@ const CreateOrder = () => {
   const [newItemError, setNewItemError] = useState<string | null>(null);
 
   const [files, setFiles] = useState<File[]>([]);
+
+  const searchCustomer = async (name?: string) => {
+    try {
+      let url = `/QuickBooks/Customers/GetCustomerName?RealmId=9341454759827689`;
+      if (name) url += `&Name=${encodeURIComponent(name)}`;
+
+      const response = await axiosInstance.get(url);
+      setCustomerOptions(response.data ?? []);
+    } catch (error) {
+      console.error("Error buscando clientes:", error);
+    }
+  };
+
+  const debouncedSearch = useRef(
+    debounce((value: string) => {
+      if (value.length >= 3) {
+        searchCustomer(value);
+      } else {
+        setCustomerOptions([]);
+      }
+    }, 500)
+  ).current;
+
+  const handleCustomerInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = e.target.value;
+    setShowDropdown(true);
+    debouncedSearch(value);
+  };
+
+  const searchMechanic = async (name?: string) => {
+    try {
+      let url = `/QuickBooks/employees/GetEmployeeName?RealmId=9341454759827689`;
+      if (name) url += `&Name=${encodeURIComponent(name)}`;
+
+      const response = await axiosInstance.get(url);
+      setMechanicOptions(response.data ?? []);
+    } catch (error) {
+      console.error("Error buscando empleados:", error);
+    }
+  };
+
+  const debouncedSearchMechanic = useRef(
+    debounce((value: string) => {
+      if (value.length >= 3) {
+        searchMechanic(value);
+      } else {
+        setMechanicOptions([]);
+      }
+    }, 500)
+  ).current;
+
+  const handleMechanicInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = e.target.value;
+    setShowMechanicDropdown(true);
+    debouncedSearchMechanic(value);
+  };
+
+  const searchItem = async (name?: string) => {
+    try {
+      let url = `/QuickBooks/Items/GetItemName?RealmId=9341454759827689`;
+      if (name) url += `&Name=${encodeURIComponent(name)}`;
+
+      const response = await axiosInstance.get(url);
+      setItemOptions(response.data ?? []);
+    } catch (error) {
+      console.error("Error buscando items:", error);
+    }
+  };
+
+  const debouncedSearchItem = useRef(
+    debounce((value: string) => {
+      if (value.length >= 3) {
+        searchItem(value);
+      } else {
+        setItemOptions([]);
+      }
+    }, 500)
+  ).current;
+
+  const handleItemInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setNewItem((prev) => ({ ...prev, parts: value }));
+    setShowItemDropdown(true);
+    debouncedSearchItem(value);
+  };
 
   const getTodayLocalDate = (): string => {
     const now = new Date();
@@ -68,17 +198,18 @@ const CreateOrder = () => {
     const now = new Date();
     const hours = String(now.getHours()).padStart(2, "0");
     const minutes = String(now.getMinutes()).padStart(2, "0");
-    const seconds = String(now.getSeconds()).padStart(2, "0");
-    return `${hours}:${minutes}:${seconds}`;
+    return `${hours}:${minutes}`;
   };
 
   const {
     register,
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isValid },
+    setValue,
   } = useForm<OrderForm>({
     resolver: zodResolver(orderSchema),
+    mode: "onChange",
     defaultValues: {
       work_items: [],
       tires: {
@@ -103,16 +234,38 @@ const CreateOrder = () => {
     name: "work_items",
   });
 
-  const onSubmit = (data: OrderForm) => {
-    const imagesData = files.map((file) => ({ nombre: file.name }));
+  const onSubmit = async (data: OrderForm) => {
+    try {
+      const payload = mapOrderFormToApiPayload(data);
 
-    const payload = {
-      ...data,
-      createWorkOrderImages: imagesData,
-      customerId: 0,
-    };
+      // POST /WorkOrder
+      const response = await axiosInstance.post("/WorkOrder", payload);
+      const workOrderId = "9"; // Verifica dónde te devuelve el ID
 
-    console.log("📦 Formulario enviado:", payload);
+      console.log("✅ WorkOrder creado:", workOrderId);
+
+      // Subir imágenes si existen
+      if (files.length > 0) {
+        const formData = new FormData();
+        formData.append("WorkOrderId", workOrderId);
+
+        files.forEach((file) => {
+          formData.append("Files", file);
+        });
+
+        await axiosInstance.post("/WorkOrder/UploadWorkOrderPhotos", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        console.log("✅ Archivos subidos correctamente");
+      }
+
+      console.log("🎯 TODO OK - PROCESO FINALIZADO");
+
+      router.push("../");
+    } catch (error) {
+      console.error("❌ Error al procesar el formulario", error);
+    }
   };
 
   const handleAddRow = () => {
@@ -151,14 +304,71 @@ const CreateOrder = () => {
 
       <div className=" border-[#00000014] border-1 p-2 mb-6 rounded-md flex flex-col gap-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-          <div className="flex flex-row gap-2 items-center justify-center">
-            <span className={labelClass()}>Customer</span>
-            <input
-              {...register("customer_order")}
-              type="text"
-              className={inputClass(!!errors.customer_order)}
-            />
+          <div className="flex flex-row gap-2 items-center justify-center ">
+            <span className={clsx(labelClass(), `!w-[30%]`)}>Customer</span>
+            {selectedCustomer ? (
+              <div className="flex flex-1 items-center gap-2 ">
+                <span className="truncate w-0 flex-1 px-2">
+                  {selectedCustomer.name}
+                </span>
+                <button
+                  type="button"
+                  className="btn p-2 btn-xs bg-transparent hover:shadow-none border-none  flex items-center justify-center "
+                  onClick={() => {
+                    setSelectedCustomer(null);
+                    setValue("customer_order", "");
+                    setCustomerOptions([]);
+                    if (inputRef.current) inputRef.current.value = "";
+                  }}
+                >
+                  <MdEdit className="text-2xl" />
+                </button>
+              </div>
+            ) : (
+              <div className="relative flex-1">
+                <input
+                  {...register("customer_order")}
+                  type="text"
+                  className={inputClass(!!errors.customer_order)}
+                  onChange={(e) => {
+                    handleCustomerInputChange(e);
+                    setValue("customer_order", e.target.value);
+                  }}
+                  ref={(el) => {
+                    register("customer_order").ref(el);
+                    inputRef.current = el;
+                  }}
+                  autoComplete="off"
+                />
+                <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto absolute mt-1 flex flex-col !cursor-pointer">
+                  {customerOptions.map((option, idx) => (
+                    <li
+                      key={option.id}
+                      className="w-full !cursor-pointer text-sm"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (inputRef.current) {
+                            inputRef.current.value = option.name;
+                            setShowDropdown(false);
+                            setValue("customer_order", option.name);
+                            setSelectedCustomer(option);
+                            setCustomerOptions([]);
+                            debouncedSearch.cancel();
+                          }
+                        }}
+                        className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                      >
+                        {option.name}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
+
           <div className="flex flex-row gap-2 items-center justify-center">
             <span className={labelClass()}>Location of repair</span>
             <input
@@ -232,12 +442,72 @@ const CreateOrder = () => {
             />
           </div>
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className={labelClass()}>Mechanic name</span>
-            <input
-              {...register("mechanic_name")}
-              type="text"
-              className={inputClass(!!errors.mechanic_name)}
-            />
+            <span className={clsx(labelClass(), `!w-[30%]`)}>
+              Mechanic name
+            </span>
+
+            {selectedMechanic ? (
+              <div className="flex flex-1 items-center gap-2 ">
+                <span className="truncate w-0 flex-1 px-2">
+                  {selectedMechanic.name}
+                </span>
+                <button
+                  type="button"
+                  className="btn p-2 btn-xs bg-transparent hover:shadow-none border-none flex items-center justify-center"
+                  onClick={() => {
+                    setSelectedMechanic(null);
+                    setValue("mechanic_name", "");
+                    setMechanicOptions([]);
+                    if (mechanicInputRef.current)
+                      mechanicInputRef.current.value = "";
+                  }}
+                >
+                  <MdEdit className="text-2xl" />
+                </button>
+              </div>
+            ) : (
+              <div className="relative flex-1">
+                <input
+                  {...register("mechanic_name")}
+                  type="text"
+                  className={inputClass(!!errors.mechanic_name)}
+                  onChange={(e) => {
+                    handleMechanicInputChange(e);
+                    setValue("mechanic_name", e.target.value);
+                  }}
+                  ref={(el) => {
+                    register("mechanic_name").ref(el);
+                    mechanicInputRef.current = el;
+                  }}
+                  autoComplete="off"
+                />
+                <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto absolute mt-1 flex flex-col !cursor-pointer">
+                  {mechanicOptions.map((option, idx) => (
+                    <li
+                      key={option.id}
+                      className="w-full !cursor-pointer text-sm"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (mechanicInputRef.current) {
+                            mechanicInputRef.current.value = option.name;
+                            setShowMechanicDropdown(false);
+                            setValue("mechanic_name", option.name);
+                            setSelectedMechanic(option);
+                            setMechanicOptions([]);
+                            debouncedSearchMechanic.cancel();
+                          }
+                        }}
+                        className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                      >
+                        {option.name}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -245,17 +515,73 @@ const CreateOrder = () => {
       <div className="rounded-box border-[#00000014] border-1 mb-6 p-3 gap-4 flex flex-col">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className={labelClass()}>Service/Parts</span>
-            <input
-              name="parts"
-              value={newItem.parts}
-              onChange={handleNewItemChange}
-              className={inputClass(
-                !!newItemError && newItem.parts.trim() === ""
-              )}
-              type="text"
-            />
+            <span className={clsx(labelClass(), `!w-[30%]`)}>
+              Service/Parts
+            </span>
+
+            {selectedItem ? (
+              <div className="flex flex-1 items-center gap-2 ">
+                <span className="truncate w-0 flex-1 px-2">
+                  {selectedItem.name}
+                </span>
+                <button
+                  type="button"
+                  className="btn p-2 btn-xs bg-transparent hover:shadow-none border-none flex items-center justify-center"
+                  onClick={() => {
+                    setSelectedItem(null);
+                    setNewItem((prev) => ({ ...prev, parts: "" }));
+                    setItemOptions([]);
+                    if (itemInputRef.current) itemInputRef.current.value = "";
+                  }}
+                >
+                  <MdEdit className="text-2xl" />
+                </button>
+              </div>
+            ) : (
+              <div className="relative flex-1">
+                <input
+                  name="parts"
+                  value={newItem.parts}
+                  onChange={handleItemInputChange}
+                  ref={itemInputRef}
+                  className={inputClass(
+                    !!newItemError && newItem.parts.trim() === ""
+                  )}
+                  type="text"
+                  autoComplete="off"
+                />
+                <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto absolute mt-1 flex flex-col !cursor-pointer">
+                  {itemOptions.map((option, idx) => (
+                    <li
+                      key={option.id}
+                      className="w-full !cursor-pointer text-sm"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (itemInputRef.current) {
+                            itemInputRef.current.value = option.name;
+                            setShowItemDropdown(false);
+                            setNewItem((prev) => ({
+                              ...prev,
+                              parts: option.name,
+                            }));
+                            setSelectedItem(option);
+                            setItemOptions([]);
+                            debouncedSearchItem.cancel();
+                          }
+                        }}
+                        className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                      >
+                        {option.name}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
+
           <div className="flex flex-row gap-2 items-center justify-center">
             <span className={labelClass()}>Quantity</span>
             <input
@@ -387,6 +713,20 @@ const CreateOrder = () => {
               />
             </div>
           ))}
+        </div>
+      </div>
+
+      <div className="rounded-box border-[#00000014] border-1 mb-6 p-3 gap-4 flex flex-col">
+        <div className="flex flex-col gap-2 items-left justify-center">
+          <span className="font-bold break-words !w-full">
+            General description
+          </span>
+          <textarea
+            name="general_description"
+            className="!text-left p-2 flex-1 input input-lg bg-[#f6f3f4] w-full    transition-all border-1 text-lg font-normal border-gray-100"
+            rows={5}
+            placeholder="Write work description..."
+          ></textarea>
         </div>
       </div>
 

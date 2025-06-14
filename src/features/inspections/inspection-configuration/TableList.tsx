@@ -83,20 +83,6 @@ const TableList = ({ objFilter }: TableListProps) => {
                 />
 
                 <ActionButton
-                  icon={
-                    <FaRegFilePdf className="w-[20px] h-[20px] opacity-70" />
-                  }
-                  label="Create PDF"
-                  onClick={() => console.log("Create PDF clicked")}
-                />
-
-                <ActionButton
-                  icon={<FiPrinter className="w-[20px] h-[20px] opacity-70" />}
-                  label="Print"
-                  onClick={() => console.log("Print clicked")}
-                />
-
-                <ActionButton
                   icon={<FiTrash2 className="w-[20px] h-[20px] opacity-70" />}
                   label="Delete"
                   onClick={() => console.log("Delete clicked")}

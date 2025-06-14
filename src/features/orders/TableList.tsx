@@ -5,25 +5,67 @@ import { FiTrash2, FiPrinter } from "react-icons/fi";
 import { FaRegEdit, FaRegFilePdf } from "react-icons/fa";
 import { TableListProps } from "@/shared/types/order/ITypes";
 import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
+import { FaRegEye } from "react-icons/fa";
+import { axiosInstance } from "@/shared/utils/axiosInstance";
+import { IoSync } from "react-icons/io5";
+import { IoMdCheckmark, IoMdSync } from "react-icons/io";
+import { toast } from "sonner";
 
 const TableList = ({ objFilter }: TableListProps) => {
+  const [syncStatus, setSyncStatus] = useState<{
+    [key: number]: "idle" | "loading" | "success";
+  }>({});
+
   const [allData, setAllData] = useState<WorkOrder[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await getWorkOrders();
-        setAllData(response.items);
-      } catch (error) {
-        console.error("Error fetching work orders:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const handleSyncWorkOrder = async (workOrderId: number) => {
+    setSyncStatus((prev) => ({ ...prev, [workOrderId]: "loading" }));
 
+    try {
+      await axiosInstance.put("/QuickBooks/CreateEstimateFromWorkOrder", {
+        workOrderId,
+        realmId: "9341454759827689",
+      });
+
+      setSyncStatus((prev) => ({ ...prev, [workOrderId]: "success" }));
+
+      setTimeout(async () => {
+        // Limpiamos el estado de animación
+        setSyncStatus((prev) => {
+          const updated = { ...prev };
+          delete updated[workOrderId];
+          return updated;
+        });
+        toast.success("¡Sincronización exitosa!", {
+          description: "Se actualizó el estado de la orden.",
+        });
+        await fetchData();
+      }, 1000);
+    } catch (error) {
+      console.error("Error al sincronizar:", error);
+      toast.error("Error al sincronizar.", {
+        description: "El servicio no está disponible por el momento.",
+      });
+      setSyncStatus((prev) => ({ ...prev, [workOrderId]: "idle" }));
+    }
+  };
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const response = await getWorkOrders();
+      setAllData(response.items);
+    } catch (error) {
+      console.error("Error fetching work orders:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -99,21 +141,67 @@ const TableList = ({ objFilter }: TableListProps) => {
                 <td className="truncate">{item.customerName}</td>
                 <td className="truncate">{item.employeeName}</td>
                 <td>
-                  <div className="badge badge-neutral">
+                  <div className="!hidden badge badge-neutral !h-auto">
                     {getWorkOrderStatusLabel(item.statusWorkOrder)}
                   </div>
+                  {item.statusWorkOrder === 0 && (
+                    <div className="badge badge-dash badge-info">
+                      {getWorkOrderStatusLabel(item.statusWorkOrder)}
+                    </div>
+                  )}
+                  {item.statusWorkOrder === 1 && (
+                    <div className="badge badge-dash badge-error">
+                      {getWorkOrderStatusLabel(item.statusWorkOrder)}
+                    </div>
+                  )}
+                  {item.statusWorkOrder === 2 && (
+                    <div className="badge badge-dash badge-success">
+                      {getWorkOrderStatusLabel(item.statusWorkOrder)}
+                    </div>
+                  )}
                 </td>
                 <td className="flex items-center justify-center">
-                  <input type="checkbox" className="checkbox" />
+                  {item.statusWorkOrder !== 2 && (
+                    <div className="flex items-center justify-center">
+                      {syncStatus[item.workOrderId] === "loading" ? (
+                        <IoMdSync className="loading text-gray-500 text-3xl" />
+                      ) : syncStatus[item.workOrderId] === "success" ? (
+                        <IoMdCheckmark className="text-green-500 text-xl" />
+                      ) : (
+                        <input
+                          type="checkbox"
+                          className="checkbox"
+                          onChange={() => handleSyncWorkOrder(item.workOrderId)}
+                        />
+                      )}
+                    </div>
+                  )}
                 </td>
                 <td className="text-end">
                   <div className="flex w-full flex-row gap-2 items-center justify-end">
+                    {item.statusWorkOrder === 0 ? (
+                      <ActionButton
+                        icon={
+                          <FaRegEdit className="w-[20px] h-[20px] opacity-70" />
+                        }
+                        label="Edit"
+                        onClick={() => console.log("Edit clicked")}
+                      />
+                    ) : (
+                      <ActionButton
+                        icon={
+                          <FaRegEye className="w-[20px] h-[20px] opacity-70" />
+                        }
+                        label="Watch"
+                        onClick={() => console.log("Edit clicked")}
+                      />
+                    )}
                     <ActionButton
                       icon={
-                        <FaRegEdit className="w-[20px] h-[20px] opacity-70" />
+                        <FiPrinter className="w-[20px] h-[20px] opacity-70" />
                       }
-                      label="Edit"
-                      onClick={() => console.log("Edit clicked")}
+                      label="Print"
+                      onClick={() => console.log("Print clicked")}
                     />
                     <ActionButton
                       icon={
