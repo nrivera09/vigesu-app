@@ -48,6 +48,7 @@ const orderSchema = z.object({
     cir: z.string().optional(),
     co: z.string().optional(),
   }),
+  observation: z.string().optional(),
   work_items: z.array(workItemSchema),
 });
 
@@ -718,11 +719,9 @@ const CreateOrder = () => {
 
       <div className="rounded-box border-[#00000014] border-1 mb-6 p-3 gap-4 flex flex-col">
         <div className="flex flex-col gap-2 items-left justify-center">
-          <span className="font-bold break-words !w-full">
-            General description
-          </span>
+          <span className="font-bold break-words !w-full">Observation</span>
           <textarea
-            name="general_description"
+            {...register("observation")}
             className="!text-left p-2 flex-1 input input-lg bg-[#f6f3f4] w-full    transition-all border-1 text-lg font-normal border-gray-100"
             rows={5}
             placeholder="Write work description..."

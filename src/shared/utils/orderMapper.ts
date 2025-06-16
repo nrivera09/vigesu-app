@@ -15,8 +15,9 @@ export const mapOrderFormToApiPayload = (form: OrderForm) => {
   );
 
   return {
-    customerId: 1,
-    employeeId: 1,
+    customerId: "1",
+    employeeId: "1",
+    command: "string",
     customerName: form.customer_order,
     employeeName: form.mechanic_name,
     locationOfRepair: form.location_of_repair,
@@ -41,7 +42,7 @@ export const mapOrderFormToApiPayload = (form: OrderForm) => {
     cor: tires.co,
     statusWorkOrder: 0,
     quickBookEstimateId: "",
-    observation: "",
+    observation: form.observation,
     workOrderDetails:
       form.work_items?.map((item) => ({
         itemId: 0,
