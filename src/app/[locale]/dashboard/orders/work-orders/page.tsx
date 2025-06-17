@@ -4,18 +4,31 @@ import BackButton from "@/shared/components/shared/BackButton";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
 import { IoSearchOutline } from "react-icons/io5";
 import { MdOutlineSettingsBackupRestore } from "react-icons/md";
 import { DayPicker } from "react-day-picker";
+import { axiosInstance } from "@/shared/utils/axiosInstance";
 import {
   WorkOrderStatus,
   WorkOrderStatusLabel,
 } from "@/features/orders/models/workOrder.types";
+import { debounce } from "lodash";
+
+interface CustomerOption {
+  id: number;
+  name: string;
+}
+interface MechanicOption {
+  id: number;
+  name: string;
+}
 
 const Page = () => {
   const pathname = usePathname();
+  const [refreshTable, setRefreshTable] = useState(false);
+
   const pageTitle = usePageTitle();
 
   const [date, setDate] = useState<Date | undefined>();
@@ -36,6 +49,74 @@ const Page = () => {
     creationdate: undefined as Date | undefined,
   });
 
+  const [customerOptions, setCustomerOptions] = useState<CustomerOption[]>([]);
+  const [mechanicOptions, setMechanicOptions] = useState<MechanicOption[]>([]);
+  const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
+  const [showMechanicDropdown, setShowMechanicDropdown] = useState(false);
+
+  const inputCustomerRef = useRef<HTMLInputElement>(null);
+  const inputMechanicRef = useRef<HTMLInputElement>(null);
+
+  // búsqueda cliente
+  const searchCustomer = async (name?: string) => {
+    try {
+      let url = `/QuickBooks/Customers/GetCustomerName?RealmId=9341454759827689`;
+      if (name) url += `&Name=${encodeURIComponent(name)}`;
+      const response = await axiosInstance.get(url);
+      setCustomerOptions(response.data ?? []);
+    } catch (error) {
+      console.error("Error buscando clientes:", error);
+    }
+  };
+
+  const debouncedSearchCustomer = useRef(
+    debounce((value: string) => {
+      if (value.length >= 3) {
+        searchCustomer(value);
+      } else {
+        setCustomerOptions([]);
+      }
+    }, 500)
+  ).current;
+
+  // búsqueda mecánico
+  const searchMechanic = async (name?: string) => {
+    try {
+      let url = `/QuickBooks/employees/GetEmployeeName?RealmId=9341454759827689`;
+      if (name) url += `&Name=${encodeURIComponent(name)}`;
+      const response = await axiosInstance.get(url);
+      setMechanicOptions(response.data ?? []);
+    } catch (error) {
+      console.error("Error buscando empleados:", error);
+    }
+  };
+
+  const debouncedSearchMechanic = useRef(
+    debounce((value: string) => {
+      if (value.length >= 3) {
+        searchMechanic(value);
+      } else {
+        setMechanicOptions([]);
+      }
+    }, 500)
+  ).current;
+
+  // Handle Customer Input
+  const handleCustomerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setShowCustomerDropdown(true);
+    debouncedSearchCustomer(value);
+    setObjFilterForm({ ...objFilterForm, client: value });
+  };
+
+  // Handle Mechanic Input
+  const handleMechanicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setShowMechanicDropdown(true);
+    debouncedSearchMechanic(value);
+    setObjFilterForm({ ...objFilterForm, worker: value });
+  };
+
   const resetTableList = () => {
     setObjFilterForm({
       client: "",
@@ -44,6 +125,7 @@ const Page = () => {
       worker: "",
       creationdate: undefined,
     });
+
     setObjFilterApplied({
       client: "",
       status: "",
@@ -51,6 +133,9 @@ const Page = () => {
       worker: "",
       creationdate: undefined,
     });
+
+    setDate(undefined);
+    setRefreshTable((prev) => !prev);
   };
 
   return (
@@ -93,19 +178,48 @@ const Page = () => {
                   <legend className="fieldset-legend text-lg font-normal">
                     Client
                   </legend>
-                  <input
-                    type="text"
-                    className="input input-lg text-lg w-full"
-                    placeholder="My awesome page"
-                    onChange={(e) =>
-                      setObjFilterForm({
-                        ...objFilterForm,
-                        client: e.target.value,
-                      })
-                    }
-                    value={objFilterForm.client}
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      className="input input-lg text-lg w-full"
+                      name="customer_order"
+                      value={objFilterForm.client}
+                      onChange={handleCustomerChange}
+                      ref={inputCustomerRef}
+                      autoComplete="off"
+                    />
+                    {showCustomerDropdown && (
+                      <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto absolute mt-1">
+                        {customerOptions.map((option, idx) => (
+                          <li
+                            key={option.id}
+                            className="cursor-pointer text-sm"
+                          >
+                            <button
+                              type="button"
+                              className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                              onClick={() => {
+                                if (inputCustomerRef.current) {
+                                  inputCustomerRef.current.value = option.name;
+                                  setObjFilterForm({
+                                    ...objFilterForm,
+                                    client: option.name,
+                                  });
+                                  setShowCustomerDropdown(false);
+                                  setCustomerOptions([]);
+                                  debouncedSearchCustomer.cancel();
+                                }
+                              }}
+                            >
+                              {option.name}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                 </div>
+
                 <div className="flex flex-col">
                   <legend className="fieldset-legend text-lg font-normal">
                     Status
@@ -113,6 +227,7 @@ const Page = () => {
                   <select
                     defaultValue=""
                     className="select w-full text-lg input-lg"
+                    name="status_slc"
                     onChange={(e) =>
                       setObjFilterForm({
                         ...objFilterForm,
@@ -140,7 +255,7 @@ const Page = () => {
                   <input
                     type="text"
                     className="input input-lg text-lg w-full"
-                    placeholder="My awesome page"
+                    name="nro_work_order"
                     onChange={(e) =>
                       setObjFilterForm({
                         ...objFilterForm,
@@ -154,43 +269,75 @@ const Page = () => {
                   <legend className="fieldset-legend text-lg font-normal">
                     Worker
                   </legend>
-                  <input
-                    type="text"
-                    className="input input-lg text-lg w-full"
-                    placeholder="My awesome page"
-                    onChange={(e) =>
-                      setObjFilterForm({
-                        ...objFilterForm,
-                        worker: e.target.value,
-                      })
-                    }
-                    value={objFilterForm.worker}
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      className="input input-lg text-lg w-full"
+                      name="mechanic_name"
+                      value={objFilterForm.worker}
+                      onChange={handleMechanicChange}
+                      ref={inputMechanicRef}
+                      autoComplete="off"
+                    />
+                    {showMechanicDropdown && (
+                      <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto absolute mt-1">
+                        {mechanicOptions.map((option, idx) => (
+                          <li
+                            key={option.id}
+                            className="cursor-pointer text-sm"
+                          >
+                            <button
+                              type="button"
+                              className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                              onClick={() => {
+                                if (inputMechanicRef.current) {
+                                  inputMechanicRef.current.value = option.name;
+                                  setObjFilterForm({
+                                    ...objFilterForm,
+                                    worker: option.name,
+                                  });
+                                  setShowMechanicDropdown(false);
+                                  setMechanicOptions([]);
+                                  debouncedSearchMechanic.cancel();
+                                }
+                              }}
+                            >
+                              {option.name}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                 </div>
+
                 <div className="flex flex-col">
                   <legend className="fieldset-legend text-lg font-normal">
                     Creation date
                   </legend>
-                  <button
-                    popoverTarget="rdp-popover"
-                    className="input input-border input-lg text-lg w-full"
-                    style={{ anchorName: "--rdp" } as React.CSSProperties}
-                  >
-                    {date ? date.toLocaleDateString() : "Pick a date"}
-                  </button>
-                  <div
-                    popover="auto"
-                    id="rdp-popover"
-                    className="dropdown"
-                    style={{ positionAnchor: "--rdp" } as React.CSSProperties}
-                  >
-                    <DayPicker
-                      className="react-day-picker"
-                      mode="single"
-                      selected={date}
-                      onSelect={setDate}
-                    />
-                  </div>
+                  <input
+                    type="date"
+                    className="input input-lg text-lg w-full"
+                    name="creation_date"
+                    value={
+                      objFilterForm.creationdate
+                        ? objFilterForm.creationdate
+                            .toISOString()
+                            .substring(0, 10)
+                        : ""
+                    }
+                    onChange={(e) => {
+                      const dateValue = e.target.value
+                        ? new Date(e.target.value)
+                        : undefined;
+                      setDate(dateValue);
+                      setObjFilterForm({
+                        ...objFilterForm,
+                        creationdate: dateValue,
+                      });
+                    }}
+                    autoComplete="off"
+                  />
                 </div>
                 <div className="flex flex-col">
                   <legend className="fieldset-legend text-lg font-normal hidden md:flex min-h-[32px]">
@@ -227,8 +374,9 @@ const Page = () => {
               objFilter={{
                 ...objFilterApplied,
                 workorder: Number(objFilterApplied.workorder),
-                creationdate: objFilterApplied.creationdate ?? new Date(),
+                creationdate: objFilterApplied.creationdate,
               }}
+              refreshSignal={refreshTable}
             />
           </div>
         </div>

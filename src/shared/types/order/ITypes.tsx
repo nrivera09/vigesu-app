@@ -6,4 +6,6 @@ export interface TableListProps {
     worker: string;
     creationdate: Date | undefined;
   };
+
+  refreshSignal?: boolean;
 }

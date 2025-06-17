@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { getWorkOrders } from "./api/workOrdersApi";
 import { WorkOrder, WorkOrderStatus } from "./models/workOrder.types";
@@ -10,8 +12,13 @@ import { axiosInstance } from "@/shared/utils/axiosInstance";
 import { IoSync } from "react-icons/io5";
 import { IoMdCheckmark, IoMdSync } from "react-icons/io";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+import Loading from "@/shared/components/shared/Loading";
 
-const TableList = ({ objFilter }: TableListProps) => {
+const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
+  const router = useRouter();
+  const pathname = usePathname();
   const [syncStatus, setSyncStatus] = useState<{
     [key: number]: "idle" | "loading" | "success";
   }>({});
@@ -69,18 +76,37 @@ const TableList = ({ objFilter }: TableListProps) => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (refreshSignal) {
+      fetchData();
+    }
+  }, [refreshSignal]);
+
   const filteredData = allData.filter((item) => {
     const matchClient = objFilter.client
       ? item.customerName.toLowerCase().includes(objFilter.client.toLowerCase())
       : true;
+
+    const matchWorker = objFilter.worker
+      ? item.employeeName.toLowerCase().includes(objFilter.worker.toLowerCase())
+      : true;
+
     const matchWorkorder = objFilter.workorder
       ? item.workOrderNumber.toString().includes(objFilter.workorder.toString())
       : true;
+
     const matchStatus = objFilter.status
       ? item.statusWorkOrder.toString() === objFilter.status
       : true;
 
-    return matchClient && matchWorkorder && matchStatus;
+    const matchDate = objFilter.creationdate
+      ? item.created.substring(0, 10) ===
+        objFilter.creationdate.toISOString().substring(0, 10)
+      : true;
+
+    return (
+      matchClient && matchWorker && matchWorkorder && matchStatus && matchDate
+    );
   });
 
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
@@ -125,8 +151,7 @@ const TableList = ({ objFilter }: TableListProps) => {
           {loading ? (
             <tr>
               <td colSpan={6} className="text-center py-10">
-                <span className="loading loading-spinner loading-lg"></span>
-                <div className="mt-2 font-medium">Cargando datos...</div>
+                <Loading />
               </td>
             </tr>
           ) : (
@@ -160,7 +185,7 @@ const TableList = ({ objFilter }: TableListProps) => {
                     </div>
                   )}
                 </td>
-                <td className="flex items-center justify-center">
+                <td className="">
                   {item.statusWorkOrder !== 2 && (
                     <div className="flex items-center justify-center">
                       {syncStatus[item.workOrderId] === "loading" ? (
@@ -185,7 +210,9 @@ const TableList = ({ objFilter }: TableListProps) => {
                           <FaRegEdit className="w-[20px] h-[20px] opacity-70" />
                         }
                         label="Edit"
-                        onClick={() => console.log("Edit clicked")}
+                        onClick={() =>
+                          router.push(`${pathname}/edit/${item.workOrderId}`)
+                        }
                       />
                     ) : (
                       <ActionButton

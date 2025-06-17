@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { COMPANY_INFO } from "@/config/constants";
-import React, { useRef, useState } from "react";
+import React, { FC, useRef, useState } from "react";
 import { FiTrash2 } from "react-icons/fi";
 import { z } from "zod";
 import { useForm, useFieldArray } from "react-hook-form";
@@ -10,18 +10,29 @@ import ImageUploader from "./ImageUploader";
 import { TbArrowDownToArc } from "react-icons/tb";
 import { IoAddCircleOutline } from "react-icons/io5";
 import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
-import { mapOrderFormToApiPayload } from "@/shared/utils/orderMapper";
+import {
+  mapOrderEditFormToApiPayload,
+  mapOrderFormToApiPayload,
+} from "@/shared/utils/orderMapper";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
 import { debounce } from "lodash";
 import clsx from "clsx";
 import { MdEdit } from "react-icons/md";
-import { toast } from "sonner";
+import { useParams } from "next/navigation";
+import { useEffect } from "react";
+import Loading from "@/shared/components/shared/Loading";
+
+interface WorkOrderDetail {
+  observation?: string;
+  quantity?: number | string;
+  itemId?: number;
+}
 
 const workItemSchema = z.object({
   description: z.string().min(1, "Required"),
   parts: z.string().min(1, "Required"),
-  idParts: z.number().min(1, "Required"),
   quantity: z.string().min(1, "Required"),
+  itemId: z.number().optional(),
 });
 
 const orderSchema = z.object({
@@ -70,7 +81,10 @@ interface ItemOption {
 
 export type OrderForm = z.infer<typeof orderSchema>;
 
-const CreateOrder = () => {
+const EditOrder = () => {
+  const { id } = useParams<{ id: string }>();
+  const [isLoading, setIsLoading] = useState(true);
+
   const router = useRouter();
   const [selectedCustomer, setSelectedCustomer] =
     useState<CustomerOption | null>(null);
@@ -93,9 +107,10 @@ const CreateOrder = () => {
   const [newItem, setNewItem] = useState({
     description: "",
     parts: "",
-    idParts: 0,
     quantity: "",
+    itemId: 0,
   });
+
   const [newItemError, setNewItemError] = useState<string | null>(null);
 
   const [files, setFiles] = useState<File[]>([]);
@@ -184,7 +199,7 @@ const CreateOrder = () => {
 
   const handleItemInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setNewItem((prev) => ({ ...prev, parts: value, idParts: 0 })); // Reinicia idParts
+    setNewItem((prev) => ({ ...prev, parts: value }));
     setShowItemDropdown(true);
     debouncedSearchItem(value);
   };
@@ -204,12 +219,103 @@ const CreateOrder = () => {
     return `${hours}:${minutes}`;
   };
 
+  const getCustomerName = async (customerId: string) => {
+    if (!customerId) return "";
+    const res = await axiosInstance.get(
+      `/QuickBooks/Customers/GetCustomerId?CustomerId=${customerId}&RealmId=9341454759827689`
+    );
+    return res.data?.name ?? "";
+  };
+
+  const getMechanicName = async (mechanicId: string) => {
+    if (!mechanicId) return "";
+    const res = await axiosInstance.get(
+      `/QuickBooks/Employees/GetEmployeeId?EmployeeId=${mechanicId}&RealmId=9341454759827689`
+    );
+    return res.data?.name ?? "";
+  };
+
+  const fetchWorkOrder = async () => {
+    try {
+      const res = await axiosInstance.get(
+        `/WorkOrder/GetWorkOrderById?WorkOrderId=${id}`
+      );
+      const data = res.data;
+
+      const fetchItemName = async (itemId: number): Promise<string> => {
+        if (!itemId) return "";
+        const response = await axiosInstance.get(
+          `https://ronnyruiz-001-site1.qtempurl.com/api/QuickBooks/Items/GetItemId?ItemId=${itemId}&RealmId=9341454759827689`
+        );
+        return response.data?.name ?? "";
+      };
+
+      const workItems = await Promise.all(
+        (data.workOrderDetails as WorkOrderDetail[] | undefined)?.map(
+          async (item) => ({
+            description: item.observation ?? "",
+            quantity: String(item.quantity ?? ""),
+            itemId: item.itemId ?? 0,
+            parts: await fetchItemName(item.itemId ?? 0),
+          })
+        ) ?? []
+      );
+
+      const customerName = await getCustomerName(data.customerId);
+      const mechanicName = await getMechanicName(data.employeeId);
+
+      reset({
+        customer_order: String(data.customerId),
+        mechanic_name: String(data.workOrderId),
+        location_of_repair: data.locationOfRepair ?? "",
+        time_start_service: data.timeStart?.substring(11, 16) ?? "",
+        equipment_order: data.equipament ?? "",
+        datate_of_repair: data.dateOfRepair?.substring(0, 10) ?? "",
+        time_finish_service: data.timeFinish?.substring(11, 16) ?? "",
+        license_plate: data.licencePlate ?? "",
+        po_number: data.po ?? "",
+        vin_number: data.vin ?? "",
+        observation: data.observation ?? "",
+        tires: {
+          rif: data.rif ?? "",
+          rof: data.rof ?? "",
+          rir: data.rir ?? "",
+          ror: data.ror ?? "",
+          lif: data.lif ?? "",
+          lof: data.lof ?? "",
+          lir: data.lir ?? "",
+          lor: data.lor ?? "",
+          cif: data.cif ?? "",
+          cof: data.cof ?? "",
+          cir: data.cir ?? "",
+          co: data.cor ?? "",
+        },
+        work_items: workItems,
+      });
+
+      // Luego seteamos los "visuales"
+      setSelectedCustomer({ id: data.customerId, name: customerName });
+      setSelectedMechanic({ id: data.employeeId, name: mechanicName });
+    } catch (err) {
+      console.error("Error al cargar datos de WorkOrder", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (id) {
+      fetchWorkOrder();
+    }
+  }, [id]);
+
   const {
     register,
     control,
     handleSubmit,
     formState: { errors, isValid },
     setValue,
+    reset,
   } = useForm<OrderForm>({
     resolver: zodResolver(orderSchema),
     mode: "onChange",
@@ -232,43 +338,29 @@ const CreateOrder = () => {
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control,
     name: "work_items",
   });
 
   const onSubmit = async (data: OrderForm) => {
     try {
-      const payload = mapOrderFormToApiPayload(
-        data,
+      const adaptedData = {
+        ...data,
+        work_items: data.work_items.map((item) => ({
+          ...item,
+          idParts: item.itemId ?? 0,
+        })),
+      };
+
+      const payload = mapOrderEditFormToApiPayload(
+        adaptedData,
         selectedCustomer,
-        selectedMechanic
+        selectedMechanic,
+        id
       );
 
-      // POST /WorkOrder
       const response = await axiosInstance.post("/WorkOrder", payload);
-      const workOrderId = "9"; // Verifica dónde te devuelve el ID
-
-      console.log("✅ WorkOrder creado:", workOrderId);
-
-      // Subir imágenes si existen
-      if (files.length > 0) {
-        const formData = new FormData();
-        formData.append("WorkOrderId", workOrderId);
-
-        files.forEach((file) => {
-          formData.append("Files", file);
-        });
-
-        await axiosInstance.post("/WorkOrder/UploadWorkOrderPhotos", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-
-        console.log("✅ Archivos subidos correctamente");
-      }
-
-      console.log("🎯 TODO OK - PROCESO FINALIZADO");
-
       router.push("../");
     } catch (error) {
       console.error("❌ Error al procesar el formulario", error);
@@ -276,20 +368,19 @@ const CreateOrder = () => {
   };
 
   const handleAddRow = () => {
-    if (newItem.idParts === 0) {
-      setNewItemError("Debes seleccionar un Service/Part válido");
-      return;
-    }
+    const result = workItemSchema.safeParse({
+      ...newItem,
+      itemId: Number(newItem.itemId),
+    });
 
-    const result = workItemSchema.safeParse(newItem);
     if (!result.success) {
       setNewItemError(result.error.issues[0]?.message || "Invalid input");
       return;
     }
 
     append(result.data);
-    setNewItem({ description: "", parts: "", idParts: 0, quantity: "" });
-    setSelectedItem(null); // opcional, lo puedes eliminar si no usas más selectedItem
+    setNewItem({ description: "", parts: "", quantity: "", itemId: 0 });
+    setSelectedItem(null);
     setNewItemError(null);
   };
 
@@ -297,7 +388,10 @@ const CreateOrder = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setNewItem((prev) => ({ ...prev, [name]: value }));
+    setNewItem((prev) => ({
+      ...prev,
+      [name]: name === "itemId" ? Number(value) : value,
+    }));
   };
 
   const inputClass = (hasError: boolean) =>
@@ -307,15 +401,12 @@ const CreateOrder = () => {
 
   const labelClass = () => `font-medium w-[30%] break-words`;
 
+  if (isLoading) {
+    return <Loading />;
+  }
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <div role="alert" className="alert alert-info alert-soft mb-5 text-lg">
-        <span>
-          All the grey spaces are editable, meaning you can write on them and
-          add the required data.
-        </span>
-      </div>
-
       <div className=" border-[#00000014] border-1 p-2 mb-6 rounded-md flex flex-col gap-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
           <div className="flex flex-row gap-2 items-center justify-center ">
@@ -367,10 +458,7 @@ const CreateOrder = () => {
                             inputRef.current.value = option.name;
                             setShowDropdown(false);
                             setValue("customer_order", String(option.id));
-                            setSelectedCustomer({
-                              id: option.id,
-                              name: option.name,
-                            });
+                            setSelectedCustomer(option);
                             setCustomerOptions([]);
                             debouncedSearch.cancel();
                           }
@@ -511,12 +599,13 @@ const CreateOrder = () => {
                             mechanicInputRef.current.value = option.name;
                             setShowMechanicDropdown(false);
                             setValue("mechanic_name", option.name);
-                            setSelectedMechanic({
+                            setSelectedMechanic(option);
+                            setMechanicOptions([]);
+                            debouncedSearchMechanic.cancel();
+                            console.log("Seleccionaste mechanic:", {
                               id: option.id,
                               name: option.name,
                             });
-                            setValue("mechanic_name", String(option.id));
-                            debouncedSearchMechanic.cancel();
                           }
                         }}
                         className="block w-full text-left px-4 py-2 hover:bg-gray-100"
@@ -585,7 +674,7 @@ const CreateOrder = () => {
                             setNewItem((prev) => ({
                               ...prev,
                               parts: option.name,
-                              idParts: Number(option.id),
+                              itemId: option.id,
                             }));
                             setSelectedItem(option);
                             setItemOptions([]);
@@ -687,7 +776,6 @@ const CreateOrder = () => {
                       )} bg-white border-none focus:outline-none focus:ring-0 focus:border-none`}
                     />
                   </td>
-
                   <td className="text-center">
                     <ActionButton
                       icon={
@@ -775,4 +863,4 @@ const CreateOrder = () => {
   );
 };
 
-export default CreateOrder;
+export default EditOrder;

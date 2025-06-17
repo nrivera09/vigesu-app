@@ -5,7 +5,21 @@ import {
 
 import { OrderForm } from "@/features/orders/create-order/CreateOrder";
 
-export const mapOrderFormToApiPayload = (form: OrderForm) => {
+export interface CustomerOption {
+  id: number;
+  name: string;
+}
+
+export interface MechanicOption {
+  id: number;
+  name: string;
+}
+
+export const mapOrderFormToApiPayload = (
+  form: OrderForm,
+  selectedCustomer: CustomerOption | null,
+  selectedMechanic: MechanicOption | null
+) => {
   const tires = form.tires || {};
 
   const { start, finish } = toISOStringWithTimeSmart(
@@ -15,11 +29,11 @@ export const mapOrderFormToApiPayload = (form: OrderForm) => {
   );
 
   return {
-    customerId: "1",
-    employeeId: "1",
+    customerId: String(form.customer_order),
+    employeeId: String(form.mechanic_name),
     command: "string",
-    customerName: form.customer_order,
-    employeeName: form.mechanic_name,
+    customerName: selectedCustomer?.name ?? "",
+    employeeName: selectedMechanic?.name ?? "",
     locationOfRepair: form.location_of_repair,
     equipament: form.equipment_order,
     dateOfRepair: toISOStringDateOnly(form.datate_of_repair),
@@ -45,10 +59,65 @@ export const mapOrderFormToApiPayload = (form: OrderForm) => {
     observation: form.observation,
     workOrderDetails:
       form.work_items?.map((item) => ({
-        itemId: 0,
+        itemId: item.idParts,
         quantity: Number(item.quantity),
         observation: item.description,
       })) ?? [],
     createWorkOrderPhotos: [],
+  };
+};
+
+export const mapOrderEditFormToApiPayload = (
+  form: OrderForm,
+  selectedCustomer: CustomerOption | null,
+  selectedMechanic: MechanicOption | null,
+  workOrderId: string
+) => {
+  const tires = form.tires || {};
+
+  const { start, finish } = toISOStringWithTimeSmart(
+    form.datate_of_repair,
+    form.time_start_service ?? "",
+    form.time_finish_service ?? ""
+  );
+
+  return {
+    workOrderId: Number(workOrderId), // Aquí lo agregamos al payload ✅
+    customerId: String(form.customer_order),
+    employeeId: String(form.mechanic_name),
+    command: "string",
+    customerName: selectedCustomer?.name ?? "",
+    employeeName: selectedMechanic?.name ?? "",
+    locationOfRepair: form.location_of_repair,
+    equipament: form.equipment_order,
+    dateOfRepair: toISOStringDateOnly(form.datate_of_repair),
+    timeStart: start,
+    timeFinish: finish,
+    licencePlate: form.license_plate,
+    po: form.po_number,
+    vin: form.vin_number,
+    rif: tires.rif,
+    rof: tires.rof,
+    rir: tires.rir,
+    ror: tires.ror,
+    lif: tires.lif,
+    lof: tires.lof,
+    lir: tires.lir,
+    lor: tires.lor,
+    cif: tires.cif,
+    cof: tires.cof,
+    cir: tires.cir,
+    cor: tires.co,
+    statusWorkOrder: 0,
+    quickBookEstimateId: "",
+    observation: form.observation,
+    workOrderDetails:
+      form.work_items?.map((item) => ({
+        itemId: item.idParts,
+        quantity: Number(item.quantity),
+        observation: item.description,
+      })) ?? [],
+    updateWorkOrderPhotos: [], // si no vas a enviar imágenes aún
+    deleteImageName: [], // igual
   };
 };
