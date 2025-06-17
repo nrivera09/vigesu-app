@@ -21,6 +21,7 @@ import { MdEdit } from "react-icons/md";
 import { useParams } from "next/navigation";
 import { useEffect } from "react";
 import Loading from "@/shared/components/shared/Loading";
+import { toast } from "sonner";
 
 interface WorkOrderDetail {
   observation?: string;
@@ -123,7 +124,8 @@ const EditOrder = () => {
       const response = await axiosInstance.get(url);
       setCustomerOptions(response.data ?? []);
     } catch (error) {
-      console.error("Error buscando clientes:", error);
+      toast.error(`${error}`);
+      //console.error("Error buscando clientes:", error);
     }
   };
 
@@ -153,7 +155,8 @@ const EditOrder = () => {
       const response = await axiosInstance.get(url);
       setMechanicOptions(response.data ?? []);
     } catch (error) {
-      console.error("Error buscando empleados:", error);
+      toast.error(`${error}`);
+      //console.error("Error buscando empleados:", error);
     }
   };
 
@@ -183,7 +186,8 @@ const EditOrder = () => {
       const response = await axiosInstance.get(url);
       setItemOptions(response.data ?? []);
     } catch (error) {
-      console.error("Error buscando items:", error);
+      toast.error(`${error}`);
+      //console.error("Error buscando items:", error);
     }
   };
 
@@ -297,7 +301,8 @@ const EditOrder = () => {
       setSelectedCustomer({ id: data.customerId, name: customerName });
       setSelectedMechanic({ id: data.employeeId, name: mechanicName });
     } catch (err) {
-      console.error("Error al cargar datos de WorkOrder", err);
+      toast.error(`${err}`);
+      // console.error("Error al cargar datos de WorkOrder", err);
     } finally {
       setIsLoading(false);
     }
@@ -363,7 +368,8 @@ const EditOrder = () => {
       const response = await axiosInstance.post("/WorkOrder", payload);
       router.push("../");
     } catch (error) {
-      console.error("❌ Error al procesar el formulario", error);
+      toast.error(`${error}`);
+      // console.error("❌ Error al procesar el formulario", error);
     }
   };
 

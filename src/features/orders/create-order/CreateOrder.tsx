@@ -108,7 +108,8 @@ const CreateOrder = () => {
       const response = await axiosInstance.get(url);
       setCustomerOptions(response.data ?? []);
     } catch (error) {
-      console.error("Error buscando clientes:", error);
+      toast.error(`${error}`);
+      //console.error("Error buscando clientes:", error);
     }
   };
 
@@ -138,7 +139,8 @@ const CreateOrder = () => {
       const response = await axiosInstance.get(url);
       setMechanicOptions(response.data ?? []);
     } catch (error) {
-      console.error("Error buscando empleados:", error);
+      toast.error(`${error}`);
+      //console.error("Error buscando empleados:", error);
     }
   };
 
@@ -168,7 +170,9 @@ const CreateOrder = () => {
       const response = await axiosInstance.get(url);
       setItemOptions(response.data ?? []);
     } catch (error) {
-      console.error("Error buscando items:", error);
+      //console.error("Error buscando items:", error);
+
+      toast.error(`${error}`);
     }
   };
 
@@ -274,8 +278,9 @@ const CreateOrder = () => {
       toast.success("Work Order creado correctamente!");
       router.push("../");
     } catch (error) {
-      console.error("❌ Error al procesar el formulario", error);
-      toast.error("Error al crear el Work Order");
+      //console.error("❌ Error al procesar el formulario", error);
+
+      toast.error(`${error}`);
     }
   };
 

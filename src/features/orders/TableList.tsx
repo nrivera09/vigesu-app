@@ -47,7 +47,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
         await fetchData(currentPage);
       }, 1000);
     } catch (error) {
-      console.error("Error al sincronizar:", error);
+      //console.error("Error al sincronizar:", error);
       toast.error("Error al sincronizar.");
       setSyncStatus((prev) => ({ ...prev, [workOrderId]: "idle" }));
     }
@@ -68,7 +68,8 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
       setAllData(response.items);
       setTotalRecords(response.totalCount ?? 0);
     } catch (error) {
-      console.error("Error fetching work orders:", error);
+      toast.error(`${error}`);
+      //console.error("Error fetching work orders:", error);
     } finally {
       setLoading(false);
     }
