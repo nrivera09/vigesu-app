@@ -2,7 +2,7 @@ export interface TableListProps {
   objFilter: {
     client: string;
     status: string;
-    workorder: number;
+    workorder: string;
     worker: string;
     creationdate: Date | undefined;
   };

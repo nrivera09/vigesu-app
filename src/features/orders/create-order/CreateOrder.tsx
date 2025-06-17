@@ -239,22 +239,25 @@ const CreateOrder = () => {
 
   const onSubmit = async (data: OrderForm) => {
     try {
+      // Primero generamos el payload mapeado
       const payload = mapOrderFormToApiPayload(
         data,
         selectedCustomer,
         selectedMechanic
       );
 
-      // POST /WorkOrder
+      // Enviamos el primer POST para crear el WorkOrder
       const response = await axiosInstance.post("/WorkOrder", payload);
-      const workOrderId = "9"; // Verifica dónde te devuelve el ID
+      const workOrderId = response.data;
 
       console.log("✅ WorkOrder creado:", workOrderId);
 
-      // Subir imágenes si existen
+      // Ahora validamos si hay archivos para subir
       if (files.length > 0) {
         const formData = new FormData();
-        formData.append("WorkOrderId", workOrderId);
+
+        // Importante: WorkOrderId debe ser string si lo exige el backend
+        formData.append("WorkOrderId", String(workOrderId));
 
         files.forEach((file) => {
           formData.append("Files", file);
@@ -267,11 +270,12 @@ const CreateOrder = () => {
         console.log("✅ Archivos subidos correctamente");
       }
 
-      console.log("🎯 TODO OK - PROCESO FINALIZADO");
-
+      console.log("🎯 Todo OK - proceso finalizado");
+      toast.success("Work Order creado correctamente!");
       router.push("../");
     } catch (error) {
       console.error("❌ Error al procesar el formulario", error);
+      toast.error("Error al crear el Work Order");
     }
   };
 

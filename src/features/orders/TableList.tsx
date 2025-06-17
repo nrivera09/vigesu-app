@@ -24,47 +24,49 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
   }>({});
 
   const [allData, setAllData] = useState<WorkOrder[]>([]);
+  const [totalRecords, setTotalRecords] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [loading, setLoading] = useState(true);
 
   const handleSyncWorkOrder = async (workOrderId: number) => {
     setSyncStatus((prev) => ({ ...prev, [workOrderId]: "loading" }));
-
     try {
       await axiosInstance.put("/QuickBooks/CreateEstimateFromWorkOrder", {
         workOrderId,
         realmId: "9341454759827689",
       });
-
       setSyncStatus((prev) => ({ ...prev, [workOrderId]: "success" }));
-
       setTimeout(async () => {
-        // Limpiamos el estado de animación
         setSyncStatus((prev) => {
           const updated = { ...prev };
           delete updated[workOrderId];
           return updated;
         });
-        toast.success("¡Sincronización exitosa!", {
-          description: "Se actualizó el estado de la orden.",
-        });
-        await fetchData();
+        toast.success("¡Sincronización exitosa!");
+        await fetchData(currentPage);
       }, 1000);
     } catch (error) {
       console.error("Error al sincronizar:", error);
-      toast.error("Error al sincronizar.", {
-        description: "El servicio no está disponible por el momento.",
-      });
+      toast.error("Error al sincronizar.");
       setSyncStatus((prev) => ({ ...prev, [workOrderId]: "idle" }));
     }
   };
 
-  const fetchData = async () => {
+  const fetchData = async (page = 1) => {
     setLoading(true);
     try {
-      const response = await getWorkOrders();
+      const filterToSend = {
+        ...objFilter,
+        workorder: objFilter.workorder
+          ? Number(objFilter.workorder)
+          : undefined,
+      };
+
+      const response = await getWorkOrders(objFilter, page, rowsPerPage);
+
       setAllData(response.items);
+      setTotalRecords(response.totalCount ?? 0);
     } catch (error) {
       console.error("Error fetching work orders:", error);
     } finally {
@@ -72,9 +74,26 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
     }
   };
 
-  useEffect(() => {
+  const updateWorkOrderState = async (
+    workOrderId: number,
+    statusWorkOrder: number = WorkOrderStatus.Disabled
+  ) => {
+    const payload = {
+      workOrderId,
+      statusWorkOrder,
+    };
+
+    const response = await axiosInstance.put(
+      `/WorkOrder/UpdateWorkOrderState/${workOrderId}`,
+      payload
+    );
+
     fetchData();
-  }, []);
+  };
+
+  useEffect(() => {
+    fetchData(currentPage);
+  }, [objFilter, refreshSignal, currentPage, rowsPerPage]);
 
   useEffect(() => {
     if (refreshSignal) {
@@ -109,9 +128,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
     );
   });
 
-  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-  const startIdx = (currentPage - 1) * rowsPerPage;
-  const currentRows = filteredData.slice(startIdx, startIdx + rowsPerPage);
+  const totalPages = Math.ceil(totalRecords / rowsPerPage);
 
   const changePage = (page: number) => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
@@ -155,7 +172,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
               </td>
             </tr>
           ) : (
-            currentRows.map((item) => (
+            allData.map((item) => (
               <tr
                 key={item.workOrderId}
                 className="cursor-pointer odd:bg-base-200"
@@ -235,7 +252,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
                         <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
                       }
                       label="Delete"
-                      onClick={() => console.log("Delete clicked")}
+                      onClick={() => updateWorkOrderState(item.workOrderId)}
                     />
                   </div>
                 </td>
@@ -247,14 +264,14 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
 
       <div className="join flex justify-center py-4">
         <button
-          className="join-item btn font-normal"
+          className="join-item btn"
           onClick={() => changePage(1)}
           disabled={currentPage === 1}
         >
           ««
         </button>
         <button
-          className="join-item btn font-normal"
+          className="join-item btn"
           onClick={() => changePage(currentPage - 1)}
           disabled={currentPage === 1}
         >
@@ -263,7 +280,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
         {[...Array(totalPages)].map((_, idx) => (
           <button
             key={idx}
-            className={`join-item btn font-normal ${
+            className={`join-item btn ${
               currentPage === idx + 1 ? "btn-active" : ""
             }`}
             onClick={() => changePage(idx + 1)}
@@ -272,14 +289,14 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
           </button>
         ))}
         <button
-          className="join-item btn font-normal"
+          className="join-item btn"
           onClick={() => changePage(currentPage + 1)}
           disabled={currentPage === totalPages}
         >
           »
         </button>
         <button
-          className="join-item btn font-normal"
+          className="join-item btn"
           onClick={() => changePage(totalPages)}
           disabled={currentPage === totalPages}
         >

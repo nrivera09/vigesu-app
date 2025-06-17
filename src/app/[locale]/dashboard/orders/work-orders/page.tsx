@@ -15,6 +15,7 @@ import {
   WorkOrderStatusLabel,
 } from "@/features/orders/models/workOrder.types";
 import { debounce } from "lodash";
+import AlertInfo from "@/shared/components/shared/AlertInfo";
 
 interface CustomerOption {
   id: number;
@@ -169,6 +170,10 @@ const Page = () => {
         </div>
         <div className="body-app overflow-y-auto">
           <div className="container max-w-full mb-5">
+            <AlertInfo>
+              You need to type at least 3 characters in the fields so that you
+              can select a match.
+            </AlertInfo>
             <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
               <legend className="fieldset-legend text-lg">
                 Search options
@@ -349,7 +354,6 @@ const Page = () => {
                       onClick={() =>
                         setObjFilterApplied({
                           ...objFilterForm,
-                          creationdate: date,
                         })
                       }
                     >
@@ -371,11 +375,7 @@ const Page = () => {
           </div>
           <div className="container mt-0 max-w-full">
             <TableList
-              objFilter={{
-                ...objFilterApplied,
-                workorder: Number(objFilterApplied.workorder),
-                creationdate: objFilterApplied.creationdate,
-              }}
+              objFilter={objFilterApplied}
               refreshSignal={refreshTable}
             />
           </div>
