@@ -1,6 +1,23 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
+/* app/global.css */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #pdf-content,
+  #pdf-content * {
+    visibility: visible;
+  }
+  #pdf-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+}
+
 :root {
   font-family: var(--font-jost-sans), sans-serif;
 }

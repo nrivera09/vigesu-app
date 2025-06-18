@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import Loading from "@/shared/components/shared/Loading";
+import html2canvas from "html2canvas";
 
 const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
   const router = useRouter();
@@ -43,13 +44,50 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
           delete updated[workOrderId];
           return updated;
         });
-        toast.success("¡Sincronización exitosa!");
+        await sendPdfToQuickBooks(workOrderId);
+
         await fetchData(currentPage);
+
+        toast.success("¡Sincronización exitosa!");
       }, 1000);
     } catch (error) {
       //console.error("Error al sincronizar:", error);
       toast.error("Error al sincronizar.");
       setSyncStatus((prev) => ({ ...prev, [workOrderId]: "idle" }));
+    }
+  };
+
+  const sendPdfToQuickBooks = async (workOrderId: number) => {
+    try {
+      const response = await fetch(`/api/pdf/${workOrderId}`);
+
+      if (!response.ok) {
+        throw new Error("Error al generar el PDF desde el servidor");
+      }
+      const pdfBlob = await response.blob();
+      const file = new File([pdfBlob], `WorkOrder-${workOrderId}.pdf`, {
+        type: "application/pdf",
+      });
+
+      const formData = new FormData();
+      formData.append("QuickBookEstimatedId", "2");
+      formData.append("RealmId", "9341454759827689");
+      formData.append("FilePdf", file);
+
+      await axiosInstance.post(
+        "/QuickBooks/estimates/attachmentPDF",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      toast.success("PDF enviado correctamente a QuickBooks");
+    } catch (err) {
+      console.error("Error al enviar el PDF:", err);
+      toast.error("Error al enviar el PDF a QuickBooks");
     }
   };
 
@@ -238,7 +276,9 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
                           <FaRegEye className="w-[20px] h-[20px] opacity-70" />
                         }
                         label="Watch"
-                        onClick={() => console.log("Edit clicked")}
+                        onClick={() =>
+                          router.push(`${pathname}/edit/${item.workOrderId}`)
+                        }
                       />
                     )}
                     <ActionButton
@@ -246,15 +286,22 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
                         <FiPrinter className="w-[20px] h-[20px] opacity-70" />
                       }
                       label="Print"
-                      onClick={() => console.log("Print clicked")}
-                    />
-                    <ActionButton
-                      icon={
-                        <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
+                      onClick={() =>
+                        router.push(
+                          `${pathname}/generate-pdf/${item.workOrderId}`
+                        )
                       }
-                      label="Delete"
-                      onClick={() => updateWorkOrderState(item.workOrderId)}
                     />
+
+                    {item.statusWorkOrder !== 1 && (
+                      <ActionButton
+                        icon={
+                          <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
+                        }
+                        label="Delete"
+                        onClick={() => updateWorkOrderState(item.workOrderId)}
+                      />
+                    )}
                   </div>
                 </td>
               </tr>

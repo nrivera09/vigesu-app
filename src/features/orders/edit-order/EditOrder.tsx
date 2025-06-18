@@ -87,6 +87,7 @@ const EditOrder = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const router = useRouter();
+  const [disableButton, setDisableButton] = useState<number | null>(null);
   const [selectedCustomer, setSelectedCustomer] =
     useState<CustomerOption | null>(null);
   const [selectedMechanic, setSelectedMechanic] =
@@ -245,6 +246,7 @@ const EditOrder = () => {
         `/WorkOrder/GetWorkOrderById?WorkOrderId=${id}`
       );
       const data = res.data;
+      setDisableButton(data.statusWorkOrder);
 
       const fetchItemName = async (itemId: number): Promise<string> => {
         if (!itemId) return "";
@@ -854,17 +856,18 @@ const EditOrder = () => {
           }}
         />
       </div>
-
-      <div className="pt-4">
-        <button
-          type="submit"
-          className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto"
-        >
-          <span className="py-1 px-2 text-white font-normal rounded-full md:block text-[13px]">
-            Save
-          </span>
-        </button>
-      </div>
+      {disableButton !== null && disableButton !== 1 && (
+        <div className="pt-4">
+          <button
+            type="submit"
+            className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto"
+          >
+            <span className="py-1 px-2 text-white font-normal rounded-full md:block text-[13px]">
+              Save
+            </span>
+          </button>
+        </div>
+      )}
     </form>
   );
 };

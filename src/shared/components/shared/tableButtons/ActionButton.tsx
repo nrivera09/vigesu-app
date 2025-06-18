@@ -1,7 +1,7 @@
 import React from "react";
 
 interface ActionButtonProps {
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   label?: string;
   onClick?: () => void;
   className?: string;
@@ -18,7 +18,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({
       onClick={onClick}
       className={`btn min-w-[30px] min-h-[30px] p-2 rounded-md ${className}`}
     >
-      {icon}
+      {icon && icon}
       {label && (
         <span className="hidden xl:block text-[12px] font-normal">{label}</span>
       )}

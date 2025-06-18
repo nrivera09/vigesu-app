@@ -37,3 +37,45 @@ export const toISOStringWithTimeSmart = (
     finish: finishDate.toISOString(),
   };
 };
+
+export const sanitizeElementForPDF = (element: HTMLElement) => {
+  const clone = element.cloneNode(true) as HTMLElement;
+
+  const walk = (el: HTMLElement) => {
+    const computedStyle = window.getComputedStyle(el);
+
+    const color = computedStyle.color;
+    const bg = computedStyle.backgroundColor;
+
+    // Forzar color seguro si es oklch, hsl, var(), etc.
+    if (
+      color.includes("oklch") ||
+      color.includes("var") ||
+      color.includes("hsl")
+    ) {
+      el.style.color = "#000";
+    }
+
+    if (bg.includes("oklch") || bg.includes("var") || bg.includes("hsl")) {
+      el.style.backgroundColor = "#fff";
+    }
+
+    // Recursivamente aplicar a hijos
+    Array.from(el.children).forEach((child) => {
+      if (child instanceof HTMLElement) walk(child);
+    });
+  };
+
+  walk(clone);
+  return clone;
+};
+
+export const formatDate = (input: string): string => {
+  const date = new Date(input);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${pad(date.getMonth() + 1)}/${pad(
+    date.getDate()
+  )}/${date.getFullYear()} ${pad(date.getHours())}:${pad(
+    date.getMinutes()
+  )}:${pad(date.getSeconds())}`;
+};
