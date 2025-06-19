@@ -272,7 +272,7 @@ const EditOrder = () => {
 
       reset({
         customer_order: String(data.customerId),
-        mechanic_name: String(data.workOrderId),
+        mechanic_name: String(data.employeeId),
         location_of_repair: data.locationOfRepair ?? "",
         time_start_service: data.timeStart?.substring(11, 16) ?? "",
         equipment_order: data.equipament ?? "",
