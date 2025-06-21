@@ -3,6 +3,7 @@
 import { axiosInstance } from "@/shared/utils/axiosInstance";
 import { WorkOrderResponse } from "../models/workOrder.types";
 import { WorkOrderFilters } from "@/shared/types/order/IFilters";
+import { toast } from "sonner";
 
 export const getWorkOrders = async (
   filters: WorkOrderFilters,
@@ -29,4 +30,14 @@ export const getWorkOrders = async (
 
   const response = await axiosInstance.get(`/WorkOrder?${params.toString()}`);
   return response.data;
+};
+
+export const getTotalWorkOrders = async () => {
+  try {
+    const response = await axiosInstance.get(`/WorkOrder`);
+    const data = response.data.totalCount;
+    return data ?? 0;
+  } catch (error) {
+    toast.error(`${error}`);
+  }
 };

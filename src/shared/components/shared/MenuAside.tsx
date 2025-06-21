@@ -14,18 +14,20 @@ import {
 import { TbPointFilled } from "react-icons/tb";
 import SidebarSection from "./SidebarSection";
 import Link from "next/link";
-import { FC, useEffect } from "react";
+import { FC, useEffect, useState } from "react";
 import { useSidebarStore } from "../../stores/useSidebarStore";
 import { IoCloseOutline } from "react-icons/io5";
 import { generalReactClass } from "@/shared/types/TGeneral";
 import { usePathname } from "next/navigation";
 import { HiOutlineServer } from "react-icons/hi2";
+import { getTotalWorkOrders } from "@/features/orders/api/workOrdersApi";
 
 const MenuAside: FC<generalReactClass> = ({ className }) => {
   const isSidebarOpen = useSidebarStore((state) => state.isSidebarOpen);
   const closeSidebar = useSidebarStore((state) => state.closeSidebar);
   const pathname = usePathname();
   const cleanPath = pathname?.replace(/^\/(es|en|fr)(\/|$)/, "/");
+  const [totalOrders, setTotalOrders] = useState<number>(0);
 
   // ✅ Todas tus rutas reales definidas abajo
   const ordersLinks = [
@@ -96,6 +98,14 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
       window.removeEventListener("resize", handleResize);
     };
   }, [isSidebarOpen, closeSidebar]);
+
+  useEffect(() => {
+    const fetchTotal = async () => {
+      const count = await getTotalWorkOrders();
+      setTotalOrders(count ?? 0);
+    };
+    fetchTotal();
+  }, []);
 
   return (
     <aside
@@ -175,7 +185,7 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
               </div>
               <TbPointFilled className="text-xs text-shadow-emerald-800" />
               <div>
-                12,214 <span className="text-emerald-500">Orders</span>
+                {totalOrders} <span className="text-emerald-500">Orders</span>
               </div>
             </div>
           </div>

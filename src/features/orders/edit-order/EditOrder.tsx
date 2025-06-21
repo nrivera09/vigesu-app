@@ -22,6 +22,7 @@ import { useParams } from "next/navigation";
 import { useEffect } from "react";
 import Loading from "@/shared/components/shared/Loading";
 import { toast } from "sonner";
+import { renameFileWithUniqueName } from "@/shared/utils/utils";
 
 interface WorkOrderDetail {
   observation?: string;
@@ -116,6 +117,9 @@ const EditOrder = () => {
   const [newItemError, setNewItemError] = useState<string | null>(null);
 
   const [files, setFiles] = useState<File[]>([]);
+  const previewUrlsRef = useRef<string[]>([]);
+  const [existingPhotos, setExistingPhotos] = useState<string[]>([]);
+  const [deletedPhotoNames, setDeletedPhotoNames] = useState<string[]>([]);
 
   const searchCustomer = async (name?: string) => {
     try {
@@ -303,9 +307,15 @@ const EditOrder = () => {
       // Luego seteamos los "visuales"
       setSelectedCustomer({ id: data.customerId, name: customerName });
       setSelectedMechanic({ id: data.employeeId, name: mechanicName });
+
+      setExistingPhotos(
+        data.workOrderPhotos?.map((p: { name: string }) => p.name) ?? []
+      );
+      setFiles([]);
+      previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+      previewUrlsRef.current = [];
     } catch (err) {
       toast.error(`${err}`);
-      // console.error("Error al cargar datos de WorkOrder", err);
     } finally {
       setIsLoading(false);
     }
@@ -353,6 +363,7 @@ const EditOrder = () => {
 
   const onSubmit = async (data: OrderForm) => {
     try {
+      // Adaptamos data
       const adaptedData = {
         ...data,
         work_items: data.work_items.map((item) => ({
@@ -361,18 +372,61 @@ const EditOrder = () => {
         })),
       };
 
-      const payload = mapOrderEditFormToApiPayload(
-        adaptedData,
-        selectedCustomer,
-        selectedMechanic,
-        id
-      );
+      // ⚠️ Primero sube los archivos físicos si hay
+      if (files.length > 0) {
+        const formData = new FormData();
+        formData.append("WorkOrderId", String(id));
 
-      const response = await axiosInstance.post("/WorkOrder", payload);
-      router.push("../");
+        files.forEach((file) => {
+          const renamed = renameFileWithUniqueName(file);
+          formData.append("Files", renamed);
+        });
+
+        try {
+          await axiosInstance.post(
+            "/WorkOrder/UploadWorkOrderPhotos",
+            formData,
+            {
+              headers: { "Content-Type": "multipart/form-data" },
+            }
+          );
+        } catch (error) {
+          toast.error(`${error}`);
+        }
+      }
+
+      // Luego arma el payload con los nombres reales
+      const payload = {
+        ...mapOrderEditFormToApiPayload(
+          adaptedData,
+          selectedCustomer,
+          selectedMechanic,
+          id
+        ),
+        updateWorkOrderPhotos: [
+          ...files.map((file) => ({ name: file.name })),
+          ...existingPhotos.map((name) => ({ name })),
+        ],
+        deleteImageName: deletedPhotoNames,
+      };
+      console.log("updateWorkOrderPhotos:", payload.updateWorkOrderPhotos);
+      console.log("deleteImageName:", payload.deleteImageName);
+
+      // Actualiza el registro
+      await axiosInstance.put(`/WorkOrder/${id}`, payload);
+
+      // 🔁 Refresca la orden para actualizar visuales
+      await fetchWorkOrder();
+      setFiles([]);
+      setDeletedPhotoNames([]);
+      previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+      previewUrlsRef.current = [];
+
+      setFiles([]);
+
+      toast.success("Orden actualizada correctamente");
     } catch (error) {
       toast.error(`${error}`);
-      // console.error("❌ Error al procesar el formulario", error);
     }
   };
 
@@ -409,6 +463,12 @@ const EditOrder = () => {
     }`;
 
   const labelClass = () => `font-medium w-[30%] break-words`;
+
+  useEffect(() => {
+    return () => {
+      previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, []);
 
   if (isLoading) {
     return <Loading />;
@@ -849,7 +909,20 @@ const EditOrder = () => {
 
       <div className="overflow-hidden">
         <ImageUploader
-          onFilesChange={(files) => setFiles(files)}
+          files={files} // pasamos directamente el estado
+          onFilesChange={(newFiles) => {
+            // limpiar previews anteriores
+            previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+            previewUrlsRef.current = newFiles.map((file) =>
+              URL.createObjectURL(file)
+            );
+            setFiles(newFiles);
+          }}
+          existingFiles={existingPhotos}
+          onRemoveExistingFile={(name) => {
+            setDeletedPhotoNames((prev) => [...prev, name]);
+            setExistingPhotos((prev) => prev.filter((n) => n !== name));
+          }}
           accept={{
             "image/*": [],
             "application/pdf": [],
@@ -857,6 +930,7 @@ const EditOrder = () => {
           }}
         />
       </div>
+
       {disableButton !== null && disableButton !== 1 && (
         <div className="pt-4">
           <button

@@ -1,30 +1,29 @@
 "use client";
-import React, { useCallback, useState } from "react";
+import React from "react";
 import { useDropzone, FileWithPath } from "react-dropzone";
 
 interface ImageUploaderProps {
   onFilesChange?: (files: File[]) => void;
-  accept?: { [mime: string]: string[] }; // ej. { "application/pdf": [] }
+  files: File[]; // Ahora lo recibimos como prop
+  accept?: { [mime: string]: string[] };
+  existingFiles?: string[];
+  onRemoveExistingFile?: (name: string) => void;
 }
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({
   onFilesChange,
+  files,
   accept = { "image/*": [], "application/pdf": [] },
+  existingFiles = [],
+  onRemoveExistingFile,
 }) => {
-  const [files, setFiles] = useState<FileWithPath[]>([]);
-
-  const onDrop = useCallback(
-    (acceptedFiles: FileWithPath[]) => {
-      const updated = [...files, ...acceptedFiles];
-      setFiles(updated);
-      onFilesChange?.(updated);
-    },
-    [files, onFilesChange]
-  );
+  const onDrop = (acceptedFiles: FileWithPath[]) => {
+    const updated = [...files, ...acceptedFiles];
+    onFilesChange?.(updated);
+  };
 
   const removeFile = (indexToRemove: number) => {
     const updated = files.filter((_, i) => i !== indexToRemove);
-    setFiles(updated);
     onFilesChange?.(updated);
   };
 
@@ -42,18 +41,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         {...getRootProps()}
         className="border-1 border-dashed border-gray-300 p-4 rounded-md text-center cursor-pointer bg-[#f6f3f4] py-10"
       >
-        <input
-          {...getInputProps({ capture: "environment" })}
-          style={{
-            display: "none",
-            width: 0,
-            height: 0,
-            position: "absolute",
-            overflow: "hidden",
-            opacity: 0,
-            pointerEvents: "none",
-          }}
-        />
+        <input {...getInputProps({ capture: "environment" })} />
         <p>
           {isDragActive
             ? "Drop the files here ..."
@@ -61,11 +49,34 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         </p>
       </div>
 
-      {files.length > 0 && (
+      {(existingFiles.length > 0 || files.length > 0) && (
         <div className="mt-4 flex flex-wrap gap-2">
+          {/* Archivos existentes */}
+          {existingFiles.map((name, index) => (
+            <div
+              key={`existing-${index}`}
+              className="relative border rounded-md overflow-hidden w-[100px] h-[100px] flex-shrink-0"
+            >
+              <img
+                src={`/${name}`}
+                alt={`existing-${index}`}
+                className="w-full h-full object-cover"
+              />
+              <button
+                onClick={() => onRemoveExistingFile?.(name)}
+                type="button"
+                className="btn bg-red-500 text-white absolute right-0 top-0 rounded-full cursor-pointer transition-all hover:bg-red-400 min-w-[20px] max-h-[20px] flex items-center justify-center font-normal p-0"
+                title="Remove"
+              >
+                ×
+              </button>
+            </div>
+          ))}
+
+          {/* Archivos nuevos */}
           {files.map((file, index) => (
             <div
-              key={index}
+              key={`new-${index}`}
               className="relative border rounded-md overflow-hidden w-[100px] h-[100px] flex-shrink-0"
             >
               {file.type.startsWith("image/") ? (
@@ -82,7 +93,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
               <button
                 onClick={() => removeFile(index)}
                 type="button"
-                className="absolute top-1 right-1 bg-white bg-opacity-70 rounded-full w-5 h-5 text-xs flex items-center justify-center hover:bg-red-500 hover:text-white cursor-pointer"
+                className="btn bg-red-500 text-white absolute right-0 top-0 rounded-full cursor-pointer transition-all hover:bg-red-400 min-w-[20px] max-h-[20px] flex items-center justify-center font-normal p-0"
                 title="Remove"
               >
                 ×

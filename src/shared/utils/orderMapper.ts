@@ -120,7 +120,7 @@ export const mapOrderEditFormToApiPayload = (
         quantity: Number(item.quantity),
         observation: item.description,
       })) ?? [],
-    updateWorkOrderPhotos: [], // si no vas a enviar imágenes aún
-    deleteImageName: [], // igual
+    updateWorkOrderPhotos: [],
+    deleteImageName: [],
   };
 };

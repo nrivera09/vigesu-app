@@ -30,10 +30,12 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [loading, setLoading] = useState(true);
 
-  const handleSyncWorkOrder = async (workOrderId: number) => {
+  const handleSyncWorkOrder = async (
+    workOrderId: number,
+    syncOnlyEstimate = false
+  ) => {
     setSyncStatus((prev) => ({ ...prev, [workOrderId]: "loading" }));
     try {
-      // Este valor será el QuickBookEstimatedId
       const response = await axiosInstance.put(
         "/QuickBooks/CreateEstimateFromWorkOrder",
         {
@@ -44,6 +46,10 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
 
       const quickBookEstimatedId = response.data;
 
+      if (!syncOnlyEstimate) {
+        await sendPdfToQuickBooks(quickBookEstimatedId, workOrderId);
+      }
+
       setSyncStatus((prev) => ({ ...prev, [workOrderId]: "success" }));
 
       setTimeout(async () => {
@@ -52,8 +58,6 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
           delete updated[workOrderId];
           return updated;
         });
-
-        await sendPdfToQuickBooks(quickBookEstimatedId, workOrderId);
 
         await fetchData(currentPage);
 
@@ -75,7 +79,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
       if (!response.ok) {
         throw new Error("Error al generar el PDF desde el servidor");
       }
-      debugger;
+
       const pdfBlob = await response.blob();
       const file = new File([pdfBlob], `Estimate-${quickBookEstimatedId}.pdf`, {
         type: "application/pdf",

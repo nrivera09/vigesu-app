@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from "uuid";
+
 export const toISOStringWithTime = (date: string, time: string): string => {
   if (!date) return "";
   const isoDate = date + "T" + (time || "00:00") + ":00.000Z";
@@ -79,3 +81,12 @@ export const formatDate = (input: string): string => {
     date.getMinutes()
   )}:${pad(date.getSeconds())}`;
 };
+
+export function renameFileWithUniqueName(file: File): File {
+  const extension = file.name.split(".").pop();
+  const timestamp = new Date().toISOString().replace(/[-:.TZ]/g, "");
+  const uniqueId = uuidv4();
+  const newName = `${timestamp}-${uniqueId}.${extension}`;
+
+  return new File([file], newName, { type: file.type });
+}

@@ -16,6 +16,7 @@ import { debounce } from "lodash";
 import clsx from "clsx";
 import { MdEdit } from "react-icons/md";
 import { toast } from "sonner";
+import { renameFileWithUniqueName } from "@/shared/utils/utils";
 
 const workItemSchema = z.object({
   description: z.string().min(1, "Required"),
@@ -265,7 +266,8 @@ const CreateOrder = () => {
         formData.append("WorkOrderId", String(workOrderId));
 
         files.forEach((file) => {
-          formData.append("Files", file);
+          const renamed = renameFileWithUniqueName(file);
+          formData.append("Files", renamed);
         });
 
         await axiosInstance.post("/WorkOrder/UploadWorkOrderPhotos", formData, {
