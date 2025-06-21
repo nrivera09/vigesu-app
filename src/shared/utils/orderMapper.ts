@@ -18,7 +18,8 @@ export interface MechanicOption {
 export const mapOrderFormToApiPayload = (
   form: OrderForm,
   selectedCustomer: CustomerOption | null,
-  selectedMechanic: MechanicOption | null
+  selectedMechanic: MechanicOption | null,
+  files: File[]
 ) => {
   const tires = form.tires || {};
 
@@ -63,7 +64,9 @@ export const mapOrderFormToApiPayload = (
         quantity: Number(item.quantity),
         observation: item.description,
       })) ?? [],
-    createWorkOrderPhotos: [],
+    createWorkOrderPhotos: files.map((file) => ({
+      name: file.name,
+    })),
   };
 };
 

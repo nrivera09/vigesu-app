@@ -247,7 +247,8 @@ const CreateOrder = () => {
       const payload = mapOrderFormToApiPayload(
         data,
         selectedCustomer,
-        selectedMechanic
+        selectedMechanic,
+        files
       );
 
       // Enviamos el primer POST para crear el WorkOrder

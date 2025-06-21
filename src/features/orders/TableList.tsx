@@ -33,46 +33,58 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
   const handleSyncWorkOrder = async (workOrderId: number) => {
     setSyncStatus((prev) => ({ ...prev, [workOrderId]: "loading" }));
     try {
-      await axiosInstance.put("/QuickBooks/CreateEstimateFromWorkOrder", {
-        workOrderId,
-        realmId: "9341454759827689",
-      });
+      // Este valor será el QuickBookEstimatedId
+      const response = await axiosInstance.put(
+        "/QuickBooks/CreateEstimateFromWorkOrder",
+        {
+          workOrderId,
+          realmId: "9341454759827689",
+        }
+      );
+
+      const quickBookEstimatedId = response.data;
+
       setSyncStatus((prev) => ({ ...prev, [workOrderId]: "success" }));
+
       setTimeout(async () => {
         setSyncStatus((prev) => {
           const updated = { ...prev };
           delete updated[workOrderId];
           return updated;
         });
-        await sendPdfToQuickBooks(workOrderId);
+
+        await sendPdfToQuickBooks(quickBookEstimatedId, workOrderId);
 
         await fetchData(currentPage);
 
         toast.success("¡Sincronización exitosa!");
       }, 1000);
     } catch (error) {
-      //console.error("Error al sincronizar:", error);
       toast.error("Error al sincronizar.");
       setSyncStatus((prev) => ({ ...prev, [workOrderId]: "idle" }));
     }
   };
 
-  const sendPdfToQuickBooks = async (workOrderId: number) => {
+  const sendPdfToQuickBooks = async (
+    quickBookEstimatedId: number,
+    workOrderId: number
+  ) => {
     try {
       const response = await fetch(`/api/pdf/${workOrderId}`);
 
       if (!response.ok) {
         throw new Error("Error al generar el PDF desde el servidor");
       }
+      debugger;
       const pdfBlob = await response.blob();
-      const file = new File([pdfBlob], `WorkOrder-${workOrderId}.pdf`, {
+      const file = new File([pdfBlob], `Estimate-${quickBookEstimatedId}.pdf`, {
         type: "application/pdf",
       });
 
       const formData = new FormData();
-      formData.append("QuickBookEstimatedId", "2");
-      formData.append("RealmId", "9341454759827689");
+      formData.append("QuickBookEstimatedId", String(quickBookEstimatedId));
       formData.append("FilePdf", file);
+      formData.append("RealmId", "9341454759827689");
 
       await axiosInstance.post(
         "/QuickBooks/estimates/attachmentPDF",
@@ -219,8 +231,22 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
                 <td>
                   <input type="checkbox" className="checkbox" />
                 </td>
-                <td className="truncate">{item.customerName}</td>
-                <td className="truncate">{item.employeeName}</td>
+                <td
+                  className="truncate"
+                  onClick={() =>
+                    router.push(`${pathname}/edit/${item.workOrderId}`)
+                  }
+                >
+                  {item.customerName}
+                </td>
+                <td
+                  className="truncate"
+                  onClick={() =>
+                    router.push(`${pathname}/edit/${item.workOrderId}`)
+                  }
+                >
+                  {item.employeeName}
+                </td>
                 <td>
                   <div className="!hidden badge badge-neutral !h-auto">
                     {getWorkOrderStatusLabel(item.statusWorkOrder)}

@@ -246,6 +246,7 @@ const EditOrder = () => {
         `/WorkOrder/GetWorkOrderById?WorkOrderId=${id}`
       );
       const data = res.data;
+
       setDisableButton(data.statusWorkOrder);
 
       const fetchItemName = async (itemId: number): Promise<string> => {
