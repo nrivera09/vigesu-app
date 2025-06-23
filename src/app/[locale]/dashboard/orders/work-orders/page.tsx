@@ -13,7 +13,7 @@ import { axiosInstance } from "@/shared/utils/axiosInstance";
 import {
   WorkOrderStatus,
   WorkOrderStatusLabel,
-} from "@/features/orders/models/workOrder.types";
+} from "@/features/inspections/models/inspections.types";
 import { debounce } from "lodash";
 import AlertInfo from "@/shared/components/shared/AlertInfo";
 

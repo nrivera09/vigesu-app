@@ -1,10 +1,14 @@
 "use client";
 import TableList from "@/features/inspections/inspection-configuration/TableList";
+import { WorkOrderStatusLabel } from "@/features/orders/models/workOrder.types";
 import BackButton from "@/shared/components/shared/BackButton";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
+import { axiosInstance } from "@/shared/utils/axiosInstance";
+import { CustomerOption } from "@/shared/utils/orderMapper";
+import { debounce } from "lodash";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
 import { IoSearchOutline } from "react-icons/io5";
 import { MdOutlineSettingsBackupRestore } from "react-icons/md";
@@ -12,6 +16,9 @@ import { MdOutlineSettingsBackupRestore } from "react-icons/md";
 const Page = () => {
   const pathname = usePathname();
   const pageTitle = usePageTitle();
+  const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
+  const [customerOptions, setCustomerOptions] = useState<CustomerOption[]>([]);
+  const inputCustomerRef = useRef<HTMLInputElement>(null);
 
   const [objFilterForm, setObjFilterForm] = useState({
     client: "",
@@ -36,6 +43,36 @@ const Page = () => {
       status: "",
       name: "",
     });
+  };
+
+  // búsqueda cliente
+  const searchCustomer = async (name?: string) => {
+    try {
+      let url = `/QuickBooks/Customers/GetCustomerName?RealmId=9341454759827689`;
+      if (name) url += `&Name=${encodeURIComponent(name)}`;
+      const response = await axiosInstance.get(url);
+      setCustomerOptions(response.data ?? []);
+    } catch (error) {
+      console.error("Error buscando clientes:", error);
+    }
+  };
+
+  const debouncedSearchCustomer = useRef(
+    debounce((value: string) => {
+      if (value.length >= 3) {
+        searchCustomer(value);
+      } else {
+        setCustomerOptions([]);
+      }
+    }, 500)
+  ).current;
+
+  // Handle Customer Input
+  const handleCustomerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setShowCustomerDropdown(true);
+    debouncedSearchCustomer(value);
+    setObjFilterForm({ ...objFilterForm, client: value });
   };
 
   return (
@@ -78,18 +115,46 @@ const Page = () => {
                   <legend className="fieldset-legend text-lg font-normal">
                     Client
                   </legend>
-                  <input
-                    type="text"
-                    className="input input-lg text-lg w-full"
-                    placeholder="My awesome page"
-                    onChange={(e) =>
-                      setObjFilterForm({
-                        ...objFilterForm,
-                        client: e.target.value,
-                      })
-                    }
-                    value={objFilterForm.client}
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      className="input input-lg text-lg w-full"
+                      name="customer_order"
+                      value={objFilterForm.client}
+                      onChange={handleCustomerChange}
+                      ref={inputCustomerRef}
+                      autoComplete="off"
+                    />
+                    {showCustomerDropdown && (
+                      <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto absolute mt-1">
+                        {customerOptions.map((option, idx) => (
+                          <li
+                            key={option.id}
+                            className="cursor-pointer text-sm"
+                          >
+                            <button
+                              type="button"
+                              className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                              onClick={() => {
+                                if (inputCustomerRef.current) {
+                                  inputCustomerRef.current.value = option.name;
+                                  setObjFilterForm({
+                                    ...objFilterForm,
+                                    client: option.name,
+                                  });
+                                  setShowCustomerDropdown(false);
+                                  setCustomerOptions([]);
+                                  debouncedSearchCustomer.cancel();
+                                }
+                              }}
+                            >
+                              {option.name}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                 </div>
                 <div className="flex flex-col">
                   <legend className="fieldset-legend text-lg font-normal">
@@ -105,10 +170,17 @@ const Page = () => {
                       })
                     }
                   >
-                    <option disabled={true}>Pick a color</option>
-                    <option>Crimson</option>
-                    <option>Amber</option>
-                    <option>Velvet</option>
+                    <option disabled={true} value="">
+                      Pick a status
+                    </option>
+
+                    {Object.entries(WorkOrderStatusLabel).map(
+                      ([key, label]) => (
+                        <option key={key} value={key}>
+                          {label}
+                        </option>
+                      )
+                    )}
                   </select>
                 </div>
                 <div className="flex flex-col">
