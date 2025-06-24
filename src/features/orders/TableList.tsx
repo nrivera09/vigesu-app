@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import Loading from "@/shared/components/shared/Loading";
 import html2canvas from "html2canvas";
+import { getWorkOrderStatusLabel } from "@/shared/utils/utils";
 
 const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
   const router = useRouter();
@@ -187,19 +188,6 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
 
   const changePage = (page: number) => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
-  };
-
-  const getWorkOrderStatusLabel = (status: WorkOrderStatus): string => {
-    switch (status) {
-      case WorkOrderStatus.Create:
-        return "Create";
-      case WorkOrderStatus.Disabled:
-        return "Disabled";
-      case WorkOrderStatus.SyncQuickbook:
-        return "Sync Quickbook";
-      default:
-        return "Unknown";
-    }
   };
 
   useEffect(() => {

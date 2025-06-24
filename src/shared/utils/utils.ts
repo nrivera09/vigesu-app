@@ -1,3 +1,4 @@
+import { WorkOrderStatus } from "@/features/inspections/models/inspections.types";
 import { v4 as uuidv4 } from "uuid";
 
 export const toISOStringWithTime = (date: string, time: string): string => {
@@ -90,3 +91,16 @@ export function renameFileWithUniqueName(file: File): File {
 
   return new File([file], newName, { type: file.type });
 }
+
+export const getWorkOrderStatusLabel = (status: WorkOrderStatus): string => {
+  switch (status) {
+    case WorkOrderStatus.Create:
+      return "Create";
+    case WorkOrderStatus.Disabled:
+      return "Disabled";
+    case WorkOrderStatus.SyncQuickbook:
+      return "Sync Quickbook";
+    default:
+      return "Unknown";
+  }
+};

@@ -1,6 +1,9 @@
 "use client";
 import React, { useState } from "react";
 import AnswerItem, { type AnswerNode } from "./AnswerItem";
+import { FiTrash2 } from "react-icons/fi";
+import { IoMdClose } from "react-icons/io";
+import { AiOutlineSave } from "react-icons/ai";
 
 interface Props {
   onClose: () => void;
@@ -75,15 +78,12 @@ const InspectionModal: React.FC<Props> = ({ onClose, onSave }) => {
           ))}
         </div>
 
-        <div className="modal-action">
+        <div className="modal-action flex items-center justify-between">
           <button type="button" className="btn" onClick={onClose}>
-            Cancelar
+            <IoMdClose className="w-[20px] h-[20px] opacity-70" /> Cancelar
           </button>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={handleSubmit}
-          >
+          <button type="button" className="btn" onClick={handleSubmit}>
+            <AiOutlineSave className="w-[20px] h-[20px] opacity-70" />
             Guardar
           </button>
         </div>
