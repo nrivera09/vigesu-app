@@ -10,6 +10,26 @@ interface Props {
   onSave: (question: string, answers: AnswerNode[]) => void;
 }
 
+type ApiRequest = {
+  templateInspectionId: number;
+  customerId: string;
+  customerName: string;
+  name: string;
+  description: string;
+  status: number;
+  typeInspectionQuestions: {
+    question: string;
+    // ...
+    typeInspectionDetailAnswers: {
+      response: string;
+      color: string;
+      usingItem: boolean;
+      isPrintable: boolean;
+      subTypeInspectionDetailAnswers: string[];
+    }[];
+  }[];
+};
+
 const InspectionModal: React.FC<Props> = ({ onClose, onSave }) => {
   const [question, setQuestion] = useState("");
   const [answers, setAnswers] = useState<AnswerNode[]>([]);
@@ -39,7 +59,37 @@ const InspectionModal: React.FC<Props> = ({ onClose, onSave }) => {
     setAnswers(newList);
   };
 
+  const transformAnswers = (answers: AnswerNode[]) => {
+    return answers.map((answer) => ({
+      response: answer.label,
+      color: answer.color,
+      usingItem: answer.useParts ?? false,
+      isPrintable: true,
+      subTypeInspectionDetailAnswers: (answer.children ?? []).map(
+        (child) => child.label
+      ),
+    }));
+  };
+
   const handleSubmit = () => {
+    if (!question.trim()) return alert("Pregunta obligatoria");
+
+    const structuredQuestion = {
+      templateInspectionQuestionId: 0,
+      groupId: 0,
+      question,
+      typeQuestion: 0,
+      status: 0,
+      typeInspectionDetailAnswers: transformAnswers(answers),
+    };
+
+    onSave(question, answers);
+    console.log("✅ Final payload:", structuredQuestion);
+
+    onClose();
+  };
+
+  const handleSubmit2 = () => {
     if (!question.trim()) return alert("Pregunta obligatoria");
     onSave(question, answers);
     console.log("ok: ", question, answers);

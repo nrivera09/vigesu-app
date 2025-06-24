@@ -4,7 +4,27 @@ import InspectionModal from "./InspectionModal";
 import { AnswerNode } from "./AnswerTree";
 import { IoAddCircleOutline } from "react-icons/io5";
 
-const FormChassi = () => {
+import { UseFormRegister, FieldErrors } from "react-hook-form";
+import { z } from "zod";
+
+interface FormChassiProps {
+  register: UseFormRegister<{
+    client: string;
+    name: string;
+    theme: string;
+    status?: string;
+    licenseNumber?: string;
+  }>;
+  errors: FieldErrors<{
+    client: string;
+    name: string;
+    theme: string;
+    status?: string;
+    licenseNumber?: string;
+  }>;
+}
+
+const FormChassi: React.FC<FormChassiProps> = ({ register, errors }) => {
   const [openModal, setOpenModal] = useState(false);
   const [questions, setQuestions] = useState<
     { question: string; answers: AnswerNode[] }[]
@@ -53,7 +73,11 @@ const FormChassi = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5  p-2 mb-0 rounded-md">
           <div className="flex flex-row gap-2 items-center justify-center col-span-1">
             <span className={labelClass()}>License number</span>
-            <input type="text" className={inputClass(false)} />
+            <input
+              type="text"
+              className={inputClass(!!errors.licenseNumber)}
+              {...register("licenseNumber")}
+            />
           </div>
           <div className="flex flex-row gap-2 items-center justify-center col-span-1">
             <span className={labelClass()}>State</span>
