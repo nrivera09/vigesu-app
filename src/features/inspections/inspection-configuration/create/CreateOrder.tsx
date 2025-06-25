@@ -10,6 +10,7 @@ import FormChassi from "../types-pdf/FormChassi/FormChassi";
 import { debounce } from "lodash";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
 import { CustomerOption } from "@/shared/utils/orderMapper";
+import { WorkOrderStatusLabel } from "../../models/inspections.types";
 
 interface CreateOrderProps {
   changeTitle?: (newTitle: string) => void;
@@ -168,11 +169,13 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
               {...register("status")}
             >
               <option disabled value="">
-                Pick a color
+                Pick a status
               </option>
-              <option>Crimson</option>
-              <option>Amber</option>
-              <option>Velvet</option>
+              {Object.entries(WorkOrderStatusLabel).map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
             </select>
           </div>
         </div>
