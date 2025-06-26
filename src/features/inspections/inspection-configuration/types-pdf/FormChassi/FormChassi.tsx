@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FiTrash2 } from "react-icons/fi";
 import InspectionModal from "./InspectionModal";
 import { AnswerNode } from "./AnswerTree";
 import { IoAddCircleOutline } from "react-icons/io5";
 
 import { UseFormRegister, FieldErrors } from "react-hook-form";
-import { z } from "zod";
 
 interface FormChassiProps {
   register: UseFormRegister<{
@@ -13,26 +12,46 @@ interface FormChassiProps {
     name: string;
     theme: string;
     status?: string;
-    licenseNumber?: string;
   }>;
   errors: FieldErrors<{
     client: string;
     name: string;
     theme: string;
     status?: string;
-    licenseNumber?: string;
   }>;
+  onQuestionsChange?: (hasQuestions: boolean) => void;
+  templateName: string;
+  templateId: number;
 }
 
-const FormChassi: React.FC<FormChassiProps> = ({ register, errors }) => {
+const FormChassi: React.FC<FormChassiProps> = ({
+  register,
+  errors,
+  onQuestionsChange,
+  templateName,
+  templateId,
+}) => {
   const [openModal, setOpenModal] = useState(false);
   const [questions, setQuestions] = useState<
     { question: string; answers: AnswerNode[] }[]
   >([]);
 
   const handleSave = (question: string, answers: AnswerNode[]) => {
-    setQuestions((prev) => [...prev, { question, answers }]);
+    const validAnswers = answers.filter((a) => a.label.trim() !== "");
+    if (validAnswers.length === 0) {
+      alert("Debe agregar al menos una respuesta válida");
+      return;
+    }
+
+    const updated = [...questions, { question, answers: validAnswers }];
+    setQuestions(updated);
   };
+
+  useEffect(() => {
+    if (onQuestionsChange) {
+      onQuestionsChange(questions.length > 0);
+    }
+  }, [questions]);
 
   const inputClass = (hasError: boolean) =>
     `flex-1 input input-lg bg-[#f6f3f4] w-full text-center font-bold text-3xl transition-all border-1 text-lg font-normal ${
@@ -43,63 +62,8 @@ const FormChassi: React.FC<FormChassiProps> = ({ register, errors }) => {
   return (
     <>
       <h2 className="font-bold text-xl md:text-2xl lg:text-3xl text-center mb-5">
-        Periodic chassi and trailer inspection
+        {templateName || "Create Inspection"}
       </h2>
-      <div className="rounded-box border-[#00000014] border-1 mb-6 p-3 gap-0 flex flex-col">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5  p-2 mb-0 rounded-md">
-          <div className="flex flex-row gap-2 items-center justify-center col-span-1">
-            <span className={labelClass()}>
-              Last Annual Periodic Inspecion / FMCSA
-            </span>
-            <input type="text" className={inputClass(false)} />
-          </div>
-          <div className="flex flex-row gap-2 items-center justify-center col-span-1">
-            <span className={labelClass()}>New FMCSA</span>
-            <input type="text" className={inputClass(false)} />
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5  p-2 mb-0 rounded-md">
-          <div className="flex flex-row gap-2 items-center justify-center col-span-1">
-            <span className={labelClass()}>
-              Last California Periodic Inspection / BIT
-            </span>
-            <input type="text" className={inputClass(false)} />
-          </div>
-          <div className="flex flex-row gap-2 items-center justify-center col-span-1">
-            <span className={labelClass()}>New BIT</span>
-            <input type="text" className={inputClass(false)} />
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5  p-2 mb-0 rounded-md">
-          <div className="flex flex-row gap-2 items-center justify-center col-span-1">
-            <span className={labelClass()}>License number</span>
-            <input
-              type="text"
-              className={inputClass(!!errors.licenseNumber)}
-              {...register("licenseNumber")}
-            />
-          </div>
-          <div className="flex flex-row gap-2 items-center justify-center col-span-1">
-            <span className={labelClass()}>State</span>
-            <input type="text" className={inputClass(false)} />
-          </div>
-
-          <div className="flex flex-row gap-2 items-center justify-center col-span-1">
-            <span className={labelClass()}>Location</span>
-            <input type="text" className={inputClass(false)} />
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5  p-2 mb-0 rounded-md">
-          <div className="flex flex-row gap-2 items-center justify-center col-span-1">
-            <span className={labelClass()}>Equipment Mar and Number</span>
-            <input type="text" className={inputClass(false)} />
-          </div>
-          <div className="flex flex-row gap-2 items-center justify-center col-span-1">
-            <span className={labelClass()}>Chassis Owner or Lessor</span>
-            <input type="text" className={inputClass(false)} />
-          </div>
-        </div>
-      </div>
       <div className="rounded-box border-[#00000014] border-1 mb-6 p-3 gap-0 flex flex-col">
         <div className="grid grid-cols-1 md:grid-cols-1 gap-5  p-2">
           <button

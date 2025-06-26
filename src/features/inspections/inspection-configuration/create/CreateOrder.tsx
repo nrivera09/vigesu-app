@@ -16,34 +16,27 @@ interface CreateOrderProps {
   changeTitle?: (newTitle: string) => void;
 }
 
-const baseSchema = z
-  .object({
-    client: z.string().min(1, "Client is required"),
-    status: z.string().optional(),
-    name: z.string().min(1, "Name is required"),
-    theme: z.string(),
-    licenseNumber: z.string().optional(),
-  })
-  .superRefine((data, ctx) => {
-    if (
-      data.theme === "Periodic chassi and trailer inspection" &&
-      (!data.licenseNumber || data.licenseNumber.trim() === "")
-    ) {
-      ctx.addIssue({
-        path: ["licenseNumber"],
-        code: "custom",
-        message: "License number is required when theme is chassi",
-      });
-    }
-  });
+const baseSchema = z.object({
+  client: z.string().min(1, "Client is required"),
+  status: z.string().optional(),
+  name: z.string().min(1, "Name is required"),
+  theme: z.string().min(1, "Template is required"),
+});
 
 const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
+  const [templates, setTemplates] = useState<{ id: number; name: string }[]>(
+    []
+  );
+  const [selectedTemplateName, setSelectedTemplateName] = useState<string>("");
+
   const [selectedCustomer, setSelectedCustomer] =
     useState<CustomerOption | null>(null);
 
   const [customerOptions, setCustomerOptions] = useState<CustomerOption[]>([]);
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
+  const [hasAtLeastOneQuestion, setHasAtLeastOneQuestion] = useState(false);
   const inputCustomerRef = useRef<HTMLInputElement>(null);
+
   const {
     register,
     handleSubmit,
@@ -59,7 +52,6 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
       status: "",
       name: "",
       theme: "",
-      licenseNumber: "",
     },
   });
 
@@ -101,11 +93,35 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
   };
 
   const currentTheme = watch("theme");
-  const licenseNumberValue = watch("licenseNumber");
+  const currentTemplateId = watch("theme");
 
   useEffect(() => {
-    trigger(); // 👈 fuerza validación general al cambiar theme o license
-  }, [currentTheme, licenseNumberValue]);
+    trigger();
+  }, [currentTheme]);
+
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      try {
+        const res = await axiosInstance.get("/TemplateInspection");
+        const items = res.data.items;
+        setTemplates(
+          items.map((t: { templateInspectionId: number; name: string }) => ({
+            id: t.templateInspectionId,
+            name: t.name,
+          }))
+        );
+      } catch (err) {
+        console.error("Error al cargar plantillas", err);
+      }
+    };
+
+    fetchTemplates();
+  }, []);
+
+  useEffect(() => {
+    const selected = templates.find((t) => String(t.id) === currentTemplateId);
+    setSelectedTemplateName(selected?.name ?? "");
+  }, [currentTemplateId, templates]);
 
   const inputClass = (hasError: boolean) =>
     `flex-1 input input-lg bg-[#f6f3f4] w-full text-center font-bold text-3xl transition-all border-1 text-lg font-normal ${
@@ -114,6 +130,10 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
   const labelClass = () => `font-medium w-[30%] break-words`;
 
   const onSubmit = (data: z.infer<typeof baseSchema>) => {
+    if (!hasAtLeastOneQuestion) {
+      alert("Debe agregar al menos una pregunta con respuestas");
+      return;
+    }
     console.log("✅ Valid data:", data);
   };
 
@@ -126,13 +146,15 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
             <div className="relative flex-1">
               <input
                 type="text"
-                className={inputClass(!!errors.name)}
+                className={inputClass(!!errors.client)}
+                {...register("client")}
                 name="customer_order"
                 value={objFilterForm.client}
                 onChange={handleCustomerChange}
                 ref={inputCustomerRef}
                 autoComplete="off"
               />
+
               {showCustomerDropdown && (
                 <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto absolute mt-1">
                   {customerOptions.map((option, idx) => (
@@ -142,11 +164,14 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
                         className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                         onClick={() => {
                           if (inputCustomerRef.current) {
-                            inputCustomerRef.current.value = option.name;
+                            const selectedName = option.name;
+                            inputCustomerRef.current.value = selectedName;
                             setObjFilterForm({
                               ...objFilterForm,
-                              client: option.name,
+                              client: selectedName,
                             });
+                            setValue("client", selectedName);
+                            trigger("client");
                             setShowCustomerDropdown(false);
                             setCustomerOptions([]);
                             debouncedSearchCustomer.cancel();
@@ -163,6 +188,7 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
           </div>
           <div className="flex flex-row gap-2 items-center justify-center col-span-1">
             <span className={labelClass()}>Status</span>
+
             <select
               defaultValue=""
               className={inputClass(!!errors.status)}
@@ -196,11 +222,13 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
               {...register("theme")}
             >
               <option disabled value="">
-                Pick a theme
+                Select a template
               </option>
-              <option>Crimson</option>
-              <option>Amber</option>
-              <option>Periodic chassi and trailer inspection</option>
+              {templates.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -223,14 +251,22 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
         </div>
       </div>
 
-      {currentTheme === "Periodic chassi and trailer inspection" && (
-        <FormChassi register={register} errors={errors} />
+      {selectedTemplateName && (
+        <FormChassi
+          register={register}
+          errors={errors}
+          onQuestionsChange={(hasQuestions) =>
+            setHasAtLeastOneQuestion(hasQuestions)
+          }
+          templateName={selectedTemplateName}
+          templateId={Number(currentTemplateId)}
+        />
       )}
 
       <div className="pt-4">
         <button
           type="submit"
-          disabled={!isValid}
+          disabled={!isValid || !hasAtLeastOneQuestion}
           className="disabled:cursor-not-allowed disabled:!text-black btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto"
         >
           <span className="py-1 px-2 text-white font-normal rounded-full md:block text-[13px]">

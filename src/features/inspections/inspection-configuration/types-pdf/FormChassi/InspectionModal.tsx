@@ -74,18 +74,21 @@ const InspectionModal: React.FC<Props> = ({ onClose, onSave }) => {
   const handleSubmit = () => {
     if (!question.trim()) return alert("Pregunta obligatoria");
 
+    const validAnswers = answers.filter((a) => a.label.trim() !== "");
+    if (validAnswers.length === 0)
+      return alert("Debe agregar al menos una respuesta válida");
+
     const structuredQuestion = {
       templateInspectionQuestionId: 0,
       groupId: 0,
       question,
       typeQuestion: 0,
       status: 0,
-      typeInspectionDetailAnswers: transformAnswers(answers),
+      typeInspectionDetailAnswers: transformAnswers(validAnswers),
     };
 
-    onSave(question, answers);
+    onSave(question, validAnswers); // solo pasamos las válidas
     console.log("✅ Final payload:", structuredQuestion);
-
     onClose();
   };
 
@@ -99,6 +102,19 @@ const InspectionModal: React.FC<Props> = ({ onClose, onSave }) => {
   return (
     <dialog open className="modal">
       <div className="modal-box w-11/12 max-w-5xl">
+        <div className="mb-3">
+          <label className="font-semibold mb-1 block text-lg">
+            Select a group
+          </label>
+          <input
+            type="text"
+            className="flex-1 input input-lg bg-[#f6f3f4] w-full text-center  transition-all border-1 text-lg font-normal border-gray-100"
+            placeholder="Escribe la pregunta"
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+          />
+        </div>
+        <hr className=" border border-t-0 border-dashed border-gray-300 my-5" />
         <div className="mb-3">
           <label className="font-semibold mb-1 block text-lg">Question</label>
           <input
@@ -132,7 +148,15 @@ const InspectionModal: React.FC<Props> = ({ onClose, onSave }) => {
           <button type="button" className="btn" onClick={onClose}>
             <IoMdClose className="w-[20px] h-[20px] opacity-70" /> Cancelar
           </button>
-          <button type="button" className="btn" onClick={handleSubmit}>
+          <button
+            type="button"
+            className="btn"
+            onClick={handleSubmit}
+            disabled={
+              !question.trim() ||
+              answers.filter((a) => a.label.trim() !== "").length === 0
+            }
+          >
             <AiOutlineSave className="w-[20px] h-[20px] opacity-70" />
             Guardar
           </button>
