@@ -5,6 +5,12 @@ import { AnswerNode } from "./AnswerTree";
 import { IoAddCircleOutline } from "react-icons/io5";
 
 import { UseFormRegister, FieldErrors } from "react-hook-form";
+import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
+import { GrDuplicate } from "react-icons/gr";
+import {
+  ExportedAnswer,
+  ExportedQuestion,
+} from "@/shared/types/inspection/ITypes";
 
 interface FormChassiProps {
   register: UseFormRegister<{
@@ -22,6 +28,7 @@ interface FormChassiProps {
   onQuestionsChange?: (hasQuestions: boolean) => void;
   templateName: string;
   templateId: number;
+  onQuestionsExport?: (questions: ExportedQuestion[]) => void;
 }
 
 const FormChassi: React.FC<FormChassiProps> = ({
@@ -30,27 +37,89 @@ const FormChassi: React.FC<FormChassiProps> = ({
   onQuestionsChange,
   templateName,
   templateId,
+  onQuestionsExport,
 }) => {
   const [openModal, setOpenModal] = useState(false);
-  const [questions, setQuestions] = useState<
-    { question: string; answers: AnswerNode[] }[]
-  >([]);
+  const [questions, setQuestions] = useState<ExportedQuestion[]>([]);
 
-  const handleSave = (question: string, answers: AnswerNode[]) => {
+  const handleSave = (
+    question: string,
+    answers: AnswerNode[],
+    group: { groupId: number },
+    selectedQuestion: {
+      templateInspectionQuestionId: number;
+      question: string;
+      typeQuestion: number;
+    }
+  ) => {
     const validAnswers = answers.filter((a) => a.label.trim() !== "");
     if (validAnswers.length === 0) {
       alert("Debe agregar al menos una respuesta válida");
       return;
     }
 
-    const updated = [...questions, { question, answers: validAnswers }];
+    const mapAnswersRecursive = (nodes: AnswerNode[]): ExportedAnswer[] => {
+      return nodes.map((a) => ({
+        response: a.label,
+        color: a.color,
+        usingItem: a.useParts ?? false,
+        isPrintable: true,
+        subTypeInspectionDetailAnswers: mapAnswersRecursive(a.children ?? []),
+      }));
+    };
+
+    const formattedAnswers = mapAnswersRecursive(validAnswers);
+
+    const newEntry: ExportedQuestion = {
+      templateInspectionQuestionId:
+        selectedQuestion.templateInspectionQuestionId,
+      question,
+      typeQuestion: selectedQuestion.typeQuestion,
+      groupId: group.groupId,
+      status: 1,
+      typeInspectionDetailAnswers: formattedAnswers,
+    };
+
+    setQuestions((prev) => [...prev, newEntry]);
+  };
+
+  const handleDuplicateQuestion = (index: number) => {
+    const original = questions[index];
+    const duplicated = {
+      ...original,
+      question: original.question + " (copy)",
+      templateInspectionQuestionId: original.templateInspectionQuestionId, // conserva ID
+      groupId: original.groupId,
+      status: 1,
+      typeInspectionDetailAnswers: JSON.parse(
+        JSON.stringify(original.typeInspectionDetailAnswers)
+      ),
+    };
+    setQuestions((prev) => [...prev, duplicated]);
+  };
+
+  const handleDeleteQuestion = (index: number) => {
+    const updated = [...questions];
+    updated.splice(index, 1);
     setQuestions(updated);
+  };
+
+  const getFirstLevelAnswers = (answers: ExportedAnswer[]) => {
+    return (answers ?? [])
+      .filter((a) => a.response.trim() !== "")
+      .map((a) => a.response)
+      .join(", ");
   };
 
   useEffect(() => {
     if (onQuestionsChange) {
       onQuestionsChange(questions.length > 0);
     }
+  }, [questions]);
+
+  useEffect(() => {
+    if (onQuestionsChange) onQuestionsChange(questions.length > 0);
+    if (onQuestionsExport) onQuestionsExport(questions);
   }, [questions]);
 
   const inputClass = (hasError: boolean) =>
@@ -74,33 +143,63 @@ const FormChassi: React.FC<FormChassiProps> = ({
             <IoAddCircleOutline className="text-2xl" />
             Add row
           </button>
+          <pre>{JSON.stringify(questions, null, 2)}</pre>
           <div className="overflow-x-auto rounded-box border-[#00000014] border-1 ">
             <table className="table w-full">
               <thead className="bg-[#191917]">
                 <tr className="border-b-[#00000014]">
-                  <th className=" text-center w-[40%] text-white font-medium">
-                    Inspection time
+                  <th className=" text-center w-[30%] text-white font-medium">
+                    Description
                   </th>
                   <th className=" text-center w-[15%] text-white font-medium">
-                    Ok
+                    Tipo
                   </th>
-                  <th className=" text-center w-[40%] text-white font-medium">
-                    Repair / Replace items
+                  <th className=" text-center w-[30%] text-white font-medium">
+                    Respuestas automáticas
                   </th>
-                  <th className=" text-center w-[10%] text-white font-medium"></th>
+                  <th className=" text-center w-[25%] text-white font-medium"></th>
                 </tr>
               </thead>
               <tbody>
                 {questions.map((q, index) => (
                   <tr key={index}>
-                    <td className="text-center">{q.question}</td>
+                    <td className="text-center">
+                      <div
+                        className="w-[300px] overflow-hidden text-ellipsis"
+                        aria-label="question"
+                      >
+                        <span className="truncate ">{q.question}</span>
+                      </div>
+                    </td>
                     <td className="text-center">
                       <span className="text-sm font-medium">
-                        {q.answers.map((a) => a.label).join(", ")}
+                        {q.typeQuestion}
                       </span>
                     </td>
-                    <td className="text-center">—</td>
-                    <td></td>
+
+                    <td className="text-center">
+                      <span className="text-sm font-medium">
+                        {getFirstLevelAnswers(q.typeInspectionDetailAnswers)}
+                      </span>
+                    </td>
+                    <td className="text-right">
+                      <div className="flex w-full flex-row gap-2 items-center justify-end">
+                        <ActionButton
+                          icon={
+                            <GrDuplicate className="w-[20px] h-[20px] opacity-70" />
+                          }
+                          label="Duplicar"
+                          onClick={() => handleDuplicateQuestion(index)}
+                        />
+                        <ActionButton
+                          icon={
+                            <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
+                          }
+                          label="Delete"
+                          onClick={() => handleDeleteQuestion(index)}
+                        />
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -126,6 +225,7 @@ const FormChassi: React.FC<FormChassiProps> = ({
         <InspectionModal
           onClose={() => setOpenModal(false)}
           onSave={handleSave}
+          templateId={templateId}
         />
       )}
     </>

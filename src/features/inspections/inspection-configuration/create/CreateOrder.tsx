@@ -11,6 +11,7 @@ import { debounce } from "lodash";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
 import { CustomerOption } from "@/shared/utils/orderMapper";
 import { WorkOrderStatusLabel } from "../../models/inspections.types";
+import { ExportedQuestion } from "@/shared/types/inspection/ITypes";
 
 interface CreateOrderProps {
   changeTitle?: (newTitle: string) => void;
@@ -24,6 +25,10 @@ const baseSchema = z.object({
 });
 
 const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
+  const [exportedQuestions, setExportedQuestions] = useState<
+    ExportedQuestion[]
+  >([]);
+
   const [templates, setTemplates] = useState<{ id: number; name: string }[]>(
     []
   );
@@ -129,12 +134,30 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
     }`;
   const labelClass = () => `font-medium w-[30%] break-words`;
 
-  const onSubmit = (data: z.infer<typeof baseSchema>) => {
+  const onSubmit = async (data: z.infer<typeof baseSchema>) => {
     if (!hasAtLeastOneQuestion) {
       alert("Debe agregar al menos una pregunta con respuestas");
       return;
     }
-    console.log("✅ Valid data:", data);
+
+    const payload = {
+      command: {
+        templateInspectionId: Number(currentTemplateId),
+        customerId: "9341454759827689",
+        customerName: data.client,
+        name: data.name,
+        description: "", // aquí puedes obtener el valor de tu textarea con ref o con useForm
+        status: Number(data.status || 1),
+        typeInspectionQuestions: exportedQuestions,
+      },
+    };
+
+    try {
+      const res = await axiosInstance.post("/TypeInspection", payload);
+      console.log("✅ Enviado correctamente:", res.data);
+    } catch (error) {
+      console.error("❌ Error al guardar:", error);
+    }
   };
 
   return (
@@ -258,6 +281,7 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
           onQuestionsChange={(hasQuestions) =>
             setHasAtLeastOneQuestion(hasQuestions)
           }
+          onQuestionsExport={(q) => setExportedQuestions(q)}
           templateName={selectedTemplateName}
           templateId={Number(currentTemplateId)}
         />
