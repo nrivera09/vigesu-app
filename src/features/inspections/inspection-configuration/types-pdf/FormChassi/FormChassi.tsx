@@ -11,6 +11,7 @@ import {
   ExportedAnswer,
   ExportedQuestion,
 } from "@/shared/types/inspection/ITypes";
+import { InspectionStatus } from "../../models/typeInspection";
 
 interface FormChassiProps {
   register: UseFormRegister<{
@@ -76,7 +77,7 @@ const FormChassi: React.FC<FormChassiProps> = ({
       question,
       typeQuestion: selectedQuestion.typeQuestion,
       groupId: group.groupId,
-      status: 1,
+      status: InspectionStatus.Active,
       typeInspectionDetailAnswers: formattedAnswers,
     };
 
@@ -143,7 +144,7 @@ const FormChassi: React.FC<FormChassiProps> = ({
             <IoAddCircleOutline className="text-2xl" />
             Add row
           </button>
-          <pre>{JSON.stringify(questions, null, 2)}</pre>
+          <pre className="!hidden">{JSON.stringify(questions, null, 2)}</pre>
           <div className="overflow-x-auto rounded-box border-[#00000014] border-1 ">
             <table className="table w-full">
               <thead className="bg-[#191917]">

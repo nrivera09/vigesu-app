@@ -16,7 +16,10 @@ import Loading from "@/shared/components/shared/Loading";
 import AlertInfo from "@/shared/components/shared/AlertInfo";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { InspectionStatusLabel } from "../models/typeInspection";
+import {
+  InspectionStatus,
+  InspectionStatusLabel,
+} from "../models/typeInspection";
 
 interface CreateOrderProps {
   changeTitle?: (newTitle: string) => void;
@@ -28,6 +31,7 @@ const baseSchema = z.object({
   status: z.string().optional(),
   name: z.string().min(1, "Name is required"),
   theme: z.string().min(1, "Template is required"),
+  description: z.string().optional(),
 });
 
 const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
@@ -66,6 +70,7 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
       status: "",
       name: "",
       theme: "",
+      description: "",
     },
   });
 
@@ -160,8 +165,8 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
       customerId: "9341454759827689",
       customerName: data.client,
       name: data.name,
-      description: "", // aquí puedes obtener el valor de tu textarea con ref o con useForm
-      status: Number(data.status || 1),
+      description: data.description,
+      status: data.status || Number(InspectionStatus.Active),
       typeInspectionQuestions: exportedQuestions,
     };
 
@@ -283,10 +288,11 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
             <div className="flex flex-col gap-2 items-left justify-center">
               <span className={`${labelClass()} !w-full`}>Description</span>
               <textarea
-                className={`!text-left p-2 ${inputClass(false)}`}
+                className={`!text-left p-2 ${inputClass(!!errors.description)}`}
                 rows={3}
                 placeholder="Write work description..."
-              ></textarea>
+                {...register("description")}
+              />
 
               <button
                 type="button"

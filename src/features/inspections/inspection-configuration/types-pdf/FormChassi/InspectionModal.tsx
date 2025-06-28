@@ -151,73 +151,59 @@ const InspectionModal: React.FC<Props> = ({ onClose, onSave, templateId }) => {
   return (
     <dialog open className="modal">
       <div className="modal-box w-11/12 max-w-5xl">
-        <div className="mb-3 relative">
+        <div className="mb-3">
           <label className="font-semibold mb-1 block text-lg">
             Select a group
           </label>
-          <input
-            type="text"
-            className="input input-lg bg-[#f6f3f4] w-full text-center  transition-all border-1 text-lg font-normal"
-            placeholder="Escribe el nombre del grupo"
-            value={groupInput}
-            onChange={handleGroupInputChange}
-          />
-          {groupSuggestions.length > 0 && (
-            <ul className="absolute w-full bg-white shadow-md rounded-md mt-1 max-h-60 overflow-y-auto z-50">
-              {groupSuggestions.map((g) => (
-                <li key={g.groupId}>
-                  <button
-                    type="button"
-                    className="w-full text-left px-4 py-2 hover:bg-gray-100"
-                    onClick={() => {
-                      setSelectedGroup(g);
-                      setGroupInput(g.name);
-                      setTimeout(() => {
-                        setGroupSuggestions([]);
-                      }, 100);
-                    }}
-                  >
-                    {g.name}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+          <select
+            className="input input-lg bg-[#f6f3f4] w-full text-center text-lg font-normal"
+            value={selectedGroup?.groupId ?? ""}
+            onChange={(e) => {
+              const found = groups.find(
+                (g) => g.groupId === Number(e.target.value)
+              );
+              setSelectedGroup(found ?? null);
+            }}
+          >
+            <option value="" disabled>
+              Selecciona un grupo
+            </option>
+            {groups.map((group) => (
+              <option key={group.groupId} value={group.groupId}>
+                {group.name}
+              </option>
+            ))}
+          </select>
         </div>
 
-        <div className="mb-3 relative">
+        <div className="mb-3">
           <label className="font-semibold mb-1 block text-lg">Question</label>
-          <input
-            type="text"
-            className="input input-lg bg-[#f6f3f4] w-full text-center  transition-all border-1 text-lg font-normal"
-            placeholder="Escribe la pregunta"
-            value={question}
+          <select
+            className="input input-lg bg-[#f6f3f4] w-full text-center text-lg font-normal"
+            value={selectedQuestion?.templateInspectionQuestionId ?? ""}
             onChange={(e) => {
-              setQuestion(e.target.value);
-              setSelectedQuestion(null);
+              const found = questionSuggestions.find(
+                (q) => q.templateInspectionQuestionId === Number(e.target.value)
+              );
+              setSelectedQuestion(found ?? null);
+              setQuestion(found?.question ?? "");
+              if (found) {
+                console.log("Pregunta seleccionada:", found);
+              }
             }}
-          />
-          {filteredQuestions.length > 0 && (
-            <ul className="absolute w-full bg-white shadow-md rounded-md mt-1 max-h-60 overflow-y-auto z-50">
-              {filteredQuestions.map((item) => (
-                <li key={item.templateInspectionQuestionId}>
-                  <button
-                    type="button"
-                    className="w-full text-left px-4 py-2 hover:bg-gray-100"
-                    onClick={() => {
-                      setQuestion(item.question);
-                      setSelectedQuestion(item);
-                      setTimeout(() => {
-                        setFilteredQuestions([]);
-                      }, 100);
-                    }}
-                  >
-                    {item.question}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+          >
+            <option value="" disabled>
+              Selecciona una pregunta
+            </option>
+            {questionSuggestions.map((q) => (
+              <option
+                key={q.templateInspectionQuestionId}
+                value={q.templateInspectionQuestionId}
+              >
+                {q.question}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="mb-3">
