@@ -112,8 +112,8 @@ const Page = () => {
               <legend className="fieldset-legend text-lg">
                 Search options
               </legend>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-                <div className="flex flex-col !hidden">
+              <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-3 gap-4">
+                <div className="flex-col !hidden ">
                   <legend className="fieldset-legend text-lg font-normal">
                     Client
                   </legend>
@@ -158,7 +158,7 @@ const Page = () => {
                     )}
                   </div>
                 </div>
-                <div className="flex flex-col !hidden">
+                <div className="flex-col !hidden">
                   <legend className="fieldset-legend text-lg font-normal">
                     Status
                   </legend>
@@ -185,7 +185,7 @@ const Page = () => {
                     )}
                   </select>
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col col-span-2">
                   <legend className="fieldset-legend text-lg font-normal">
                     Name
                   </legend>

@@ -161,12 +161,13 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
     }
 
     const payload = {
+      command: "Create", // 🔧 requerido por el backend
       templateInspectionId: Number(currentTemplateId),
       customerId: "9341454759827689",
       customerName: data.client,
       name: data.name,
       description: data.description,
-      status: data.status || Number(InspectionStatus.Active),
+      status: Number(data.status) || InspectionStatus.Active,
       typeInspectionQuestions: exportedQuestions,
     };
 

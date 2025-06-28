@@ -66,7 +66,6 @@ const TableList = ({ objFilter }: TableListProps) => {
       <table className="table table-fixed w-full">
         <thead>
           <tr>
-            <th className="w-[10%]">Sel</th>
             <th className="w-[25%]">Name</th>
             <th className="w-[30%]">Description</th>
             <th className="w-[15%]">Status</th>
@@ -86,9 +85,6 @@ const TableList = ({ objFilter }: TableListProps) => {
                 key={item.typeInspectionId}
                 className="cursor-pointer odd:bg-base-200"
               >
-                <th>
-                  <input type="checkbox" className="checkbox" />
-                </th>
                 <td className="truncate">{item.name}</td>
                 <td className="truncate">{item.description}</td>
                 <td>{/* badge lógica */}</td>
