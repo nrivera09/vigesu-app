@@ -12,14 +12,10 @@ const Page = () => {
   return (
     <>
       <div className="header-page flex flex-row items-center justify-between min-h-[70px] bg-base-200 px-6 gap-2">
-        <BackButton title={!title ? "New Inspection configuration" : title} />
+        <BackButton title="New Inspection configuration" />
       </div>
       <div className="body-app overflow-y-auto pt-[20px]">
         <div className="container max-w-full mb-5">
-          <AlertInfo>
-            All the grey spaces are editable, meaning you can write on them and
-            add the required data.
-          </AlertInfo>
           <CreateOrder changeTitle={changeTitle} />
         </div>
       </div>

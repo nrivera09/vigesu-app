@@ -12,9 +12,15 @@ import { axiosInstance } from "@/shared/utils/axiosInstance";
 import { CustomerOption } from "@/shared/utils/orderMapper";
 import { WorkOrderStatusLabel } from "../../models/inspections.types";
 import { ExportedQuestion } from "@/shared/types/inspection/ITypes";
+import Loading from "@/shared/components/shared/Loading";
+import AlertInfo from "@/shared/components/shared/AlertInfo";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { InspectionStatusLabel } from "../models/typeInspection";
 
 interface CreateOrderProps {
   changeTitle?: (newTitle: string) => void;
+  isLoadingStatus?: () => void;
 }
 
 const baseSchema = z.object({
@@ -25,6 +31,9 @@ const baseSchema = z.object({
 });
 
 const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+
   const [exportedQuestions, setExportedQuestions] = useState<
     ExportedQuestion[]
   >([]);
@@ -105,10 +114,14 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
   }, [currentTheme]);
 
   useEffect(() => {
-    const fetchTemplates = async () => {
+    const fetchInitialData = async () => {
       try {
-        const res = await axiosInstance.get("/TemplateInspection");
-        const items = res.data.items;
+        const [templateRes] = await Promise.all([
+          axiosInstance.get("/TemplateInspection"),
+          // Puedes agregar otros endpoints iniciales aquí
+        ]);
+
+        const items = templateRes.data.items;
         setTemplates(
           items.map((t: { templateInspectionId: number; name: string }) => ({
             id: t.templateInspectionId,
@@ -116,11 +129,13 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
           }))
         );
       } catch (err) {
-        console.error("Error al cargar plantillas", err);
+        console.error("Error al cargar datos iniciales", err);
+      } finally {
+        setIsLoading(false); // 👈 Aquí desactivas el loading
       }
     };
 
-    fetchTemplates();
+    fetchInitialData();
   }, []);
 
   useEffect(() => {
@@ -141,164 +156,174 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
     }
 
     const payload = {
-      command: {
-        templateInspectionId: Number(currentTemplateId),
-        customerId: "9341454759827689",
-        customerName: data.client,
-        name: data.name,
-        description: "", // aquí puedes obtener el valor de tu textarea con ref o con useForm
-        status: Number(data.status || 1),
-        typeInspectionQuestions: exportedQuestions,
-      },
+      templateInspectionId: Number(currentTemplateId),
+      customerId: "9341454759827689",
+      customerName: data.client,
+      name: data.name,
+      description: "", // aquí puedes obtener el valor de tu textarea con ref o con useForm
+      status: Number(data.status || 1),
+      typeInspectionQuestions: exportedQuestions,
     };
 
     try {
       const res = await axiosInstance.post("/TypeInspection", payload);
-      console.log("✅ Enviado correctamente:", res.data);
+      //console.log("✅ Enviado correctamente:", res.data);
+
+      toast.success("Inspection order creado correctamente!");
+      router.push("../");
     } catch (error) {
-      console.error("❌ Error al guardar:", error);
+      //console.error("❌ Error al guardar:", error);
+      toast.error(`${error}`);
     }
   };
 
-  return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="rounded-box border-[#00000014] border-1 mb-6 p-3 gap-0 flex flex-col">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5  p-2 mb-0 rounded-md">
-          <div className="flex flex-row gap-2 items-center justify-center col-span-1">
-            <span className="font-medium w-[30%] break-words">Client</span>
-            <div className="relative flex-1">
-              <input
-                type="text"
-                className={inputClass(!!errors.client)}
-                {...register("client")}
-                name="customer_order"
-                value={objFilterForm.client}
-                onChange={handleCustomerChange}
-                ref={inputCustomerRef}
-                autoComplete="off"
-              />
+  if (isLoading) return <Loading />;
 
-              {showCustomerDropdown && (
-                <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto absolute mt-1">
-                  {customerOptions.map((option, idx) => (
-                    <li key={option.id} className="cursor-pointer text-sm">
-                      <button
-                        type="button"
-                        className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                        onClick={() => {
-                          if (inputCustomerRef.current) {
-                            const selectedName = option.name;
-                            inputCustomerRef.current.value = selectedName;
-                            setObjFilterForm({
-                              ...objFilterForm,
-                              client: selectedName,
-                            });
-                            setValue("client", selectedName);
-                            trigger("client");
-                            setShowCustomerDropdown(false);
-                            setCustomerOptions([]);
-                            debouncedSearchCustomer.cancel();
-                          }
-                        }}
-                      >
-                        {option.name}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
+  return (
+    <>
+      <AlertInfo>
+        All the grey spaces are editable, meaning you can write on them and add
+        the required data.
+      </AlertInfo>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="rounded-box border-[#00000014] border-1 mb-6 p-3 gap-0 flex flex-col">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5  p-2 mb-0 rounded-md">
+            <div className="flex flex-row gap-2 items-center justify-center col-span-1">
+              <span className="font-medium w-[30%] break-words">Client</span>
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  className={inputClass(!!errors.client)}
+                  {...register("client")}
+                  name="customer_order"
+                  value={objFilterForm.client}
+                  onChange={handleCustomerChange}
+                  ref={inputCustomerRef}
+                  autoComplete="off"
+                />
+
+                {showCustomerDropdown && (
+                  <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto absolute mt-1">
+                    {customerOptions.map((option, idx) => (
+                      <li key={option.id} className="cursor-pointer text-sm">
+                        <button
+                          type="button"
+                          className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                          onClick={() => {
+                            if (inputCustomerRef.current) {
+                              const selectedName = option.name;
+                              inputCustomerRef.current.value = selectedName;
+                              setObjFilterForm({
+                                ...objFilterForm,
+                                client: selectedName,
+                              });
+                              setValue("client", selectedName);
+                              trigger("client");
+                              setShowCustomerDropdown(false);
+                              setCustomerOptions([]);
+                              debouncedSearchCustomer.cancel();
+                            }
+                          }}
+                        >
+                          {option.name}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+            <div className="flex flex-row gap-2 items-center justify-center col-span-1">
+              <span className={labelClass()}>Status</span>
+
+              <select
+                defaultValue=""
+                className={inputClass(!!errors.status)}
+                {...register("status")}
+              >
+                <option disabled value="">
+                  Pick a status
+                </option>
+                {Object.entries(InspectionStatusLabel).map(([key, label]) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
-          <div className="flex flex-row gap-2 items-center justify-center col-span-1">
-            <span className={labelClass()}>Status</span>
-
-            <select
-              defaultValue=""
-              className={inputClass(!!errors.status)}
-              {...register("status")}
-            >
-              <option disabled value="">
-                Pick a status
-              </option>
-              {Object.entries(WorkOrderStatusLabel).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5  p-2 mb-0 rounded-md">
+            <div className="flex flex-row gap-2 items-center justify-center col-span-1">
+              <span className={labelClass()}>Name</span>
+              <input
+                type="text"
+                className={inputClass(!!errors.name)}
+                {...register("name")}
+              />
+            </div>
+            <div className="flex flex-row gap-2 items-center justify-center col-span-1">
+              <span className={labelClass()}>Theme</span>
+              <select
+                defaultValue=""
+                className={inputClass(!!errors.theme)}
+                {...register("theme")}
+              >
+                <option disabled value="">
+                  Select a template
                 </option>
-              ))}
-            </select>
+                {templates.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-2 mt-3 p-2">
+            <div className="flex flex-col gap-2 items-left justify-center">
+              <span className={`${labelClass()} !w-full`}>Description</span>
+              <textarea
+                className={`!text-left p-2 ${inputClass(false)}`}
+                rows={3}
+                placeholder="Write work description..."
+              ></textarea>
+
+              <button
+                type="button"
+                className="!hidden btn min-w-[30px] min-h-[39px] p-2 rounded-md mt-3"
+              >
+                Add group
+              </button>
+            </div>
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5  p-2 mb-0 rounded-md">
-          <div className="flex flex-row gap-2 items-center justify-center col-span-1">
-            <span className={labelClass()}>Name</span>
-            <input
-              type="text"
-              className={inputClass(!!errors.name)}
-              {...register("name")}
-            />
-          </div>
-          <div className="flex flex-row gap-2 items-center justify-center col-span-1">
-            <span className={labelClass()}>Theme</span>
-            <select
-              defaultValue=""
-              className={inputClass(!!errors.theme)}
-              {...register("theme")}
-            >
-              <option disabled value="">
-                Select a template
-              </option>
-              {templates.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
-                </option>
-              ))}
-            </select>
-          </div>
+
+        {selectedTemplateName && (
+          <FormChassi
+            register={register}
+            errors={errors}
+            onQuestionsChange={(hasQuestions) =>
+              setHasAtLeastOneQuestion(hasQuestions)
+            }
+            onQuestionsExport={(q) => setExportedQuestions(q)}
+            templateName={selectedTemplateName}
+            templateId={Number(currentTemplateId)}
+          />
+        )}
+
+        <div className="pt-4">
+          <button
+            type="submit"
+            disabled={!isValid || !hasAtLeastOneQuestion}
+            className="disabled:cursor-not-allowed disabled:!text-black btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto"
+          >
+            <span className="py-1 px-2 text-white font-normal rounded-full md:block text-[13px]">
+              Save
+            </span>
+          </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-2 mt-3 p-2">
-          <div className="flex flex-col gap-2 items-left justify-center">
-            <span className={`${labelClass()} !w-full`}>Description</span>
-            <textarea
-              className={`!text-left p-2 ${inputClass(false)}`}
-              rows={3}
-              placeholder="Write work description..."
-            ></textarea>
-
-            <button
-              type="button"
-              className="!hidden btn min-w-[30px] min-h-[39px] p-2 rounded-md mt-3"
-            >
-              Add group
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {selectedTemplateName && (
-        <FormChassi
-          register={register}
-          errors={errors}
-          onQuestionsChange={(hasQuestions) =>
-            setHasAtLeastOneQuestion(hasQuestions)
-          }
-          onQuestionsExport={(q) => setExportedQuestions(q)}
-          templateName={selectedTemplateName}
-          templateId={Number(currentTemplateId)}
-        />
-      )}
-
-      <div className="pt-4">
-        <button
-          type="submit"
-          disabled={!isValid || !hasAtLeastOneQuestion}
-          className="disabled:cursor-not-allowed disabled:!text-black btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto"
-        >
-          <span className="py-1 px-2 text-white font-normal rounded-full md:block text-[13px]">
-            Save
-          </span>
-        </button>
-      </div>
-    </form>
+      </form>
+    </>
   );
 };
 

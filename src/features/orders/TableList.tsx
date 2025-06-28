@@ -211,7 +211,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
           {loading ? (
             <tr>
               <td colSpan={6} className="text-center py-10">
-                <Loading />
+                <Loading height="h-[200px]" />
               </td>
             </tr>
           ) : (

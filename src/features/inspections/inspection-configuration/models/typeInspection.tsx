@@ -22,3 +22,13 @@ export interface GetTypeInspectionResponse {
   hasPreviousPage: boolean;
   hasNextPage: boolean;
 }
+
+export enum InspectionStatus {
+  Active = 0,
+  Inactive = 1,
+}
+
+export const InspectionStatusLabel: Record<InspectionStatus, string> = {
+  [InspectionStatus.Active]: "Active",
+  [InspectionStatus.Inactive]: "Inactive",
+};

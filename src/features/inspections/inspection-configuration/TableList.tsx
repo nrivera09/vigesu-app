@@ -10,6 +10,7 @@ import { getTypeInspections } from "@/features/inspections/inspection-configurat
 import { ITypeInspectionItem } from "./models/typeInspection";
 import { toast } from "sonner";
 import { getWorkOrderStatusLabel } from "@/shared/utils/utils";
+import Loading from "@/shared/components/shared/Loading";
 
 const TableList = ({ objFilter }: TableListProps) => {
   const [allData, setAllData] = useState<ITypeInspectionItem[]>([]);
@@ -17,34 +18,6 @@ const TableList = ({ objFilter }: TableListProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [loading, setLoading] = useState(false);
-
-  const fetchData2 = async () => {
-    setLoading(true);
-    try {
-      const { items, totalCount } = await getTypeInspections({
-        Name: objFilter.name,
-        PageNumber: currentPage,
-        PageSize: rowsPerPage,
-      });
-
-      // 🔁 Mapeamos del tipo de la API al tipo de frontend (ITypeInspectionItem)
-      const mappedItems: ITypeInspectionItem[] = items.map((item) => ({
-        typeInspectionId: item.typeInspectionID,
-        templateInspectionId: item.templateInspectionID,
-        customerId: item.customerID,
-        name: item.name,
-        description: item.description,
-        status: item.status,
-      }));
-
-      setAllData(mappedItems);
-      setTotalCount(totalCount);
-    } catch (error) {
-      toast.error("Error al cargar configuraciones de inspección");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -101,50 +74,30 @@ const TableList = ({ objFilter }: TableListProps) => {
           </tr>
         </thead>
         <tbody>
-          {allData.map((item) => (
-            <tr
-              key={item.typeInspectionId}
-              className="cursor-pointer odd:bg-base-200"
-            >
-              <th>
-                <input type="checkbox" className="checkbox" />
-              </th>
-              <td className="truncate">{item.name}</td>
-              <td className="truncate">{item.description}</td>
-              <td>
-                <div className="!hidden badge badge-neutral !h-auto">
-                  {getWorkOrderStatusLabel(item.status)}
-                </div>
-                {item.status === 0 && (
-                  <div className="badge badge-dash badge-info">
-                    {getWorkOrderStatusLabel(item.status)}
-                  </div>
-                )}
-                {item.status === 1 && (
-                  <div className="badge badge-dash badge-error">
-                    {getWorkOrderStatusLabel(item.status)}
-                  </div>
-                )}
-                {item.status === 2 && (
-                  <div className="badge badge-dash badge-success">
-                    {getWorkOrderStatusLabel(item.status)}
-                  </div>
-                )}
-              </td>
-              <td className="flex items-center gap-2 justify-end">
-                <ActionButton
-                  icon={<FaRegEdit className="w-[20px] h-[20px] opacity-70" />}
-                  label="Edit"
-                  onClick={() => console.log("Editar", item.typeInspectionId)}
-                />
-                <ActionButton
-                  icon={<FiTrash2 className="w-[20px] h-[20px] opacity-70" />}
-                  label="Delete"
-                  onClick={() => console.log("Eliminar", item.typeInspectionId)}
-                />
+          {loading ? (
+            <tr>
+              <td colSpan={5} className="py-10 text-center">
+                <Loading height="h-[200px]" />
               </td>
             </tr>
-          ))}
+          ) : (
+            allData.map((item) => (
+              <tr
+                key={item.typeInspectionId}
+                className="cursor-pointer odd:bg-base-200"
+              >
+                <th>
+                  <input type="checkbox" className="checkbox" />
+                </th>
+                <td className="truncate">{item.name}</td>
+                <td className="truncate">{item.description}</td>
+                <td>{/* badge lógica */}</td>
+                <td className="flex items-center gap-2 justify-end">
+                  {/* action buttons */}
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
 
@@ -164,17 +117,22 @@ const TableList = ({ objFilter }: TableListProps) => {
         >
           «
         </button>
-        {[...Array(totalPages)].map((_, idx) => (
-          <button
-            key={idx}
-            className={`join-item btn ${
-              currentPage === idx + 1 ? "btn-active" : ""
-            }`}
-            onClick={() => changePage(idx + 1)}
-          >
-            {idx + 1}
-          </button>
-        ))}
+        {totalPages > 0 &&
+          Array.from({ length: totalPages }, (_, idx) => {
+            const page = idx + 1;
+            return (
+              <button
+                key={`page-${page}`}
+                className={`join-item btn ${
+                  currentPage === page ? "btn-active" : ""
+                }`}
+                onClick={() => changePage(page)}
+              >
+                {page}
+              </button>
+            );
+          })}
+
         <button
           className="join-item btn"
           onClick={() => changePage(currentPage + 1)}

@@ -1,4 +1,5 @@
 "use client";
+import { InspectionStatusLabel } from "@/features/inspections/inspection-configuration/models/typeInspection";
 import TableList from "@/features/inspections/inspection-configuration/TableList";
 import { WorkOrderStatusLabel } from "@/features/orders/models/workOrder.types";
 import BackButton from "@/shared/components/shared/BackButton";
@@ -16,6 +17,7 @@ import { MdOutlineSettingsBackupRestore } from "react-icons/md";
 const Page = () => {
   const pathname = usePathname();
   const pageTitle = usePageTitle();
+  const [title, setTitle] = useState<string>("");
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
   const [customerOptions, setCustomerOptions] = useState<CustomerOption[]>([]);
   const inputCustomerRef = useRef<HTMLInputElement>(null);
@@ -79,7 +81,7 @@ const Page = () => {
     <>
       <div className="gap-4 flex flex-col  min-h-full ">
         <div className="header-page flex flex-row items-center justify-between min-h-[70px] bg-base-200 px-6 gap-2">
-          <BackButton />
+          <BackButton title={!title ? "New Inspection configuration" : title} />
           <div className="flex flex-row gap-2">
             <Link
               href={`${pathname}/create`}
@@ -111,7 +113,7 @@ const Page = () => {
                 Search options
               </legend>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-                <div className="flex flex-col">
+                <div className="flex flex-col !hidden">
                   <legend className="fieldset-legend text-lg font-normal">
                     Client
                   </legend>
@@ -156,7 +158,7 @@ const Page = () => {
                     )}
                   </div>
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col !hidden">
                   <legend className="fieldset-legend text-lg font-normal">
                     Status
                   </legend>
@@ -174,7 +176,7 @@ const Page = () => {
                       Pick a status
                     </option>
 
-                    {Object.entries(WorkOrderStatusLabel).map(
+                    {Object.entries(InspectionStatusLabel).map(
                       ([key, label]) => (
                         <option key={key} value={key}>
                           {label}
