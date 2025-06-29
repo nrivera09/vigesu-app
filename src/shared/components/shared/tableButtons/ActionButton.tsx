@@ -16,6 +16,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   return (
     <button
       onClick={onClick}
+      type="button"
       className={`btn min-w-[30px] min-h-[30px] p-2 rounded-md ${className}`}
     >
       {icon && icon}

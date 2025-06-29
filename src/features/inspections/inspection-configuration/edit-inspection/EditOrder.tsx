@@ -6,20 +6,24 @@ import React, { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { useForm, UseFormRegister, FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import FormChassi from "../types-pdf/FormChassi/FormChassi";
+import FormChassi from "../types-pdf/FormChassiEdit/FormChassi";
 import { debounce } from "lodash";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
 import { CustomerOption } from "@/shared/utils/orderMapper";
 import { WorkOrderStatusLabel } from "../../models/inspections.types";
-import { ExportedQuestion } from "@/shared/types/inspection/ITypes";
+import {
+  ExportedAnswer,
+  ExportedQuestion,
+} from "@/shared/types/inspection/ITypes";
 import Loading from "@/shared/components/shared/Loading";
 import AlertInfo from "@/shared/components/shared/AlertInfo";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   InspectionStatus,
   InspectionStatusLabel,
 } from "../models/typeInspection";
+import { MdEdit } from "react-icons/md";
 
 interface EditOrderProps {
   changeTitle?: (newTitle: string) => void;
@@ -35,6 +39,8 @@ const baseSchema = z.object({
 });
 
 const EditOrder = ({ changeTitle }: EditOrderProps) => {
+  const { id } = useParams<{ id: string }>();
+  const initialQuestionsRef = useRef<ExportedQuestion[] | null>(null);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -114,6 +120,14 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
   const currentTheme = watch("theme");
   const currentTemplateId = watch("theme");
 
+  const getCustomerName = async (customerId: string) => {
+    if (!customerId) return "";
+    const res = await axiosInstance.get(
+      `/QuickBooks/Customers/GetCustomerId?CustomerId=${customerId}&RealmId=9341454759827689`
+    );
+    return res.data?.name ?? "";
+  };
+
   useEffect(() => {
     trigger();
   }, [currentTheme]);
@@ -121,9 +135,11 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const [templateRes] = await Promise.all([
+        const [templateRes, inspectionRes] = await Promise.all([
           axiosInstance.get("/TemplateInspection"),
-          // Puedes agregar otros endpoints iniciales aquí
+          axiosInstance.get(
+            `/TypeInspection/GetTypeInspectionId?TypeInspectionId=${id}`
+          ),
         ]);
 
         const items = templateRes.data.items;
@@ -133,10 +149,59 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
             name: t.name,
           }))
         );
+
+        const data = inspectionRes.data;
+
+        setValue("client", data.customerName);
+        setValue("status", String(data.status));
+        setValue("name", data.name);
+        setValue("theme", String(data.templateInspectionId));
+        setValue("description", data.description ?? "");
+
+        const customerName = await getCustomerName(String(data.customerId));
+
+        setSelectedCustomer({
+          id: Number(data.customerId),
+          name: customerName,
+        });
+
+        setObjFilterForm((prev) => ({
+          ...prev,
+          client: customerName,
+        }));
+
+        setValue("client", customerName);
+
+        const mappedQuestions: ExportedQuestion[] =
+          data.typeInspectionQuestions.map((q: ExportedQuestion) => ({
+            typeInspectionDetailId: q.typeInspectionDetailId ?? 0,
+            templateInspectionQuestionId: q.templateInspectionQuestionId,
+            question: q.question,
+            typeQuestion: q.typeQuestion,
+            groupId: q.groupId,
+            status: q.status,
+            typeInspectionDetailAnswers: q.typeInspectionDetailAnswers.map(
+              (a: ExportedAnswer) => ({
+                response: a.response,
+                color: a.color,
+                usingItem: a.usingItem,
+                isPrintable: a.isPrintable,
+                subTypeInspectionDetailAnswers:
+                  a.subTypeInspectionDetailAnswers ?? [], // ← ahora string[]
+              })
+            ),
+          }));
+
+        if (!initialQuestionsRef.current) {
+          initialQuestionsRef.current = mappedQuestions;
+          setExportedQuestions(mappedQuestions);
+          setHasAtLeastOneQuestion(mappedQuestions.length > 0);
+        }
+        setHasAtLeastOneQuestion(mappedQuestions.length > 0);
       } catch (err) {
         console.error("Error al cargar datos iniciales", err);
       } finally {
-        setIsLoading(false); // 👈 Aquí desactivas el loading
+        setIsLoading(false);
       }
     };
 
@@ -147,6 +212,10 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
     const selected = templates.find((t) => String(t.id) === currentTemplateId);
     setSelectedTemplateName(selected?.name ?? "");
   }, [currentTemplateId, templates]);
+
+  useEffect(() => {
+    console.log("ExportedQuestions actualizados:", exportedQuestions);
+  }, [exportedQuestions]);
 
   const inputClass = (hasError: boolean) =>
     `flex-1 input input-lg bg-[#f6f3f4] w-full text-center font-bold text-3xl transition-all border-1 text-lg font-normal ${
@@ -161,9 +230,9 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
     }
 
     const payload = {
-      command: "Create", // 🔧 requerido por el backend
+      typeInspectionId: Number(id), // ✅ aquí lo agregamos
       templateInspectionId: Number(currentTemplateId),
-      customerId: selectedCustomer?.id ?? "",
+      customerId: String(selectedCustomer?.id ?? ""),
       customerName: data.client,
       name: data.name,
       description: data.description,
@@ -172,14 +241,12 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
     };
 
     try {
-      const res = await axiosInstance.post("/TypeInspection", payload);
-      //console.log("✅ Enviado correctamente:", res.data);
-
-      toast.success("Inspection order creado correctamente!");
+      await axiosInstance.put(`/TypeInspection/${id}`, payload);
+      toast.success("Orden editada correctamente");
       router.push("../");
     } catch (error) {
-      //console.error("❌ Error al guardar:", error);
-      toast.error(`${error}`);
+      toast.error("Error al guardar los cambios");
+      console.error(error);
     }
   };
 
@@ -196,49 +263,71 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5  p-2 mb-0 rounded-md">
             <div className="flex flex-row gap-2 items-center justify-center col-span-1">
               <span className="font-medium w-[30%] break-words">Client</span>
-              <div className="relative flex-1">
-                <input
-                  type="text"
-                  className={inputClass(!!errors.client)}
-                  {...register("client")}
-                  name="customer_order"
-                  value={objFilterForm.client}
-                  onChange={handleCustomerChange}
-                  ref={inputCustomerRef}
-                  autoComplete="off"
-                />
 
-                {showCustomerDropdown && (
-                  <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto absolute mt-1">
-                    {customerOptions.map((option, idx) => (
-                      <li key={option.id} className="cursor-pointer text-sm">
-                        <button
-                          type="button"
-                          className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                          onClick={() => {
-                            if (inputCustomerRef.current) {
-                              const selectedName = option.name;
-                              inputCustomerRef.current.value = selectedName;
-                              setObjFilterForm({
-                                ...objFilterForm,
-                                client: selectedName,
-                              });
-                              setValue("client", selectedName);
-                              trigger("client");
-                              setShowCustomerDropdown(false);
-                              setCustomerOptions([]);
-                              debouncedSearchCustomer.cancel();
-                            }
-                          }}
-                        >
-                          {option.name}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
+              {selectedCustomer ? (
+                <div className="flex flex-1 items-center gap-2">
+                  <span className="truncate w-0 flex-1 px-2">
+                    {selectedCustomer.name}
+                  </span>
+                  <button
+                    type="button"
+                    className="btn p-2 btn-xs bg-transparent hover:shadow-none border-none flex items-center justify-center"
+                    onClick={() => {
+                      setSelectedCustomer(null);
+                      setValue("client", "");
+                      setObjFilterForm((prev) => ({ ...prev, client: "" }));
+                      setCustomerOptions([]);
+                      if (inputCustomerRef.current)
+                        inputCustomerRef.current.value = "";
+                    }}
+                  >
+                    <MdEdit className="text-2xl" />
+                  </button>
+                </div>
+              ) : (
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    className={inputClass(!!errors.client)}
+                    {...register("client")}
+                    value={objFilterForm.client}
+                    onChange={handleCustomerChange}
+                    ref={inputCustomerRef}
+                    autoComplete="off"
+                  />
+                  {showCustomerDropdown && (
+                    <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto absolute mt-1 flex flex-col !cursor-pointer">
+                      {customerOptions.map((option) => (
+                        <li key={option.id} className="text-sm">
+                          <button
+                            type="button"
+                            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                            onClick={() => {
+                              if (inputCustomerRef.current) {
+                                inputCustomerRef.current.value = option.name;
+                                setObjFilterForm((prev) => ({
+                                  ...prev,
+                                  client: option.name,
+                                }));
+                                setValue("client", option.name);
+                                setSelectedCustomer(option);
+                                setShowCustomerDropdown(false);
+                                setCustomerOptions([]);
+                                debouncedSearchCustomer.cancel();
+                                trigger("client");
+                              }
+                            }}
+                          >
+                            {option.name}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
             </div>
+
             <div className="flex flex-row gap-2 items-center justify-center col-span-1">
               <span className={labelClass()}>Status</span>
 
@@ -271,6 +360,7 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
               <span className={labelClass()}>Theme</span>
               <select
                 defaultValue=""
+                disabled
                 className={inputClass(!!errors.theme)}
                 {...register("theme")}
               >
@@ -312,9 +402,12 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
             onQuestionsChange={(hasQuestions) =>
               setHasAtLeastOneQuestion(hasQuestions)
             }
-            onQuestionsExport={(q) => setExportedQuestions(q)}
+            onQuestionsExport={(updatedQuestions) => {
+              setExportedQuestions(updatedQuestions);
+            }}
             templateName={selectedTemplateName}
             templateId={Number(currentTemplateId)}
+            initialQuestions={initialQuestionsRef.current || []}
           />
         )}
 

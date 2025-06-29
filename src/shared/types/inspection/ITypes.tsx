@@ -15,6 +15,7 @@ export interface ExportedAnswer {
 }
 
 export interface ExportedQuestion {
+  typeInspectionDetailId?: number;
   templateInspectionQuestionId: number;
   question: string;
   typeQuestion: number;
