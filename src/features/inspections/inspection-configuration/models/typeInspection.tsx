@@ -1,5 +1,6 @@
 // src/features/inspections/inspection-configuration/models/typeInspection.types.ts
 export interface ITypeInspectionItem {
+  //statusWorkOrder: number;
   typeInspectionId: number;
   templateInspectionId: number;
   customerId: string;

@@ -4,15 +4,22 @@
 import { useEffect, useState } from "react";
 import { TableListProps } from "@/shared/types/inspection/ITypes";
 import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
-import { FaRegEdit } from "react-icons/fa";
+import { FaRegEdit, FaRegEye } from "react-icons/fa";
 import { FiTrash2 } from "react-icons/fi";
 import { getTypeInspections } from "@/features/inspections/inspection-configuration/api/typeInspectionApi";
 import { ITypeInspectionItem } from "./models/typeInspection";
 import { toast } from "sonner";
-import { getWorkOrderStatusLabel } from "@/shared/utils/utils";
+import {
+  getInspectionStatusLabel,
+  getWorkOrderStatusLabel,
+} from "@/shared/utils/utils";
 import Loading from "@/shared/components/shared/Loading";
+import { usePathname, useRouter } from "next/navigation";
+import { axiosInstance } from "@/shared/utils/axiosInstance";
 
 const TableList = ({ objFilter }: TableListProps) => {
+  const router = useRouter();
+  const pathname = usePathname();
   const [allData, setAllData] = useState<ITypeInspectionItem[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -30,9 +37,9 @@ const TableList = ({ objFilter }: TableListProps) => {
 
       // Mapear y mostrar (sin filtros frontend)
       const mappedItems: ITypeInspectionItem[] = items.map((item) => ({
-        typeInspectionId: item.typeInspectionID,
-        templateInspectionId: item.templateInspectionID,
-        customerId: item.customerID,
+        typeInspectionId: item.typeInspectionId,
+        templateInspectionId: item.templateInspectionId,
+        customerId: item.customerId,
         name: item.name,
         description: item.description,
         status: item.status,
@@ -51,6 +58,26 @@ const TableList = ({ objFilter }: TableListProps) => {
 
   const changePage = (page: number) => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
+  };
+
+  const deleteTypeInspection = async (id: number) => {
+    try {
+      setLoading(true);
+      await axiosInstance.put(
+        `/TypeInspection/UpdateTypeInspectionState/${id}`,
+        {
+          typeInspectionId: id,
+        }
+      );
+
+      toast.success("Estado actualizado correctamente");
+      fetchData();
+    } catch (error) {
+      console.error("Error al actualizar estado:", error);
+      toast.error("No se pudo actualizar el estado de la inspección");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -87,9 +114,39 @@ const TableList = ({ objFilter }: TableListProps) => {
               >
                 <td className="truncate">{item.name}</td>
                 <td className="truncate">{item.description}</td>
-                <td>{/* badge lógica */}</td>
+                <td>
+                  {item.status === 0 && (
+                    <div className="badge badge-dash badge-success">
+                      {getInspectionStatusLabel(item.status)}
+                    </div>
+                  )}
+                  {item.status === 1 && (
+                    <div className="badge badge-dash badge-error">
+                      {getInspectionStatusLabel(item.status)}
+                    </div>
+                  )}
+                </td>
                 <td className="flex items-center gap-2 justify-end">
-                  {/* action buttons */}
+                  <ActionButton
+                    icon={
+                      <FaRegEdit className="w-[20px] h-[20px] opacity-70" />
+                    }
+                    label="Edit"
+                    onClick={() =>
+                      router.push(`${pathname}/edit/${item.typeInspectionId}`)
+                    }
+                  />
+                  {item.status !== 1 && (
+                    <ActionButton
+                      icon={
+                        <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
+                      }
+                      label="Delete"
+                      onClick={() =>
+                        deleteTypeInspection(item.typeInspectionId)
+                      }
+                    />
+                  )}
                 </td>
               </tr>
             ))

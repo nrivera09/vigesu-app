@@ -1,6 +1,7 @@
 // 📁 src/features/inspections/inspection-configuration/api/typeInspectionApi.ts
 
 import { axiosInstance } from "@/shared/utils/axiosInstance";
+import { GetTypeInspectionResponse } from "../models/typeInspection";
 
 export interface GetTypeInspectionParams {
   Name?: string;
@@ -27,14 +28,8 @@ export interface TypeInspectionResponse {
 }
 
 export const getTypeInspections = async (
-  filters: GetTypeInspectionParams
-): Promise<TypeInspectionResponse> => {
-  const response = await axiosInstance.get<TypeInspectionResponse>(
-    "/TypeInspection",
-    {
-      params: filters,
-    }
-  );
-
-  return response.data;
+  params: GetTypeInspectionParams
+): Promise<GetTypeInspectionResponse> => {
+  const { data } = await axiosInstance.get("/TypeInspection", { params });
+  return data;
 };

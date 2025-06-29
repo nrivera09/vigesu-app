@@ -1,3 +1,4 @@
+import { InspectionStatus } from "@/features/inspections/inspection-configuration/models/typeInspection";
 import { WorkOrderStatus } from "@/features/inspections/models/inspections.types";
 import { v4 as uuidv4 } from "uuid";
 
@@ -102,5 +103,14 @@ export const getWorkOrderStatusLabel = (status: WorkOrderStatus): string => {
       return "Sync Quickbook";
     default:
       return "Unknown";
+  }
+};
+
+export const getInspectionStatusLabel = (status: InspectionStatus): string => {
+  switch (status) {
+    case InspectionStatus.Active:
+      return "Active";
+    default:
+      return "Desactive";
   }
 };
