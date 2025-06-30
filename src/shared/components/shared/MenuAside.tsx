@@ -21,8 +21,10 @@ import { generalReactClass } from "@/shared/types/TGeneral";
 import { usePathname } from "next/navigation";
 import { HiOutlineServer } from "react-icons/hi2";
 import { getTotalWorkOrders } from "@/features/orders/api/workOrdersApi";
+import { useAuthUser } from "@/shared/stores/useAuthUser";
 
 const MenuAside: FC<generalReactClass> = ({ className }) => {
+  const { userName, employeeName, rol } = useAuthUser();
   const isSidebarOpen = useSidebarStore((state) => state.isSidebarOpen);
   const closeSidebar = useSidebarStore((state) => state.closeSidebar);
   const pathname = usePathname();
@@ -30,18 +32,27 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
   const [totalOrders, setTotalOrders] = useState<number>(0);
 
   // ✅ Todas tus rutas reales definidas abajo
-  const ordersLinks = [
-    {
-      label: "Work orders",
-      href: "/dashboard/orders/work-orders",
-      icon: <SlBookOpen />,
-    },
-    {
-      label: "Inspections",
-      href: "#",
-      icon: <SlNote />,
-    },
-  ];
+  const ordersLinks =
+    rol === 1
+      ? [
+          {
+            label: "Work orders",
+            href: "/dashboard/orders/work-orders",
+            icon: <SlBookOpen />,
+          },
+          {
+            label: "Inspections",
+            href: "/dashboard/orders/inspections",
+            icon: <SlNote />,
+          },
+        ]
+      : [
+          {
+            label: "Inspections",
+            href: "#",
+            icon: <SlNote />,
+          },
+        ];
 
   const inspectionsLinks = [
     {
@@ -126,12 +137,8 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
               </div>
             </div>
             <div className="flex flex-col justify-center gap-[.5px]">
-              <h1 className="text-white text-sm font-light">
-                Neill Bryan Rivera Livia
-              </h1>
-              <span className="text-gray-500 text-xs">
-                bryan.riv09@live.com
-              </span>
+              <h1 className="text-white text-sm font-light">{employeeName}</h1>
+              <span className="text-gray-500 text-xs">{userName}</span>
             </div>
           </div>
           <div className="flex flex-row gap-3">
@@ -196,16 +203,22 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
               links={ordersLinks}
               activeHref={activeHref}
             />
-            <SidebarSection
-              title="Catalogs"
-              links={inspectionsLinks}
-              activeHref={activeHref}
-            />
-            <SidebarSection
-              title="Configuration"
-              links={configurationLinks}
-              activeHref={activeHref}
-            />
+            {
+              <>
+                {rol === 1 && (
+                  <SidebarSection
+                    title="Catalogs"
+                    links={inspectionsLinks}
+                    activeHref={activeHref}
+                  />
+                )}
+                <SidebarSection
+                  title="Configuration"
+                  links={configurationLinks}
+                  activeHref={activeHref}
+                />
+              </>
+            }
           </nav>
         </div>
 

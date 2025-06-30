@@ -5,9 +5,10 @@ import { FC, useEffect, useState } from "react";
 
 interface BackButtonProps {
   title?: string;
+  disableArrow?: boolean;
 }
 
-const BackButton: FC<BackButtonProps> = ({ title }) => {
+const BackButton: FC<BackButtonProps> = ({ title, disableArrow = false }) => {
   const router = useRouter();
   const pathname = usePathname();
   const pageTitle = usePageTitle();
@@ -33,10 +34,12 @@ const BackButton: FC<BackButtonProps> = ({ title }) => {
 
   return (
     <div className="flex flex-row gap-4 items-center">
-      <button onClick={handleBack} className="btn btn-sm">
-        ←
-      </button>
       <h1 className="font-bold text-xl md:text-2xl lg:text-3xl">
+        {!disableArrow && (
+          <button onClick={handleBack} className="btn btn-sm">
+            ←
+          </button>
+        )}
         {title ||
           (pageTitle ? (
             pageTitle
