@@ -10,12 +10,15 @@ import { BiSupport } from "react-icons/bi";
 import { FaRegBell } from "react-icons/fa";
 import { IoMenu } from "react-icons/io5";
 import { useEffect } from "react";
+import { useSessionValidator } from "@/shared/hooks/useSessionValidator";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  useSessionValidator();
+
   const router = useRouter();
   const token = useAuthStore((state) => state.token);
 
@@ -23,11 +26,11 @@ export default function DashboardLayout({
   const isSidebarOpen = useSidebarStore((state) => state.isSidebarOpen);
   const pathname = usePathname();
 
-  useEffect(() => {
+  /*useEffect(() => {
     if (!token) {
       router.push("/");
     }
-  }, [token]);
+  }, [token]);*/
 
   return (
     <div
