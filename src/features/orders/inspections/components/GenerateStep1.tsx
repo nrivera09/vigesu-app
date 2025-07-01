@@ -12,6 +12,7 @@ import {
   IFullQuestion,
   IFullTypeInspection,
 } from "../types/IFullTypeInspection";
+import Loading from "@/shared/components/shared/Loading";
 
 const GenerateStep1 = () => {
   const [customerOptions, setCustomerOptions] = useState<CustomerOption[]>([]);
@@ -124,7 +125,7 @@ const GenerateStep1 = () => {
     <>
       <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
         <legend className="fieldset-legend text-lg">Generator options</legend>
-        <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4">
           {/* Client */}
           <div className="flex flex-col">
             <legend className="fieldset-legend text-lg font-normal">
@@ -181,7 +182,7 @@ const GenerateStep1 = () => {
           </div>
 
           {/* Botones */}
-          <div className="flex flex-col">
+          <div className="flex flex-col !hidden">
             <legend className="fieldset-legend text-lg font-normal hidden md:flex min-h-[32px]">
               {" "}
             </legend>
@@ -206,6 +207,7 @@ const GenerateStep1 = () => {
         </div>
       </fieldset>
 
+      {!inspectionData && <Loading height="h-[300px]" />}
       {/* Grupos (cards) */}
       <div className="cont my-5 flex flex-col gap-4">
         {inspectionData &&
