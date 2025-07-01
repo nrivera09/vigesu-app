@@ -207,7 +207,9 @@ const GenerateStep1 = () => {
         </div>
       </fieldset>
 
-      {!inspectionData && <Loading height="h-[300px]" />}
+      {!inspectionData && (
+        <Loading height="h-[300px]" label="Esperando configuración ..." />
+      )}
       {/* Grupos (cards) */}
       <div className="cont my-5 flex flex-col gap-4">
         {inspectionData &&

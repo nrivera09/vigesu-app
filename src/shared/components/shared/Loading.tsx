@@ -2,17 +2,29 @@ import React, { FC } from "react";
 
 interface LoadingProps {
   height?: string;
+  enableLabel?: boolean;
+  label?: string;
+  size?: string;
 }
 
-const Loading: FC<LoadingProps> = ({ height }) => {
+const Loading: FC<LoadingProps> = ({
+  height,
+  enableLabel = true,
+  label,
+  size,
+}) => {
   return (
     <div
       className={`flex flex-col w-full items-center justify-center ${
         height ?? "h-[88vh]"
       }`}
     >
-      <span className="loading loading-spinner loading-lg"></span>
-      <div className="mt-2 font-medium">Cargando datos...</div>
+      <span
+        className={`loading loading-spinner ${size ?? "loading-lg"}`}
+      ></span>
+      {enableLabel && (
+        <div className="mt-2 font-medium">{label ?? "Cargando datos..."}</div>
+      )}
     </div>
   );
 };

@@ -22,6 +22,8 @@ import { usePathname } from "next/navigation";
 import { HiOutlineServer } from "react-icons/hi2";
 import { getTotalWorkOrders } from "@/features/orders/api/workOrdersApi";
 import { useAuthUser } from "@/shared/stores/useAuthUser";
+import { getInspections } from "@/features/orders/inspections/api/inspectionApi";
+import Loading from "./Loading";
 
 const MenuAside: FC<generalReactClass> = ({ className }) => {
   const { userName, employeeName, rol } = useAuthUser();
@@ -30,6 +32,7 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
   const pathname = usePathname();
   const cleanPath = pathname?.replace(/^\/(es|en|fr)(\/|$)/, "/");
   const [totalOrders, setTotalOrders] = useState<number>(0);
+  const [totalInspections, setTotalInspections] = useState<number>(0);
 
   // ✅ Todas tus rutas reales definidas abajo
   const ordersLinks =
@@ -115,7 +118,15 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
       const count = await getTotalWorkOrders();
       setTotalOrders(count ?? 0);
     };
-    fetchTotal();
+    const fetchTotalInspections = async () => {
+      const response = await getInspections({ PageNumber: 1, PageSize: 10 });
+      setTotalInspections(response.totalCount ?? 0);
+    };
+
+    setTimeout(() => {
+      fetchTotal();
+      fetchTotalInspections();
+    }, 1500);
   }, []);
 
   return (
@@ -187,13 +198,38 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
               </p>
             </div>
             <div className="flex flex-row gap-2 text-white text-sm font-light tracking-[.5px] items-center justify-start">
-              <div>
-                12,231 <span className="text-emerald-500 ">Inspections</span>
-              </div>
+              {totalInspections > 0 ? (
+                <div>
+                  {totalInspections}{" "}
+                  <span className="text-emerald-500 ">Inspections</span>
+                </div>
+              ) : (
+                <div className="flex flex-row items-center justify-center gap-2">
+                  <Loading
+                    height="h-auto"
+                    enableLabel={false}
+                    size="loading-sm"
+                  />
+                  <span className="text-emerald-500 ">Inspections</span>
+                </div>
+              )}
               <TbPointFilled className="text-xs text-shadow-emerald-800" />
-              <div>
-                {totalOrders} <span className="text-emerald-500">Orders</span>
-              </div>
+
+              {totalOrders > 0 ? (
+                <div>
+                  {totalOrders}{" "}
+                  <span className="text-emerald-500 ">Orders</span>
+                </div>
+              ) : (
+                <div className="flex flex-row items-center justify-center gap-2">
+                  <Loading
+                    height="h-auto"
+                    enableLabel={false}
+                    size="loading-sm"
+                  />
+                  <span className="text-emerald-500 ">Orders</span>
+                </div>
+              )}
             </div>
           </div>
 
