@@ -194,7 +194,7 @@ const Page = () => {
                       autoComplete="off"
                     />
                     {showCustomerDropdown && (
-                      <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto absolute mt-1">
+                      <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto relative mt-1">
                         {customerOptions.map((option, idx) => (
                           <li
                             key={option.id}
@@ -285,7 +285,7 @@ const Page = () => {
                       autoComplete="off"
                     />
                     {showMechanicDropdown && (
-                      <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto absolute mt-1">
+                      <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto relative mt-1">
                         {mechanicOptions.map((option, idx) => (
                           <li
                             key={option.id}

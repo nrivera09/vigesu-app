@@ -9,6 +9,8 @@ import { FaRegEdit } from "react-icons/fa";
 import { FiTrash2 } from "react-icons/fi";
 import { getInspections } from "./api/inspectionApi";
 import { IInspectionItem } from "./models/inspection.types";
+import { formatDate, toISOStringWithTimeSmart } from "@/shared/utils/utils";
+import { GiAutoRepair } from "react-icons/gi";
 
 const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
   const router = useRouter();
@@ -61,12 +63,12 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
       <table className="table table-fixed w-full">
         <thead>
           <tr>
-            <th className="w-[25%]">Inspection #</th>
-            <th className="w-[25%]">Cliente</th>
-            <th className="w-[25%]">Empleado</th>
-            <th className="w-[20%]">Fecha</th>
-            <th className="w-[15%]">Estado</th>
-            <th className="w-[15%]"></th>
+            <th className="w-[20%]">Inspection #</th>
+            <th className="w-[15%]">Cliente</th>
+            <th className="w-[15%]">Empleado</th>
+            <th className="w-[10%]">Fecha</th>
+            <th className="w-[10%]">Estado</th>
+            <th className="w-[20%]"></th>
           </tr>
         </thead>
         <tbody>
@@ -86,7 +88,7 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
                 <td className="truncate">{item.customerName}</td>
                 <td className="truncate">{item.employeeName}</td>
                 <td className="truncate">
-                  {new Date(item.dateOfInspection).toLocaleDateString()}
+                  {formatDate(item.dateOfInspection)}
                 </td>
                 <td>
                   {item.status === 0 && (
@@ -99,7 +101,16 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
                     <div className="badge badge-neutral">Sin estado</div>
                   )}
                 </td>
-                <td className="flex justify-end">
+                <td className="flex justify-end gap-2">
+                  <ActionButton
+                    icon={
+                      <GiAutoRepair className="w-[20px] h-[20px] opacity-70" />
+                    }
+                    label="Work order"
+                    onClick={() =>
+                      router.push(`${pathname}/workorder/${item.inspectionId}`)
+                    }
+                  />
                   {item.status !== 1 && (
                     <ActionButton
                       icon={

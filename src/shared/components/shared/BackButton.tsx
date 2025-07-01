@@ -34,7 +34,7 @@ const BackButton: FC<BackButtonProps> = ({ title, disableArrow = false }) => {
 
   return (
     <div className="flex flex-row gap-4 items-center">
-      <h1 className="font-bold text-xl md:text-2xl lg:text-3xl">
+      <h1 className="font-bold text-xl md:text-2xl lg:text-3xl gap-2 flex flex-row items-center justify-start">
         {!disableArrow && (
           <button onClick={handleBack} className="btn btn-sm">
             ←

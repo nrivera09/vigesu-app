@@ -296,7 +296,7 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
                     autoComplete="off"
                   />
                   {showCustomerDropdown && (
-                    <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto absolute mt-1 flex flex-col !cursor-pointer">
+                    <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto relative mt-1 flex flex-col !cursor-pointer">
                       {customerOptions.map((option) => (
                         <li key={option.id} className="text-sm">
                           <button
