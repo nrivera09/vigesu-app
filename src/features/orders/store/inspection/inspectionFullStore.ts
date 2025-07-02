@@ -1,0 +1,62 @@
+// src/shared/store/inspection/inspectionFullStore.ts
+
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { IFullTypeInspection } from "../../inspections/types/IFullTypeInspection";
+
+interface InspectionFullState {
+  fullInspection: IFullTypeInspection | null;
+  groupName: string;
+  groupId: number;
+  titleQuestion: string;
+  stepWizard: number;
+  completeStep1: boolean;
+  completeStep2: boolean;
+  completeStep3: boolean;
+  setCompleteStep1: (complete: boolean) => void;
+  setCompleteStep2: (complete: boolean) => void;
+  setCompleteStep3: (complete: boolean) => void;
+  setTitleQuestion: (title: string) => void;
+  setFullInspection: (data: IFullTypeInspection) => void;
+  setGroupName: (name: string) => void;
+  setGroupId: (id: number) => void;
+  setStepWizard: (step: number) => void;
+  resetFullInspection: () => void;
+}
+
+export const useInspectionFullStore = create<InspectionFullState>()(
+  persist(
+    (set) => ({
+      fullInspection: null,
+      groupName: "",
+      groupId: 0,
+      titleQuestion: "",
+      stepWizard: 1,
+      completeStep1: false,
+      completeStep2: false,
+      completeStep3: false,
+      setCompleteStep1: (complete: boolean) => set({ completeStep1: complete }),
+      setCompleteStep2: (complete: boolean) => set({ completeStep2: complete }),
+      setCompleteStep3: (complete: boolean) => set({ completeStep3: complete }),
+      setTitleQuestion: (title: string) => set({ titleQuestion: title }),
+      setFullInspection: (data) => set({ fullInspection: data }),
+      setGroupName: (name) => set({ groupName: name }),
+      setGroupId: (id: number) => set({ groupId: id }),
+      setStepWizard: (step: number) => set({ stepWizard: step }),
+      resetFullInspection: () =>
+        set({
+          fullInspection: null,
+          groupName: "",
+          titleQuestion: "",
+          groupId: 0,
+          stepWizard: 1,
+          completeStep1: false,
+          completeStep2: false,
+          completeStep3: false,
+        }),
+    }),
+    {
+      name: "inspection-full-storage",
+    }
+  )
+);
