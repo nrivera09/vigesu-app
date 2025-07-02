@@ -17,26 +17,28 @@ const GenerateStep2 = () => {
   return (
     <>
       <Wizard />
-      {fullInspection?.questions
-        .filter(
-          (item) => item.groupName === groupName && item.groupId === groupId
-        )
-        .map((item, index) => (
-          <button
-            onClick={() => goStep(item.question)}
-            className="w-full card lg:card-side bg-black/80 shadow-sm overflow-hidden cursor-pointer transition-all hover:shadow-lg mb-5 hover:bg-[#191917] text-white hover:text-white/80"
-            key={index}
-          >
-            <div className="bg-[#191917] w-fit flex items-center justify-center p-2">
-              <BsQuestionCircle className="w-[20px] h-[20px]  text-white" />
-            </div>
-            <div className="card-body flex flex-row justify-between gap-5">
-              <div>
-                <h2 className="card-title">{item.question}</h2>
+      <div className="cont my-5 flex flex-col gap-4">
+        {fullInspection?.questions
+          .filter(
+            (item) => item.groupName === groupName && item.groupId === groupId
+          )
+          .map((item, index) => (
+            <button
+              onClick={() => goStep(item.question)}
+              className="w-full card lg:card-side bg-black/80 shadow-sm overflow-hidden cursor-pointer transition-all hover:shadow-lg  hover:bg-[#191917] text-white hover:text-white/80"
+              key={index}
+            >
+              <div className="bg-[#191917] w-fit flex items-center justify-center p-2">
+                <BsQuestionCircle className="w-[20px] h-[20px]  text-white" />
               </div>
-            </div>
-          </button>
-        ))}
+              <div className="card-body flex flex-row justify-between gap-5">
+                <div>
+                  <h2 className="card-title">{item.question}</h2>
+                </div>
+              </div>
+            </button>
+          ))}
+      </div>
     </>
   );
 };
