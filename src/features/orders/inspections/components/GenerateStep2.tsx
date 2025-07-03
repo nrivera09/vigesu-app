@@ -17,6 +17,10 @@ const GenerateStep2 = () => {
   return (
     <>
       <Wizard />
+      <div className="flex flex-col my-10 text-center justify-items-center">
+        <h1 className="font-bold text-2xl">{fullInspection?.name ?? ""}</h1>
+        <p>{fullInspection?.description ?? ""}</p>
+      </div>
       {fullInspection?.questions
         .filter(
           (item) => item.groupName === groupName && item.groupId === groupId

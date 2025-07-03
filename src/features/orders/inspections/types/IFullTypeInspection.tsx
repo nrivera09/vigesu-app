@@ -28,4 +28,10 @@ export interface IFullAnswer {
   isPrintable: boolean;
   usingItem: boolean;
   subAnswers: IFullAnswer[];
+  selectedItems?: {
+    id: string;
+    name: string;
+    unitPrice: number;
+    quantity: number;
+  }[];
 }
