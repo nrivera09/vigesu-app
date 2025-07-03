@@ -253,7 +253,7 @@ const GenerateStep1 = () => {
                 onClick={() =>
                   goStep(inspectionData.typeInspectionId, groupName, groupId)
                 }
-                className="w-full card lg:card-side bg-black/80 shadow-sm overflow-hidden cursor-pointer transition-all hover:shadow-lg mb-5 hover:bg-[#191917] text-white hover:text-white/80"
+                className="w-full card lg:card-side bg-black/80 shadow-sm overflow-hidden cursor-pointer transition-all hover:shadow-lg  hover:bg-[#191917] text-white hover:text-white/80"
                 key={groupName}
               >
                 <div className="bg-[#191917] w-fit flex items-center justify-center p-2">

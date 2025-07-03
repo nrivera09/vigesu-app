@@ -1,6 +1,5 @@
 import React from "react";
 import { useInspectionFullStore } from "../../store/inspection/inspectionFullStore";
-import { GiAutoRepair } from "react-icons/gi";
 import { BsQuestionCircle } from "react-icons/bs";
 import Wizard from "./Wizard";
 
@@ -21,6 +20,7 @@ const GenerateStep2 = () => {
         <h1 className="font-bold text-2xl">{fullInspection?.name ?? ""}</h1>
         <p>{fullInspection?.description ?? ""}</p>
       </div>
+
       {fullInspection?.questions
         .filter(
           (item) => item.groupName === groupName && item.groupId === groupId
