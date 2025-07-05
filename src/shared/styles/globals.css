@@ -131,3 +131,10 @@ button[popovertarget="rdp-popover"],
 select {
   /* background-color: #f8f8f8;*/
 }
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
