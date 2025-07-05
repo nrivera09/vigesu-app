@@ -44,9 +44,28 @@ const GenerateStep3 = () => {
   const isMultiple = fullQuestion?.typeQuestion === TypeQuestion.MultipleChoice;
   const isText = fullQuestion?.typeQuestion === TypeQuestion.TextInput;
 
+  const getAnswerFromTree = (
+    tree: IFullAnswer[],
+    answerId: string
+  ): IFullAnswer | undefined => {
+    for (const answer of tree) {
+      if (String(answer.typeInspectionDetailAnswerId) === answerId)
+        return answer;
+      if (answer.subAnswers?.length) {
+        const found = getAnswerFromTree(answer.subAnswers, answerId);
+        if (found) return found;
+      }
+    }
+    return undefined;
+  };
+
   const openItemModal = (answer: IFullAnswer) => {
+    const fromTree = getAnswerFromTree(
+      selectedTree,
+      String(answer.typeInspectionDetailAnswerId)
+    );
     setModalAnswer(answer);
-    setInitialItems(answer.selectedItems ?? []);
+    setInitialItems(fromTree?.selectedItems ?? []);
     setShowItemModal(true);
   };
 
@@ -57,7 +76,13 @@ const GenerateStep3 = () => {
   ): IFullAnswer[] => {
     if (!parentId) {
       if (!isMultiple) {
-        return [{ ...answer, subAnswers: [] }];
+        return [
+          {
+            ...answer,
+            subAnswers: answer.subAnswers ?? [],
+            selectedItems: answer.selectedItems ?? [],
+          },
+        ];
       }
       const exists = tree.find(
         (a) =>
@@ -69,7 +94,14 @@ const GenerateStep3 = () => {
               a.typeInspectionDetailAnswerId !==
               answer.typeInspectionDetailAnswerId
           )
-        : [...tree, { ...answer, subAnswers: [] }];
+        : [
+            ...tree,
+            {
+              ...answer,
+              subAnswers: answer.subAnswers ?? [],
+              selectedItems: answer.selectedItems ?? [],
+            },
+          ];
     }
 
     return tree.map((node) => {
@@ -85,7 +117,14 @@ const GenerateStep3 = () => {
                 sub.typeInspectionDetailAnswerId !==
                 answer.typeInspectionDetailAnswerId
             )
-          : [...(node.subAnswers ?? []), { ...answer, subAnswers: [] }];
+          : [
+              ...(node.subAnswers ?? []),
+              {
+                ...answer,
+                subAnswers: answer.subAnswers ?? [],
+                selectedItems: answer.selectedItems ?? [],
+              },
+            ];
         return { ...node, subAnswers: newSubs };
       }
       if (node.subAnswers?.length) {
@@ -138,6 +177,11 @@ const GenerateStep3 = () => {
       String(answer.typeInspectionDetailAnswerId),
       selectedTree
     );
+    const answerInTree = getAnswerFromTree(
+      selectedTree,
+      String(answer.typeInspectionDetailAnswerId)
+    );
+    const hasItems = answerInTree?.selectedItems?.length ?? 0 > 0;
 
     return (
       <div
@@ -190,7 +234,10 @@ const GenerateStep3 = () => {
                   e.stopPropagation();
                   openItemModal(answer);
                 }}
-                className="bg-[#35353382] h-full cursor-pointer flex items-center rounded-tr-full rounded-br-full justify-center px-3 min-w-[45px]"
+                className={clsx(
+                  "h-full cursor-pointer flex items-center rounded-tr-full rounded-br-full justify-center px-3 min-w-[45px]",
+                  hasItems ? "bg-green-300" : "bg-[#35353382]"
+                )}
               >
                 <GoChecklist className="size-7 text-black/50 transition-all hover:text-black" />
               </div>
