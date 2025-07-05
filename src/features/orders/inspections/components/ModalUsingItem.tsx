@@ -15,12 +15,18 @@ interface ItemOption {
 interface ModalUsingItemProps {
   onClose: () => void;
   onSave: (items: ItemOption[]) => void;
+  initialItems?: ItemOption[];
 }
 
-const ModalUsingItem = ({ onClose, onSave }: ModalUsingItemProps) => {
+const ModalUsingItem = ({
+  onClose,
+  onSave,
+  initialItems,
+}: ModalUsingItemProps) => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<ItemOption[]>([]);
   const [selectedItems, setSelectedItems] = useState<ItemOption[]>([]);
+
   const [selectedItem, setSelectedItem] = useState<ItemOption | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
 
@@ -37,6 +43,7 @@ const ModalUsingItem = ({ onClose, onSave }: ModalUsingItemProps) => {
       const filtered = data.filter((item: ItemOption) =>
         item.name.toLowerCase().includes(term.toLowerCase())
       );
+
       setResults(filtered);
     } catch (err) {
       console.error("Error fetching items:", err);
@@ -44,14 +51,6 @@ const ModalUsingItem = ({ onClose, onSave }: ModalUsingItemProps) => {
   };
 
   const debouncedFetch = useMemo(() => debounce(fetchItems, 300), []);
-
-  useEffect(() => {
-    if (query.length >= 3) {
-      debouncedFetch(query);
-    } else {
-      setResults([]);
-    }
-  }, [query, debouncedFetch]);
 
   const handleAddItem = () => {
     if (selectedItem && quantity > 0) {
@@ -66,6 +65,18 @@ const ModalUsingItem = ({ onClose, onSave }: ModalUsingItemProps) => {
   const handleDeleteItem = (id: string) => {
     setSelectedItems((prev) => prev.filter((i) => i.id !== id));
   };
+
+  useEffect(() => {
+    setSelectedItems(initialItems ?? []);
+  }, [initialItems]);
+
+  useEffect(() => {
+    if (query.length >= 3) {
+      debouncedFetch(query);
+    } else {
+      setResults([]);
+    }
+  }, [query, debouncedFetch]);
 
   return (
     <dialog open className="modal">

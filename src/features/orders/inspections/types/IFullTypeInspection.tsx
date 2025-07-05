@@ -34,4 +34,5 @@ export interface IFullAnswer {
     unitPrice: number;
     quantity: number;
   }[];
+  parentRootId?: string; // ✅ Agrega esta línea
 }

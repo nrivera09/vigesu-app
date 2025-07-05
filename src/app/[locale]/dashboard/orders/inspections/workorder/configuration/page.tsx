@@ -22,7 +22,7 @@ const Page = () => {
         <BackButton title={groupName || "New Inspection configuration"} />
         <ActionButton
           icon={<IoCloseOutline className="w-[20px] h-[20px] opacity-70" />}
-          className="bg-red-600 text-white"
+          className="bg-red-400 transition-all hover:bg-red-600 text-white  !rounded-full"
           label="Close configuration"
           onClick={() => {
             resetFullInspection();

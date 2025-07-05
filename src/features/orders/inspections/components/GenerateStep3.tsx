@@ -1,10 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useInspectionFullStore } from "../../store/inspection/inspectionFullStore";
 import { isColorLight } from "@/shared/utils/utils";
 import { IFullAnswer } from "../types/IFullTypeInspection";
 import Wizard from "./Wizard";
-import { IoCheckmarkSharp } from "react-icons/io5";
 import ModalUsingItem from "./ModalUsingItem";
+import Loading from "@/shared/components/shared/Loading";
+import { GoChecklist } from "react-icons/go";
+import clsx from "clsx";
+import { TypeQuestion, TypeQuestionLabel } from "../../models/workOrder.types";
+import { IoIosInformationCircleOutline } from "react-icons/io";
 
 interface ItemWithQuantity {
   id: string;
@@ -14,14 +18,14 @@ interface ItemWithQuantity {
 }
 
 const GenerateStep3 = () => {
-  const { fullInspection, groupName, groupId, titleQuestion } =
+  const { fullInspection, groupName, groupId, titleQuestion, fullQuestion } =
     useInspectionFullStore();
 
-  const [selectedPath, setSelectedPath] = useState<IFullAnswer[]>([]);
+  const [selectedPath, setSelectedPath] = useState<IFullAnswer[][]>([]);
   const [showItemModal, setShowItemModal] = useState(false);
   const [modalAnswer, setModalAnswer] = useState<IFullAnswer | null>(null);
+  const [initialItems, setInitialItems] = useState<ItemWithQuantity[]>([]);
 
-  // Obtener answers del grupo
   const currentAnswers =
     fullInspection?.questions
       .filter(
@@ -29,143 +33,271 @@ const GenerateStep3 = () => {
       )
       .flatMap((question) => question.answers) ?? [];
 
-  // Función para seleccionar una respuesta en un nivel dado
-  const handleAnswerClick = (answer: IFullAnswer, level: number) => {
-    const newPath = [...selectedPath.slice(0, level), answer];
-    console.log(`CLICK LEVEL ${level}:`, answer);
+  const openItemModal = (answer: IFullAnswer) => {
+    setModalAnswer({ ...answer });
+    setInitialItems(answer.selectedItems ?? []);
+    setShowItemModal(true);
+  };
 
-    setSelectedPath(newPath);
+  const toggleAnswerSelection = (
+    answer: IFullAnswer,
+    level: number,
+    rootId: string
+  ) => {
+    const existingGroupIndex = selectedPath.findIndex(
+      (group) => group[0]?.parentRootId === rootId
+    );
 
-    if (answer.usingItem) {
-      setModalAnswer(answer);
-      setShowItemModal(true);
+    const isSingle = fullQuestion?.typeQuestion === TypeQuestion.SingleChoice;
+    const isMultiple =
+      fullQuestion?.typeQuestion === TypeQuestion.MultipleChoice;
+
+    let updatedPath = [...selectedPath];
+
+    if (existingGroupIndex !== -1) {
+      const selectedAtLevel = updatedPath[existingGroupIndex][level];
+      const isSame =
+        selectedAtLevel?.typeInspectionDetailAnswerId ===
+        answer.typeInspectionDetailAnswerId;
+
+      if (isSame) {
+        updatedPath[existingGroupIndex] = updatedPath[existingGroupIndex].slice(
+          0,
+          level
+        );
+      } else {
+        updatedPath[existingGroupIndex] = [
+          ...updatedPath[existingGroupIndex].slice(0, level),
+          { ...answer, parentRootId: rootId },
+        ];
+      }
+    } else {
+      updatedPath.push([{ ...answer, parentRootId: rootId }]);
     }
 
-    // Muestra la estructura actual completa
-    console.log(
-      "📦 PATH SELECCIONADO:",
-      newPath.map((a) => ({
-        id: a.typeInspectionDetailAnswerId,
-        response: a.response,
-        usingItem: a.usingItem,
-        color: a.color,
+    if (isSingle) {
+      updatedPath = updatedPath.filter(
+        (group) => group[0]?.parentRootId === rootId
+      );
+    }
+
+    setSelectedPath(updatedPath);
+  };
+
+  const renderAnswerBlock = (
+    answers: IFullAnswer[],
+    level: number,
+    rootId: string
+  ): React.ReactElement => {
+    const groupPath =
+      selectedPath.find((group) => group[0]?.parentRootId === rootId) ?? [];
+
+    const selectedAnswer = groupPath[level];
+
+    return (
+      <>
+        <legend
+          key={`level-${level}-${rootId}`}
+          className="border h-auto border-black/8 rounded-lg p-4 mt-4 flex flex-row flex-nowrap overflow-x-auto gap-2"
+        >
+          {answers.map((answer, index) => {
+            const backgroundColor =
+              answer.color === "#ffffff" ? "#171717" : answer.color;
+            const isLight = isColorLight(backgroundColor);
+            const textColor = isLight ? "#000000" : "#ffffff";
+            const isSelected =
+              selectedAnswer?.typeInspectionDetailAnswerId ===
+              answer.typeInspectionDetailAnswerId;
+
+            return (
+              <div key={index} className="flex flex-col items-start">
+                <div className="flex flex-row items-center justify-center">
+                  <div
+                    className="flex flex-row items-center gap-0 cursor-pointer group"
+                    onClick={() =>
+                      toggleAnswerSelection(answer, level, String(rootId))
+                    }
+                  >
+                    <div
+                      data-color={answer.color}
+                      style={{ backgroundColor, color: textColor }}
+                      className={clsx(
+                        !answer.usingItem
+                          ? "overflow-hidden rounded-tl-full rounded-full px-5 flex flex-row transition-all group-hover:shadow-lg"
+                          : "overflow-hidden rounded-tl-full rounded-bl-full px-5 flex flex-row transition-all group-hover:shadow-lg"
+                      )}
+                    >
+                      <div className="h-[45px] flex items-center justify-center pr-4">
+                        <input
+                          type="radio"
+                          name={`radio-level-${level}-${rootId}`}
+                          checked={isSelected}
+                          readOnly
+                          className="radio bg-white checked:bg-white checked:text-green-600 checked:border-green-500"
+                        />
+                      </div>
+                      <div className="flex flex-row items-center justify-center min-w-auto h-[45px] overflow-hidden">
+                        <p className="truncate">{answer.response}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {answer.usingItem && (
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openItemModal(answer);
+                      }}
+                      className="bg-[#35353382] h-full cursor-pointer flex items-center rounded-tr-full rounded-br-full justify-center px-3 min-w-[45px]"
+                    >
+                      <GoChecklist className="size-7 text-black/50 transition-all hover:text-black" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </legend>
+
+        {selectedAnswer?.subAnswers?.length > 0 &&
+          renderAnswerBlock(
+            selectedAnswer.subAnswers,
+            level + 1,
+            String(rootId)
+          )}
+      </>
+    );
+  };
+
+  useEffect(() => {
+    const result = selectedPath.map((group) =>
+      group.map((answer, index) => ({
+        level: index + 1,
+        root: answer.parentRootId,
+        response: answer.response,
+        usingItem: answer.usingItem,
+        selectedItems: answer.selectedItems ?? [],
       }))
     );
-  };
+    console.log("📡 Estado actualizado:", result);
+  }, [selectedPath]);
 
-  // Renderizar fila de respuestas (por nivel)
-  const renderAnswerRow = (
-    answers: IFullAnswer[],
-    level: number
-  ): React.ReactElement => {
+  if (fullQuestion?.typeQuestion === TypeQuestion.TextInput)
     return (
-      <legend
-        key={level}
-        className="border h-auto border-black/8 rounded-lg p-4 mt-4 flex flex-row flex-nowrap gap-5 overflow-x-auto"
-      >
-        {answers.map((answer, index) => {
-          const backgroundColor =
-            answer.color === "#ffffff" ? "#171717" : answer.color;
-          const isLight = isColorLight(backgroundColor);
-          const textColor = isLight ? "#000000" : "#ffffff";
-
-          return (
-            <button
-              data-color={answer.color}
-              key={index}
-              onClick={() => handleAnswerClick(answer, level)}
-              style={{ backgroundColor, color: textColor }}
-              className={`min-w-[250px] min-h-[50px] card shadow-sm overflow-hidden cursor-pointer transition-all hover:shadow-lg flex gap-2 flex-row items-center justify-center p-2 hover:opacity-80 `}
+      <>
+        <Wizard />
+        <div className="card bg-base-200 p-6 shadow-xs">
+          <div className="flex flex-row justify-between items-center">
+            <h1 className="text-center text-2xl font-bold">
+              Question: {titleQuestion}
+            </h1>
+            <label
+              htmlFor=""
+              className="rounded-full bg-red-400 hidden md:flex items-center justify-center text-white overflow-hidden px-3 gap-1 py-1"
             >
-              <p className="flex-1">{answer.response}</p>
-              {selectedPath[level]?.typeInspectionDetailAnswerId ===
-                answer.typeInspectionDetailAnswerId && (
-                <span className="bg-red-500 rounded-full p-1 w-[20px] h-[20px] flex items-center justify-center">
-                  <IoCheckmarkSharp className="size-4 font-bold text-white" />
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </legend>
+              <IoIosInformationCircleOutline className="size-6" />
+              {fullQuestion?.typeQuestion
+                ? TypeQuestionLabel[fullQuestion.typeQuestion as TypeQuestion]
+                : ""}
+            </label>
+          </div>
+          <legend className="border h-auto border-black/8 rounded-lg p-4 mt-4 flex flex-row flex-nowrap overflow-x-auto gap-2">
+            <div className="relative grid grid-cols-1 md:grid-cols-3 xl:grid-cols-3 gap-4 w-full">
+              <div className="flex-1 w-full col-span-1 md:col-span-2">
+                <label
+                  htmlFor=""
+                  className="fieldset-legend text-lg font-normal"
+                >
+                  Set your answer
+                </label>
+                <input type="text" className="input input-lg text-lg w-full" />
+              </div>
+              <div className="min-w-full md:min-w-[150px]">
+                <label
+                  htmlFor=""
+                  className=" hidden md:block fieldset-legend text-lg font-normal min-h-[33px]"
+                >
+                  {""}
+                </label>
+                <button className="btn bg-black rounded-full min-h-[39px] w-full  sm:flex border-none flex-1">
+                  <span className=" py-1 px-4 text-white font-normal rounded-full  md:block text-[13px] ">
+                    Save
+                  </span>
+                </button>
+              </div>
+            </div>
+          </legend>
+        </div>
+      </>
     );
-  };
 
   return (
     <>
       <Wizard />
       <div className="card bg-base-200 p-6 shadow-xs">
-        <h1 className="text-center text-2xl font-bold">
-          Question: {titleQuestion}
-        </h1>
-        <div className="flex flex-row gap-5">
-          <div className="w-full">
-            {/* Nivel 0: respuestas iniciales */}
-            {renderAnswerRow(currentAnswers, 0)}
+        <div className="flex flex-row justify-between items-center">
+          <h1 className="text-center text-2xl font-bold">
+            Question: {titleQuestion}
+          </h1>
+          <label
+            htmlFor=""
+            className="rounded-full bg-red-400 hidden md:flex items-center justify-center text-white overflow-hidden px-3 gap-1 py-1"
+          >
+            <IoIosInformationCircleOutline className="size-6" />
+            {fullQuestion?.typeQuestion
+              ? TypeQuestionLabel[fullQuestion.typeQuestion as TypeQuestion]
+              : ""}
+          </label>
+        </div>
 
-            {/* Niveles recursivos: subAnswers */}
-            {selectedPath.map((answer, level) =>
-              answer.subAnswers?.length > 0
-                ? renderAnswerRow(answer.subAnswers, level + 1)
-                : null
-            )}
-          </div>
-          <div className="w-full !hidden">
-            {/* Log visual del camino seleccionado */}
-            <legend className=" h-auto rounded-lg p-0 mt-4 flex flex-row flex-nowrap gap-5 overflow-x-auto">
-              <div className=" bg-white border rounded-lg p-4 shadow-sm w-full">
-                <h2 className="text-lg font-semibold mb-2">
-                  Respuestas seleccionadas:
-                </h2>
-                <ul className="space-y-2 pl-4">
-                  {selectedPath.map((answer, index) => (
-                    <li key={index} className="flex items-center gap-2">
-                      <span className="text-sm font-bold">
-                        Nivel {index + 1}:
-                      </span>
-                      <span className="text-gray-800">{answer.response}</span>
-                      {answer.subAnswers?.length > 0 && (
-                        <span className="text-blue-600 text-xs font-medium">
-                          📂 subniveles
-                        </span>
-                      )}
-                    </li>
-                  ))}
+        {currentAnswers.map((answer, index) =>
+          renderAnswerBlock(
+            [answer],
+            0,
+            String(answer.typeInspectionDetailAnswerId)
+          )
+        )}
 
-                  {selectedPath.length === 0 && (
-                    <li className="text-sm text-gray-500 italic">
-                      No hay respuestas seleccionadas.
-                    </li>
-                  )}
-                </ul>
-
-                {selectedPath.length > 0 && (
-                  <div className="mt-3">
-                    <button
-                      onClick={() => setSelectedPath([])}
-                      className="btn btn-sm btn-outline btn-error"
-                    >
-                      Limpiar selección
-                    </button>
-                  </div>
-                )}
-              </div>
-            </legend>
-          </div>
+        <div className="text-center mt-6">
+          <button
+            className="btn btn-success btn-lg"
+            onClick={() => {
+              const result = selectedPath.map((group) =>
+                group.map((answer, index) => ({
+                  level: index + 1,
+                  root: answer.parentRootId,
+                  response: answer.response,
+                  usingItem: answer.usingItem,
+                  selectedItems: answer.selectedItems ?? [],
+                }))
+              );
+              console.log("🚀 JSON FINAL:", result);
+            }}
+          >
+            Guardar todo
+          </button>
         </div>
       </div>
+
       {showItemModal && modalAnswer && (
         <ModalUsingItem
           onClose={() => setShowItemModal(false)}
           onSave={(items: ItemWithQuantity[]) => {
-            modalAnswer.selectedItems = items;
-            setShowItemModal(false);
+            if (!modalAnswer) return;
 
-            console.log("✅ Items guardados en answer:", {
-              answer: modalAnswer.response,
-              items,
-            });
+            const updated = selectedPath.map((group) =>
+              group.map((a) =>
+                a.typeInspectionDetailAnswerId ===
+                modalAnswer.typeInspectionDetailAnswerId
+                  ? { ...a, selectedItems: items }
+                  : a
+              )
+            );
+
+            setSelectedPath(updated);
+            setShowItemModal(false);
           }}
+          initialItems={initialItems}
         />
       )}
     </>

@@ -2,15 +2,20 @@ import React from "react";
 import { useInspectionFullStore } from "../../store/inspection/inspectionFullStore";
 import { BsQuestionCircle } from "react-icons/bs";
 import Wizard from "./Wizard";
+import {
+  IFullQuestion,
+  IFullTypeInspection,
+} from "../types/IFullTypeInspection";
 
 const GenerateStep2 = () => {
   const { fullInspection, groupName, groupId } = useInspectionFullStore();
   console.log("Full Inspection:", fullInspection);
 
-  const goStep = (question: string) => {
+  const goStep = (question: IFullQuestion) => {
     useInspectionFullStore.getState().setStepWizard(2);
     useInspectionFullStore.getState().setCompleteStep1(true);
-    useInspectionFullStore.getState().setTitleQuestion(question);
+    useInspectionFullStore.getState().setTitleQuestion(question.question);
+    useInspectionFullStore.getState().setFullQuestion(question);
   };
 
   return (
@@ -27,7 +32,7 @@ const GenerateStep2 = () => {
         )
         .map((item, index) => (
           <button
-            onClick={() => goStep(item.question)}
+            onClick={() => goStep(item)}
             className="w-full card lg:card-side bg-black/80 shadow-sm overflow-hidden cursor-pointer transition-all hover:shadow-lg mb-5 hover:bg-[#191917] text-white hover:text-white/80"
             key={index}
           >

@@ -27,3 +27,15 @@ export const WorkOrderStatusLabel: Record<WorkOrderStatus, string> = {
   [WorkOrderStatus.Disabled]: "Disabled",
   [WorkOrderStatus.SyncQuickbook]: "Sync Quickbook",
 };
+
+export enum TypeQuestion {
+  SingleChoice = 0, // Selección única como estamos trabajando
+  MultipleChoice = 1, // Selección múltiple pero de la misma respuesta raiz, pero solo de la misma raiz, osea raiz uno y puede seleccionar sub 1 y sub2 y asi sucesivamente, PERO de la misma respuesta raiz
+  TextInput = 2, // Texto libre, aqui no selecciona NADA solo ingresa su respuesta libremente
+}
+
+export const TypeQuestionLabel: Record<TypeQuestion, string> = {
+  [TypeQuestion.SingleChoice]: "Single Choice",
+  [TypeQuestion.MultipleChoice]: "Multiple Choice",
+  [TypeQuestion.TextInput]: "Text Input",
+};
