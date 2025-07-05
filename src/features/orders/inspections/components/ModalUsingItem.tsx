@@ -4,12 +4,14 @@ import { AiOutlineSave } from "react-icons/ai";
 import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
 import { IoMdClose } from "react-icons/io";
 import debounce from "lodash/debounce";
+import { v4 as uuidv4 } from "uuid";
 
 interface ItemOption {
   id: string;
   name: string;
   unitPrice: number;
   quantity: number;
+  _uid?: string; // ✅ identificador único por ítem agregado
 }
 
 interface ModalUsingItemProps {
@@ -32,7 +34,6 @@ const ModalUsingItem = ({
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // 🔍 función para buscar coincidencias
   const fetchItems = async (term: string) => {
     if (term.length < 3) return;
     try {
@@ -54,7 +55,10 @@ const ModalUsingItem = ({
 
   const handleAddItem = () => {
     if (selectedItem && quantity > 0) {
-      setSelectedItems((prev) => [...prev, { ...selectedItem, quantity }]);
+      setSelectedItems((prev) => [
+        ...prev,
+        { ...selectedItem, quantity, _uid: uuidv4() },
+      ]);
       setSelectedItem(null);
       setQuery("");
       setQuantity(1);
@@ -62,12 +66,17 @@ const ModalUsingItem = ({
     }
   };
 
-  const handleDeleteItem = (id: string) => {
-    setSelectedItems((prev) => prev.filter((i) => i.id !== id));
+  const handleDeleteItem = (uid: string) => {
+    setSelectedItems((prev) => prev.filter((i) => i._uid !== uid));
   };
 
   useEffect(() => {
-    setSelectedItems(initialItems ?? []);
+    // Asegura que cada ítem tenga un _uid único
+    const itemsWithUid = (initialItems ?? []).map((item) => ({
+      ...item,
+      _uid: item._uid ?? uuidv4(),
+    }));
+    setSelectedItems(itemsWithUid);
   }, [initialItems]);
 
   useEffect(() => {
@@ -150,7 +159,7 @@ const ModalUsingItem = ({
             </thead>
             <tbody>
               {selectedItems.map((item) => (
-                <tr key={item.id} className="odd:bg-base-200">
+                <tr key={item._uid} className="odd:bg-base-200">
                   <td className="text-center">{item.name}</td>
                   <td className="text-center">{item.quantity}</td>
                   <td className="text-right">
@@ -159,7 +168,7 @@ const ModalUsingItem = ({
                         <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
                       }
                       label="Delete"
-                      onClick={() => handleDeleteItem(item.id)}
+                      onClick={() => handleDeleteItem(item._uid!)}
                     />
                   </td>
                 </tr>
