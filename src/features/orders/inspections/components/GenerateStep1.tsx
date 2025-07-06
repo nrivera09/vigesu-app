@@ -253,7 +253,7 @@ const GenerateStep1 = () => {
                 onClick={() =>
                   goStep(inspectionData.typeInspectionId, groupName, groupId)
                 }
-                className="w-full card lg:card-side bg-black/80 shadow-sm overflow-hidden cursor-pointer transition-all hover:shadow-lg  hover:bg-[#191917] text-white hover:text-white/80"
+                className="w-full card lg:card-side bg-black/80 shadow-sm overflow-hidden cursor-pointer transition-all hover:shadow-lg  hover:bg-[#191917] text-white hover:text-white/80 flex flex-row"
                 key={groupName}
               >
                 <div className="bg-[#191917] w-fit flex items-center justify-center p-2">
@@ -262,7 +262,9 @@ const GenerateStep1 = () => {
                 <div className="card-body flex flex-row justify-between gap-5">
                   <div className="flex flex-col items-start">
                     <h2 className="card-title">{groupName} </h2>
-                    <p className="text-lg">{inspectionData.description}</p>
+                    <p className="text-lg text-left">
+                      {inspectionData.description}
+                    </p>
                   </div>
                   <div className="card-actions justify-end flex items-center ">
                     {questions.filter((item) => item.status === 0).length >

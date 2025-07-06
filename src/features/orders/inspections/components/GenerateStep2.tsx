@@ -33,7 +33,7 @@ const GenerateStep2 = () => {
         .map((item, index) => (
           <button
             onClick={() => goStep(item)}
-            className="w-full card lg:card-side bg-black/80 shadow-sm overflow-hidden cursor-pointer transition-all hover:shadow-lg mb-5 hover:bg-[#191917] text-white hover:text-white/80"
+            className="w-full flex flex-row card lg:card-side bg-black/80 shadow-sm overflow-hidden cursor-pointer transition-all hover:shadow-lg mb-5 hover:bg-[#191917] text-white hover:text-white/80"
             key={index}
           >
             <div className="bg-[#191917] w-fit flex items-center justify-center p-2">
