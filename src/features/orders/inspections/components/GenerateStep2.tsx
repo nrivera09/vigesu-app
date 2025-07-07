@@ -12,8 +12,8 @@ const GenerateStep2 = () => {
   console.log("Full Inspection:", fullInspection);
 
   const goStep = (question: IFullQuestion) => {
-    useInspectionFullStore.getState().setStepWizard(2);
-    useInspectionFullStore.getState().setCompleteStep1(true);
+    useInspectionFullStore.getState().setStepWizard(3);
+    useInspectionFullStore.getState().setCompleteStep2(true);
     useInspectionFullStore.getState().setTitleQuestion(question.question);
     useInspectionFullStore.getState().setFullQuestion(question);
   };

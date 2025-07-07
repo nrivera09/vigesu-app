@@ -1,6 +1,8 @@
 "use client";
 import CreateOrder from "@/features/inspections/inspection-configuration/create-inspection/CreateOrder";
 import EditOrder from "@/features/inspections/inspection-configuration/edit-inspection/EditOrder";
+import GenerateStep1 from "@/features/orders/inspections/components/GenerateStep1";
+import GenerateStep0 from "@/features/orders/inspections/components/GenerateStep1";
 import GenerateStep2 from "@/features/orders/inspections/components/GenerateStep2";
 import GenerateStep3 from "@/features/orders/inspections/components/GenerateStep3";
 import { useInspectionFullStore } from "@/features/orders/store/inspection/inspectionFullStore";
@@ -26,14 +28,15 @@ const Page = () => {
           label="Close configuration"
           onClick={() => {
             resetFullInspection();
-            router.push("../");
+            router.push("../workorder");
           }}
         />
       </div>
       <div className="body-app overflow-y-auto pt-[20px]">
         <div className="container max-w-full mb-5">
-          {stepWizard === 1 && <GenerateStep2 />}
-          {stepWizard === 2 && <GenerateStep3 />}
+          {stepWizard === 1 && <GenerateStep1 />}
+          {stepWizard === 2 && <GenerateStep2 />}
+          {stepWizard === 3 && <GenerateStep3 />}
         </div>
       </div>
     </>

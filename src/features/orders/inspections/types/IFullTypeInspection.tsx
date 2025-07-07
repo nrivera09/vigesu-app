@@ -6,6 +6,7 @@ export interface IFullTypeInspection {
   templateName: string;
   templateFilePath: string;
   questions: IFullQuestion[];
+  statusInspectionConfig?: false;
 }
 
 export interface IFullQuestion {

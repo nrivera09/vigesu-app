@@ -1,17 +1,19 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+"use client";
+import React, { useEffect, useRef, useState } from "react";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
 import { AiOutlineSave } from "react-icons/ai";
 import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
 import { IoMdClose } from "react-icons/io";
-import debounce from "lodash/debounce";
 import { v4 as uuidv4 } from "uuid";
+import { axiosInstance } from "@/shared/utils/axiosInstance";
+import debounce from "lodash/debounce";
 
 interface ItemOption {
   id: string;
   name: string;
   unitPrice: number;
   quantity: number;
-  _uid?: string; // ✅ identificador único por ítem agregado
+  _uid?: string;
 }
 
 interface ModalUsingItemProps {
@@ -28,30 +30,30 @@ const ModalUsingItem = ({
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<ItemOption[]>([]);
   const [selectedItems, setSelectedItems] = useState<ItemOption[]>([]);
-
   const [selectedItem, setSelectedItem] = useState<ItemOption | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
-
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const fetchItems = async (term: string) => {
-    if (term.length < 3) return;
-    try {
-      const res = await fetch(
-        "https://ronnyruiz-001-site1.qtempurl.com/api/QuickBooks/Items/GetItemName"
-      );
-      const data = await res.json();
-      const filtered = data.filter((item: ItemOption) =>
-        item.name.toLowerCase().includes(term.toLowerCase())
-      );
+  // ✅ Debounced search function usando useRef como en tu ejemplo
+  const debouncedFetch = useRef(
+    debounce(async (term: string) => {
+      if (term.length < 3) return;
 
-      setResults(filtered);
-    } catch (err) {
-      console.error("Error fetching items:", err);
-    }
-  };
+      try {
+        const res = await axiosInstance.get<ItemOption[]>(
+          "/QuickBooks/Items/GetItemName"
+        );
 
-  const debouncedFetch = useMemo(() => debounce(fetchItems, 300), []);
+        const filtered = res.data.filter((item) =>
+          item.name.toLowerCase().includes(term.toLowerCase())
+        );
+
+        setResults(filtered);
+      } catch (err) {
+        console.error("Error fetching items:", err);
+      }
+    }, 500)
+  ).current;
 
   const handleAddItem = () => {
     if (selectedItem && quantity > 0) {
@@ -71,7 +73,6 @@ const ModalUsingItem = ({
   };
 
   useEffect(() => {
-    // Asegura que cada ítem tenga un _uid único
     const itemsWithUid = (initialItems ?? []).map((item) => ({
       ...item,
       _uid: item._uid ?? uuidv4(),
@@ -92,40 +93,46 @@ const ModalUsingItem = ({
       <div className="modal-box w-11/12 max-w-2xl">
         {/* Input y cantidad */}
         <div className="mb-3 flex flex-row gap-4 items-center justify-center">
-          <div className="relative flex-1">
-            <label>Item:</label>
-            <input
-              type="search"
-              ref={inputRef}
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setSelectedItem(null);
-              }}
-              className="input input-lg text-lg w-full"
-            />
-            {results.length > 0 && (
-              <ul className="absolute z-50 mt-1 w-full bg-white border shadow rounded max-h-40 overflow-y-auto">
-                {results.map((item) => (
-                  <li
-                    key={item.id}
-                    className="px-4 py-2 text-sm hover:bg-base-200 cursor-pointer"
-                    onClick={() => {
-                      setSelectedItem(item);
-                      setQuery(item.name);
-                      setResults([]);
-                      setQuantity(1);
-                    }}
-                  >
-                    {item.name} — ${item.unitPrice}
-                  </li>
-                ))}
-              </ul>
-            )}
+          <div className="flex flex-col flex-1">
+            <legend className="fieldset-legend text-lg font-normal">
+              Item:
+            </legend>
+            <div className="relative">
+              <input
+                type="search"
+                ref={inputRef}
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setSelectedItem(null);
+                }}
+                className="input input-lg text-lg w-full"
+              />
+              {results.length > 0 && (
+                <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto absolute  mt-1">
+                  {results.map((item) => (
+                    <li
+                      key={item.id}
+                      className="cursor-pointer text-sm block w-full text-left px-4 py-2 hover:bg-gray-100"
+                      onClick={() => {
+                        setSelectedItem(item);
+                        setQuery(item.name);
+                        setResults([]);
+                        setQuantity(1);
+                      }}
+                    >
+                      {item.name}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
 
           <div className="max-w-[100px]">
-            <label>Cantidad:</label>
+            <legend className="fieldset-legend text-lg font-normal">
+              Cantidad:
+            </legend>
             <input
               type="number"
               className="input input-lg text-lg w-full"

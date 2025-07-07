@@ -1,6 +1,6 @@
 "use client";
 import CreateOrder from "@/features/inspections/inspection-configuration/create-inspection/CreateOrder";
-import GenerateStep1 from "@/features/orders/inspections/components/GenerateStep1";
+import GenerateStep1 from "@/features/orders/inspections/components/GenerateStep0";
 import { IInspectionItemFull } from "@/features/orders/inspections/types/IInspectionDetailFull";
 
 import BackButton from "@/shared/components/shared/BackButton";

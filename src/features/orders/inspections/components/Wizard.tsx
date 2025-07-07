@@ -8,41 +8,59 @@ const Wizard = () => {
     completeStep2,
     completeStep3,
     setStepWizard,
-    setCompleteStep1,
-    setCompleteStep2,
-    setCompleteStep3,
   } = useInspectionFullStore();
+
+  const goToStep = (step: number) => {
+    const store = useInspectionFullStore.getState();
+    switch (step) {
+      case 1:
+        if (completeStep1) store.setStepWizard(1);
+        break;
+      case 2:
+        if (completeStep1) store.setStepWizard(2);
+        break;
+      case 3:
+        if (completeStep2) store.setStepWizard(3);
+        break;
+      case 4:
+        if (completeStep3) store.setStepWizard(4);
+        break;
+    }
+  };
+
   return (
     <ul className="steps w-full mb-10 transition-all">
       <li
-        onClick={() => [
-          completeStep1 && setStepWizard(1),
-          setCompleteStep1(false),
-        ]}
-        className={`step ${stepWizard > 0 && `step-neutral`} transition-all ${
-          completeStep1 ? "cursor-pointer" : "cursor-not-allowed"
-        }`}
+        onClick={() => goToStep(1)}
+        className={`step transition-all ${
+          stepWizard >= 1 ? "step-neutral" : ""
+        } ${completeStep1 ? "cursor-pointer" : "cursor-not-allowed"}`}
+      >
+        Select a group
+      </li>
+      <li
+        onClick={() => goToStep(2)}
+        className={`step transition-all ${
+          stepWizard >= 2 ? "step-neutral" : ""
+        } ${completeStep1 ? "cursor-pointer" : "cursor-not-allowed"}`}
       >
         Select a question
       </li>
       <li
-        onClick={() => [
-          completeStep1 && setStepWizard(2),
-          setCompleteStep2(false),
-        ]}
-        className={`step ${stepWizard > 1 && `step-neutral`}  transition-all  ${
-          completeStep2 ? "cursor-pointer" : "cursor-not-allowed"
-        }`}
+        onClick={() => goToStep(3)}
+        className={`step transition-all ${
+          stepWizard >= 3 ? "step-neutral" : ""
+        } ${completeStep2 ? "cursor-pointer" : "cursor-not-allowed"}`}
       >
-        Set an answer
+        Select an answer
       </li>
       <li
-        onClick={() => completeStep2 && setStepWizard(3)}
-        className={`step ${stepWizard > 2 && `step-neutral`} transition-all  ${
-          completeStep2 ? "cursor-pointer" : "cursor-not-allowed"
-        }`}
+        onClick={() => goToStep(4)}
+        className={`step transition-all ${
+          stepWizard >= 4 ? "step-neutral" : ""
+        } ${completeStep3 ? "cursor-pointer" : "cursor-not-allowed"}`}
       >
-        Config. final step
+        Set images
       </li>
     </ul>
   );

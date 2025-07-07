@@ -17,9 +17,14 @@ interface InspectionFullState {
   completeStep1: boolean;
   completeStep2: boolean;
   completeStep3: boolean;
+  completeStep4: boolean;
+  groupedQuestions: Record<string, IFullTypeInspection[]>;
+  setGroupedQuestions: (data: Record<string, IFullTypeInspection[]>) => void;
+
   setCompleteStep1: (complete: boolean) => void;
   setCompleteStep2: (complete: boolean) => void;
   setCompleteStep3: (complete: boolean) => void;
+  setCompleteStep4: (complete: boolean) => void;
   setTitleQuestion: (title: string) => void;
   setFullInspection: (data: IFullTypeInspection) => void;
   setFullQuestion: (question: IFullQuestion) => void;
@@ -41,13 +46,26 @@ export const useInspectionFullStore = create<InspectionFullState>()(
       completeStep1: false,
       completeStep2: false,
       completeStep3: false,
+      completeStep4: false,
+      groupedQuestions: {}, // ✅ inicialización
+      setGroupedQuestions: (data) => set({ groupedQuestions: data }), // ✅ setter
       setCompleteStep1: (complete: boolean) => set({ completeStep1: complete }),
       setCompleteStep2: (complete: boolean) => set({ completeStep2: complete }),
       setCompleteStep3: (complete: boolean) => set({ completeStep3: complete }),
+      setCompleteStep4: (complete: boolean) => set({ completeStep4: complete }),
       setTitleQuestion: (title: string) => set({ titleQuestion: title }),
-      setFullInspection: (data) => set({ fullInspection: data }),
+      setFullInspection: (data) =>
+        set({
+          fullInspection: {
+            ...data,
+            statusInspectionConfig:
+              typeof data.statusInspectionConfig === "boolean"
+                ? data.statusInspectionConfig
+                : false,
+          },
+        }),
       setFullQuestion: (question) => set({ fullQuestion: question }),
-      setGroupName: (name) => set({ groupName: name }),
+      setGroupName: (name: string) => set({ groupName: name }),
       setGroupId: (id: number) => set({ groupId: id }),
       setStepWizard: (step: number) => set({ stepWizard: step }),
       resetFullInspection: () =>
@@ -61,6 +79,8 @@ export const useInspectionFullStore = create<InspectionFullState>()(
           completeStep1: false,
           completeStep2: false,
           completeStep3: false,
+          completeStep4: false,
+          groupedQuestions: {}, // ✅ también se limpia al resetear
         }),
     }),
     {

@@ -31,7 +31,6 @@ interface ExportedAnswer {
 const GenerateStep3 = () => {
   const { fullInspection, groupName, groupId, titleQuestion, fullQuestion } =
     useInspectionFullStore();
-
   const [selectedTree, setSelectedTree] = useState<IFullAnswer[]>([]);
   const [showItemModal, setShowItemModal] = useState(false);
   const [modalAnswer, setModalAnswer] = useState<IFullAnswer | null>(null);
@@ -41,7 +40,11 @@ const GenerateStep3 = () => {
   const currentAnswers =
     fullInspection?.questions
       .filter(
-        (item) => item.groupName === groupName && item.groupId === groupId
+        (item) =>
+          item.groupName === groupName &&
+          item.groupId === groupId &&
+          item.templateInspectionQuestionId ===
+            fullQuestion?.templateInspectionQuestionId
       )
       .flatMap((question) => question.answers) ?? [];
 
