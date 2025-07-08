@@ -5,6 +5,7 @@ import GenerateStep1 from "@/features/orders/inspections/components/GenerateStep
 import GenerateStep0 from "@/features/orders/inspections/components/GenerateStep1";
 import GenerateStep2 from "@/features/orders/inspections/components/GenerateStep2";
 import GenerateStep3 from "@/features/orders/inspections/components/GenerateStep3";
+import GenerateStep4 from "@/features/orders/inspections/components/GenerateStep4";
 import { useInspectionFullStore } from "@/features/orders/store/inspection/inspectionFullStore";
 import AlertInfo from "@/shared/components/shared/AlertInfo";
 import BackButton from "@/shared/components/shared/BackButton";
@@ -37,6 +38,7 @@ const Page = () => {
           {stepWizard === 1 && <GenerateStep1 />}
           {stepWizard === 2 && <GenerateStep2 />}
           {stepWizard === 3 && <GenerateStep3 />}
+          {stepWizard === 4 && <GenerateStep4 />}
         </div>
       </div>
     </>

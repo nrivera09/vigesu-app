@@ -369,18 +369,39 @@ const GenerateStep3 = () => {
         )}
 
         <div className="text-center mt-6">
-          <button
-            className="btn btn-success"
-            onClick={() => {
-              if (isText) {
-                console.log("✏️ TEXT RESPONSE:", textResponse);
-              } else {
-                console.log("🚀 JSON FINAL TREE:", exportTree(selectedTree));
-              }
-            }}
-          >
-            Guardar todo
-          </button>
+          {isText ? (
+            <button
+              disabled={textResponse.length === 0}
+              className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto"
+              onClick={() => {
+                useInspectionFullStore.getState().setCompleteStep3(true);
+                useInspectionFullStore.getState().setStepWizard(4);
+                /*if (isText) {
+                  console.log("✏️ TEXT RESPONSE:", textResponse);
+                } else {
+                  console.log("🚀 JSON FINAL TREE:", exportTree(selectedTree));
+                }*/
+              }}
+            >
+              Continue
+            </button>
+          ) : (
+            <button
+              disabled={exportTree(selectedTree).length === 0}
+              className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto"
+              onClick={() => {
+                useInspectionFullStore.getState().setCompleteStep3(true);
+                useInspectionFullStore.getState().setStepWizard(4);
+                /*if (isText) {
+                  console.log("✏️ TEXT RESPONSE:", textResponse);
+                } else {
+                  console.log("🚀 JSON FINAL TREE:", exportTree(selectedTree));
+                }*/
+              }}
+            >
+              Continue
+            </button>
+          )}
         </div>
       </div>
 
