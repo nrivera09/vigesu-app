@@ -114,6 +114,10 @@ const EditOrder = () => {
     itemId: 0,
   });
 
+  const [isLoadingCustomer, setIsLoadingCustomer] = useState(false);
+  const [isLoadingMechanic, setIsLoadingMechanic] = useState(false);
+  const [isLoadingServiceParts, setIsLoadingServiceParts] = useState(false);
+
   const [newItemError, setNewItemError] = useState<string | null>(null);
 
   const [files, setFiles] = useState<File[]>([]);
@@ -131,6 +135,8 @@ const EditOrder = () => {
     } catch (error) {
       toast.error(`${error}`);
       //console.error("Error buscando clientes:", error);
+    } finally {
+      setIsLoadingMechanic(false);
     }
   };
 
@@ -149,6 +155,13 @@ const EditOrder = () => {
   ) => {
     const value = e.target.value;
     setShowDropdown(true);
+
+    if (value.length >= 1) {
+      setIsLoadingCustomer(true); // 🔥 Mostrar desde el primer caracter
+    } else {
+      setIsLoadingCustomer(false); // 🔕 Apagar si el campo queda vacío
+    }
+
     debouncedSearch(value);
   };
 
@@ -162,6 +175,8 @@ const EditOrder = () => {
     } catch (error) {
       toast.error(`${error}`);
       //console.error("Error buscando empleados:", error);
+    } finally {
+      setIsLoadingMechanic(false);
     }
   };
 
@@ -180,6 +195,13 @@ const EditOrder = () => {
   ) => {
     const value = e.target.value;
     setShowMechanicDropdown(true);
+
+    if (value.length >= 1) {
+      setIsLoadingMechanic(true); // 🔥 Mostrar desde el primer caracter
+    } else {
+      setIsLoadingMechanic(false); // 🔕 Apagar si el campo queda vacío
+    }
+
     debouncedSearchMechanic(value);
   };
 
@@ -193,6 +215,8 @@ const EditOrder = () => {
     } catch (error) {
       toast.error(`${error}`);
       //console.error("Error buscando items:", error);
+    } finally {
+      setIsLoadingServiceParts(false);
     }
   };
 
@@ -210,6 +234,13 @@ const EditOrder = () => {
     const value = e.target.value;
     setNewItem((prev) => ({ ...prev, parts: value }));
     setShowItemDropdown(true);
+
+    if (value.length >= 1) {
+      setIsLoadingServiceParts(true); // 🔥 Mostrar desde el primer caracter
+    } else {
+      setIsLoadingServiceParts(false);
+    }
+
     debouncedSearchItem(value);
   };
 
@@ -489,6 +520,7 @@ const EditOrder = () => {
                   type="button"
                   className="btn p-2 btn-xs bg-transparent hover:shadow-none border-none  flex items-center justify-center "
                   onClick={() => {
+                    setIsLoadingCustomer(false);
                     setSelectedCustomer(null);
                     setValue("customer_order", "");
                     setCustomerOptions([]);
@@ -500,21 +532,32 @@ const EditOrder = () => {
               </div>
             ) : (
               <div className="relative flex-1">
-                <input
-                  {...register("customer_order")}
-                  type="text"
-                  className={inputClass(!!errors.customer_order)}
-                  onChange={(e) => {
-                    handleCustomerInputChange(e);
-                    setValue("customer_order", e.target.value);
-                  }}
-                  ref={(el) => {
-                    register("customer_order").ref(el);
-                    inputRef.current = el;
-                  }}
-                  autoComplete="off"
-                />
-                <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto relative mt-1 flex flex-col !cursor-pointer">
+                <div className="relative">
+                  <input
+                    {...register("customer_order")}
+                    type="text"
+                    className={inputClass(!!errors.customer_order)}
+                    onChange={(e) => {
+                      handleCustomerInputChange(e);
+                      setValue("customer_order", e.target.value);
+                    }}
+                    ref={(el) => {
+                      register("customer_order").ref(el);
+                      inputRef.current = el;
+                    }}
+                    autoComplete="off"
+                  />
+                  {isLoadingCustomer && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
+                      <Loading
+                        height="h-[39px]"
+                        enableLabel={false}
+                        size="loading-sm "
+                      />
+                    </div>
+                  )}
+                </div>
+                <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto absolute mt-1 flex flex-col !cursor-pointer">
                   {customerOptions.map((option, idx) => (
                     <li
                       key={option.id}
@@ -629,6 +672,7 @@ const EditOrder = () => {
                   type="button"
                   className="btn p-2 btn-xs bg-transparent hover:shadow-none border-none flex items-center justify-center"
                   onClick={() => {
+                    setIsLoadingMechanic(false);
                     setSelectedMechanic(null);
                     setValue("mechanic_name", "");
                     setMechanicOptions([]);
@@ -641,21 +685,28 @@ const EditOrder = () => {
               </div>
             ) : (
               <div className="relative flex-1">
-                <input
-                  {...register("mechanic_name")}
-                  type="text"
-                  className={inputClass(!!errors.mechanic_name)}
-                  onChange={(e) => {
-                    handleMechanicInputChange(e);
-                    setValue("mechanic_name", e.target.value);
-                  }}
-                  ref={(el) => {
-                    register("mechanic_name").ref(el);
-                    mechanicInputRef.current = el;
-                  }}
-                  autoComplete="off"
-                />
-                <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto relative mt-1 flex flex-col !cursor-pointer">
+                <div className="reelative">
+                  <input
+                    {...register("mechanic_name")}
+                    type="text"
+                    className={inputClass(!!errors.mechanic_name)}
+                    onChange={(e) => {
+                      handleMechanicInputChange(e);
+                      setValue("mechanic_name", e.target.value);
+                    }}
+                    ref={(el) => {
+                      register("mechanic_name").ref(el);
+                      mechanicInputRef.current = el;
+                    }}
+                    autoComplete="off"
+                  />
+                  {isLoadingMechanic && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
+                      <Loading enableLabel={false} size="loading-sm " />
+                    </div>
+                  )}
+                </div>
+                <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto absolute mt-1 flex flex-col !cursor-pointer">
                   {mechanicOptions.map((option, idx) => (
                     <li
                       key={option.id}
@@ -717,18 +768,25 @@ const EditOrder = () => {
               </div>
             ) : (
               <div className="relative flex-1">
-                <input
-                  name="parts"
-                  value={newItem.parts}
-                  onChange={handleItemInputChange}
-                  ref={itemInputRef}
-                  className={inputClass(
-                    !!newItemError && newItem.parts.trim() === ""
+                <div className="flex">
+                  <input
+                    name="parts"
+                    value={newItem.parts}
+                    onChange={handleItemInputChange}
+                    ref={itemInputRef}
+                    className={inputClass(
+                      !!newItemError && newItem.parts.trim() === ""
+                    )}
+                    type="text"
+                    autoComplete="off"
+                  />
+                  {isLoadingServiceParts && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
+                      <Loading enableLabel={false} size="loading-sm " />
+                    </div>
                   )}
-                  type="text"
-                  autoComplete="off"
-                />
-                <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto relative mt-1 flex flex-col !cursor-pointer">
+                </div>
+                <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto absolute mt-1 flex flex-col !cursor-pointer">
                   {itemOptions.map((option, idx) => (
                     <li
                       key={option.id}
@@ -738,6 +796,7 @@ const EditOrder = () => {
                         type="button"
                         onClick={() => {
                           if (itemInputRef.current) {
+                            setIsLoadingServiceParts(false);
                             itemInputRef.current.value = option.name;
                             setShowItemDropdown(false);
                             setNewItem((prev) => ({

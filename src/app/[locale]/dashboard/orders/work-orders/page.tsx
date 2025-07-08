@@ -16,6 +16,8 @@ import {
 } from "@/features/inspections/models/inspections.types";
 import { debounce } from "lodash";
 import AlertInfo from "@/shared/components/shared/AlertInfo";
+import { toast } from "sonner";
+import Loading from "@/shared/components/shared/Loading";
 
 interface CustomerOption {
   id: number;
@@ -54,6 +56,8 @@ const Page = () => {
   const [mechanicOptions, setMechanicOptions] = useState<MechanicOption[]>([]);
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
   const [showMechanicDropdown, setShowMechanicDropdown] = useState(false);
+  const [isLoadingCustomer, setIsLoadingCustomer] = useState(false);
+  const [isLoadingMechanic, setIsLoadingMechanic] = useState(false);
 
   const inputCustomerRef = useRef<HTMLInputElement>(null);
   const inputMechanicRef = useRef<HTMLInputElement>(null);
@@ -67,6 +71,8 @@ const Page = () => {
       setCustomerOptions(response.data ?? []);
     } catch (error) {
       console.error("Error buscando clientes:", error);
+    } finally {
+      setIsLoadingCustomer(false);
     }
   };
 
@@ -83,12 +89,15 @@ const Page = () => {
   // búsqueda mecánico
   const searchMechanic = async (name?: string) => {
     try {
+      setIsLoadingMechanic(true);
       let url = `/QuickBooks/employees/GetEmployeeName?RealmId=9341454759827689`;
       if (name) url += `&Name=${encodeURIComponent(name)}`;
       const response = await axiosInstance.get(url);
       setMechanicOptions(response.data ?? []);
     } catch (error) {
       console.error("Error buscando empleados:", error);
+    } finally {
+      setIsLoadingMechanic(false);
     }
   };
 
@@ -105,17 +114,35 @@ const Page = () => {
   // Handle Customer Input
   const handleCustomerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+
+    setObjFilterForm((prev) => ({ ...prev, client: value }));
     setShowCustomerDropdown(true);
-    debouncedSearchCustomer(value);
-    setObjFilterForm({ ...objFilterForm, client: value });
+
+    if (value.length >= 1) {
+      setIsLoadingCustomer(true); // 🔥 Mostrar desde el primer caracter
+    } else {
+      setIsLoadingCustomer(false); // 🔕 Apagar si el campo queda vacío
+      setCustomerOptions([]);
+    }
+
+    debouncedSearchCustomer(value); // La búsqueda real solo con 3+
   };
 
   // Handle Mechanic Input
   const handleMechanicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setShowMechanicDropdown(true);
-    debouncedSearchMechanic(value);
+
     setObjFilterForm({ ...objFilterForm, worker: value });
+    setShowMechanicDropdown(true);
+
+    if (value.length >= 1) {
+      setIsLoadingMechanic(true); // 🔥 Mostrar desde el primer caracter
+    } else {
+      setIsLoadingMechanic(false); // 🔕 Apagar si el campo queda vacío
+      setMechanicOptions([]);
+    }
+
+    debouncedSearchMechanic(value);
   };
 
   const resetTableList = () => {
@@ -193,6 +220,11 @@ const Page = () => {
                       ref={inputCustomerRef}
                       autoComplete="off"
                     />
+                    {isLoadingCustomer && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
+                        <Loading enableLabel={false} size="loading-sm " />
+                      </div>
+                    )}
                     {showCustomerDropdown && (
                       <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto relative mt-1">
                         {customerOptions.map((option, idx) => (
@@ -284,6 +316,11 @@ const Page = () => {
                       ref={inputMechanicRef}
                       autoComplete="off"
                     />
+                    {isLoadingMechanic && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
+                        <Loading enableLabel={false} size="loading-sm " />
+                      </div>
+                    )}
                     {showMechanicDropdown && (
                       <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto relative mt-1">
                         {mechanicOptions.map((option, idx) => (

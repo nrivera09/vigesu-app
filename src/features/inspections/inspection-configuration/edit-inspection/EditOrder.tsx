@@ -61,6 +61,8 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
   const [hasAtLeastOneQuestion, setHasAtLeastOneQuestion] = useState(false);
   const inputCustomerRef = useRef<HTMLInputElement>(null);
 
+  const [isLoadingCustomer, setIsLoadingCustomer] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -97,6 +99,8 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
       setCustomerOptions(response.data ?? []);
     } catch (error) {
       console.error("Error buscando clientes:", error);
+    } finally {
+      setIsLoadingCustomer(false);
     }
   };
 
@@ -114,6 +118,13 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
     const value = e.target.value;
     setShowCustomerDropdown(true);
     debouncedSearchCustomer(value);
+
+    if (value.length >= 1) {
+      setIsLoadingCustomer(true);
+    } else {
+      setIsLoadingCustomer(false);
+    }
+
     setObjFilterForm({ ...objFilterForm, client: value });
   };
 
@@ -286,17 +297,28 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
                 </div>
               ) : (
                 <div className="relative flex-1">
-                  <input
-                    type="text"
-                    className={inputClass(!!errors.client)}
-                    {...register("client")}
-                    value={objFilterForm.client}
-                    onChange={handleCustomerChange}
-                    ref={inputCustomerRef}
-                    autoComplete="off"
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      className={inputClass(!!errors.client)}
+                      {...register("client")}
+                      value={objFilterForm.client}
+                      onChange={handleCustomerChange}
+                      ref={inputCustomerRef}
+                      autoComplete="off"
+                    />
+                    {isLoadingCustomer && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
+                        <Loading
+                          height="h-[39px]"
+                          enableLabel={false}
+                          size="loading-sm "
+                        />
+                      </div>
+                    )}
+                  </div>
                   {showCustomerDropdown && (
-                    <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto relative mt-1 flex flex-col !cursor-pointer">
+                    <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto absolute mt-1 flex flex-col !cursor-pointer">
                       {customerOptions.map((option) => (
                         <li key={option.id} className="text-sm">
                           <button
@@ -304,6 +326,7 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
                             className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                             onClick={() => {
                               if (inputCustomerRef.current) {
+                                setIsLoadingCustomer(false);
                                 inputCustomerRef.current.value = option.name;
                                 setObjFilterForm((prev) => ({
                                   ...prev,

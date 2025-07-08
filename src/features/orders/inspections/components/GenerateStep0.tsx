@@ -33,6 +33,9 @@ const GenerateStep0 = () => {
     null
   );
 
+  const [isLoadingCustomer, setIsLoadingCustomer] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const [inspectionData, setInspectionData] =
     useState<IFullTypeInspection | null>(null);
 
@@ -56,6 +59,8 @@ const GenerateStep0 = () => {
         } catch (error) {
           console.error("Error buscando clientes:", error);
           setCustomerOptions([]);
+        } finally {
+          setIsLoadingCustomer(false);
         }
       } else {
         setCustomerOptions([]);
@@ -67,6 +72,13 @@ const GenerateStep0 = () => {
   const handleCustomerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setObjFilterForm({ client: value });
+
+    if (value.length >= 1) {
+      setIsLoadingCustomer(true); // 🔥 Mostrar desde el primer caracter
+    } else {
+      setIsLoadingCustomer(false); // 🔕 Apagar si el campo queda vacío
+    }
+
     debouncedSearchCustomer(value);
 
     // Si se borra el campo, reinicia todo
@@ -124,6 +136,7 @@ const GenerateStep0 = () => {
     groupId: number
   ) => {
     try {
+      setIsLoading(true);
       const res = await axiosInstance.get<IFullTypeInspection>(
         `/TypeInspection/GetFullTypeInspectionId?TypeInspectionId=${typeInspectionId}`
       );
@@ -136,7 +149,6 @@ const GenerateStep0 = () => {
         acc[question.groupName].push(question);
         return acc;
       }, {} as Record<string, IFullQuestion[]>);*/
-
       router.push(`${pathname}/configuration`);
     } catch (err) {
       console.error("Error al obtener datos completos de inspección", err);
@@ -184,17 +196,28 @@ const GenerateStep0 = () => {
               Client
             </legend>
             <div className="relative">
-              <input
-                type="text"
-                className="input input-lg text-lg w-full"
-                name="customer_order"
-                value={objFilterForm.client}
-                onChange={handleCustomerChange}
-                ref={inputCustomerRef}
-                autoComplete="off"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  className="input input-lg text-lg w-full"
+                  name="customer_order"
+                  value={objFilterForm.client}
+                  onChange={handleCustomerChange}
+                  ref={inputCustomerRef}
+                  autoComplete="off"
+                />
+                {isLoadingCustomer && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
+                    <Loading
+                      height="h-[39px]"
+                      enableLabel={false}
+                      size="loading-sm "
+                    />
+                  </div>
+                )}
+              </div>
               {showCustomerDropdown && customerOptions.length > 0 && (
-                <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto relative mt-1">
+                <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto relative">
                   {customerOptions.map((option) => (
                     <li key={option.id} className="cursor-pointer text-sm">
                       <button
@@ -312,6 +335,9 @@ const GenerateStep0 = () => {
             })}
         </div>
       </div>
+      {isLoading && (
+        <Loading className="absolute top-0 left-0 h-full bg-[#00000017] z-50" />
+      )}
     </>
   );
 };
