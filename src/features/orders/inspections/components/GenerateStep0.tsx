@@ -18,8 +18,15 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useInspectionFullStore } from "../../store/inspection/inspectionFullStore";
 import { group } from "console";
+import Page from "@/app/[locale]/dashboard/orders/work-orders/edit/page";
+import GenerateStep1 from "./GenerateStep1";
+import GenerateStep2 from "./GenerateStep2";
+import GenerateStep3 from "./GenerateStep3";
+import GenerateStep4 from "./GenerateStep4";
 
 const GenerateStep0 = () => {
+  const { fullInspection, groupName, stepWizard, resetFullInspection } =
+    useInspectionFullStore();
   const router = useRouter();
   const pathname = usePathname();
   const [customerOptions, setCustomerOptions] = useState<CustomerOption[]>([]);
@@ -144,12 +151,14 @@ const GenerateStep0 = () => {
       useInspectionFullStore.getState().setGroupName(groupName);
       useInspectionFullStore.getState().setGroupId(groupId);
       useInspectionFullStore.getState().setStepWizard(1);
+
+      setIsLoading(false);
       /* const grouped = res.data.questions.reduce((acc, question) => {
         if (!acc[question.groupName]) acc[question.groupName] = [];
         acc[question.groupName].push(question);
         return acc;
       }, {} as Record<string, IFullQuestion[]>);*/
-      router.push(`${pathname}/configuration`);
+      //router.push(`${pathname}/configuration`);
     } catch (err) {
       console.error("Error al obtener datos completos de inspección", err);
     }
@@ -335,6 +344,14 @@ const GenerateStep0 = () => {
             })}
         </div>
       </div>
+      {inspectionData && (
+        <div className="containerX mt-12 max-w-full mb-5">
+          {stepWizard === 1 && <GenerateStep1 />}
+          {stepWizard === 2 && <GenerateStep2 />}
+          {stepWizard === 3 && <GenerateStep3 />}
+          {stepWizard === 4 && <GenerateStep4 />}
+        </div>
+      )}
       {isLoading && (
         <Loading className="absolute top-0 left-0 h-full bg-[#00000017] z-50" />
       )}

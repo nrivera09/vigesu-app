@@ -6,6 +6,8 @@ import {
   IFullQuestion,
   IFullTypeInspection,
 } from "../types/IFullTypeInspection";
+import Lottie from "lottie-react";
+import checkLottie from "@/assets/lotties/check.json";
 
 const GenerateStep2 = () => {
   const { fullInspection, groupName, groupId } = useInspectionFullStore();
@@ -36,9 +38,18 @@ const GenerateStep2 = () => {
             className="w-full flex flex-row card lg:card-side bg-black/80 shadow-sm overflow-hidden cursor-pointer transition-all hover:shadow-lg mb-5 hover:bg-[#191917] text-white hover:text-white/80"
             key={index}
           >
-            <div className="bg-[#191917] w-fit flex items-center justify-center p-2">
-              <BsQuestionCircle className="w-[20px] h-[20px]  text-white" />
-            </div>
+            {fullInspection.statusInspectionConfig ? (
+              <Lottie
+                animationData={checkLottie}
+                style={{ width: 35, height: 35 }}
+                loop={false}
+              />
+            ) : (
+              <div className="bg-[#191917] w-fit flex items-center justify-center p-2">
+                <BsQuestionCircle className="w-[20px] h-[20px]  text-white" />
+              </div>
+            )}
+
             <div className="card-body flex flex-row justify-between gap-5">
               <div>
                 <h2 className="card-title">{item.question}</h2>

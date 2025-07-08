@@ -6,6 +6,7 @@ import { routing } from "@/i18n/routing";
 import "@/shared/styles/globals.css";
 
 import { Toaster } from "sonner";
+import SessionGuard from "@/SessionGuard";
 
 const jostSans = Poppins({
   subsets: ["latin"],
@@ -31,17 +32,19 @@ export default async function RootLayout({
     notFound();
   }
   return (
-    <html lang={locale} suppressHydrationWarning>
-      <body className={`${jostSans.className}  antialiased`}>
-        <NextIntlClientProvider>
-          {/*
+    <SessionGuard>
+      <html lang={locale} suppressHydrationWarning>
+        <body className={`${jostSans.className}  antialiased`}>
+          <NextIntlClientProvider>
+            {/*
           <ThemeSwitcher />
           <LanguageSwitcher />
           */}
-          {children}
-          <Toaster richColors position="bottom-center" />
-        </NextIntlClientProvider>
-      </body>
-    </html>
+            {children}
+            <Toaster richColors position="bottom-center" />
+          </NextIntlClientProvider>
+        </body>
+      </html>
+    </SessionGuard>
   );
 }

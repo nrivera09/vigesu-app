@@ -62,6 +62,13 @@ export const useInspectionFullStore = create<InspectionFullState>()(
               typeof data.statusInspectionConfig === "boolean"
                 ? data.statusInspectionConfig
                 : false,
+            questions: data.questions.map((q) => ({
+              ...q,
+              statusInspectionConfig:
+                typeof q.statusInspectionConfig === "boolean"
+                  ? q.statusInspectionConfig
+                  : false,
+            })),
           },
         }),
       setFullQuestion: (question) => set({ fullQuestion: question }),

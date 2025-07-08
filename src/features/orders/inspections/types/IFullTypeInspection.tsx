@@ -20,6 +20,7 @@ export interface IFullQuestion {
   groupName: string;
   typeInspectionDetailId: number;
   answers: IFullAnswer[];
+  statusInspectionConfig?: false;
 }
 
 export interface IFullAnswer {
