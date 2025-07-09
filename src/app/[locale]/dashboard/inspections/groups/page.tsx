@@ -1,5 +1,7 @@
 "use client";
 import TableList from "@/features/inspections/groups/TableList";
+import { GroupStatusLabel } from "@/features/inspections/models/GroupTypes";
+import { WorkOrderStatusLabel } from "@/features/inspections/models/inspections.types";
 import BackButton from "@/shared/components/shared/BackButton";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import Link from "next/link";
@@ -86,11 +88,11 @@ const Page = () => {
                   />
                 </div>
                 <div className="flex flex-col">
-                  <legend className="fieldset-legend text-lg font-normal">
+                  <legend className="fieldset-legend text-lg  font-normal">
                     Status
                   </legend>
                   <select
-                    defaultValue="Pick a color"
+                    value={objFilterForm.status}
                     className="select w-full text-lg input-lg"
                     onChange={(e) =>
                       setObjFilterForm({
@@ -99,10 +101,15 @@ const Page = () => {
                       })
                     }
                   >
-                    <option disabled={true}>Pick a color</option>
-                    <option>Crimson</option>
-                    <option>Amber</option>
-                    <option>Velvet</option>
+                    <option disabled={true} value="">
+                      Pick a status
+                    </option>
+
+                    {Object.entries(GroupStatusLabel).map(([key, label]) => (
+                      <option key={key} value={key}>
+                        {label}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div className="flex flex-col col-span-1 sm:col-span-1 md:col-span-1">

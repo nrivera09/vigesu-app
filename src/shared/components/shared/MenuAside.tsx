@@ -31,8 +31,8 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
   const closeSidebar = useSidebarStore((state) => state.closeSidebar);
   const pathname = usePathname();
   const cleanPath = pathname?.replace(/^\/(es|en|fr)(\/|$)/, "/");
-  const [totalOrders, setTotalOrders] = useState<number>(0);
-  const [totalInspections, setTotalInspections] = useState<number>(0);
+  const [totalOrders, setTotalOrders] = useState<number | null>(null);
+  const [totalInspections, setTotalInspections] = useState<number | null>(null);
 
   // ✅ Todas tus rutas reales definidas abajo
   const ordersLinks =
@@ -198,35 +198,41 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
               </p>
             </div>
             <div className="flex flex-row gap-2 text-white text-sm font-light tracking-[.5px] items-center justify-start">
-              {totalInspections > 0 ? (
+              {totalInspections && totalInspections > 0 ? (
                 <div>
                   {totalInspections}{" "}
                   <span className="text-emerald-500 ">Inspections</span>
                 </div>
               ) : (
                 <div className="flex flex-row items-center justify-center gap-2">
-                  <Loading
-                    height="h-auto"
-                    enableLabel={false}
-                    size="loading-sm"
-                  />
+                  {totalInspections === null && (
+                    <Loading
+                      height="h-auto"
+                      enableLabel={false}
+                      size="loading-sm"
+                    />
+                  )}
+                  {totalInspections}{" "}
                   <span className="text-emerald-500 ">Inspections</span>
                 </div>
               )}
               <TbPointFilled className="text-xs text-shadow-emerald-800" />
 
-              {totalOrders > 0 ? (
+              {totalOrders && totalOrders > 0 ? (
                 <div>
                   {totalOrders}{" "}
                   <span className="text-emerald-500 ">Orders</span>
                 </div>
               ) : (
                 <div className="flex flex-row items-center justify-center gap-2">
-                  <Loading
-                    height="h-auto"
-                    enableLabel={false}
-                    size="loading-sm"
-                  />
+                  {totalOrders === null && (
+                    <Loading
+                      height="h-auto"
+                      enableLabel={false}
+                      size="loading-sm"
+                    />
+                  )}
+                  {totalOrders}{" "}
                   <span className="text-emerald-500 ">Orders</span>
                 </div>
               )}

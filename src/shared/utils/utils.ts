@@ -115,6 +115,17 @@ export const getInspectionStatusLabel = (status: InspectionStatus): string => {
   }
 };
 
+export const getInspectionStatusGroupsLabel = (status: number): string => {
+  switch (status) {
+    case InspectionStatus.Active:
+      return "Active";
+    case InspectionStatus.Inactive:
+      return "Inactive";
+    default:
+      return "Unknown";
+  }
+};
+
 export const isColorLight = (hexColor: string): boolean => {
   const hex = hexColor.replace("#", "");
 

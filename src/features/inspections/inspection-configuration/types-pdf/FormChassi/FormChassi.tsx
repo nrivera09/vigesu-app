@@ -187,7 +187,7 @@ const FormChassi: React.FC<FormChassiProps> = ({
                       <div className="flex w-full flex-row gap-2 items-center justify-end">
                         <ActionButton
                           icon={
-                            <GrDuplicate className="w-[20px] h-[20px] opacity-70" />
+                            <GrDuplicate className="w-[20px] h-[20px] opacity-70 !hidden" />
                           }
                           label="Duplicar"
                           onClick={() => handleDuplicateQuestion(index)}

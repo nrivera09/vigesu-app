@@ -1,28 +1,42 @@
 import { useEffect, useState } from "react";
-import { generateFakeTableData } from "@/shared/data/fakeTableData";
-import { FiTrash2, FiPrinter } from "react-icons/fi";
-import { FaRegEdit, FaRegFilePdf } from "react-icons/fa";
+import { IGroup, StatusEnum } from "../models/GroupTypes";
 import { TableListProps } from "@/shared/types/inspection/ITypes";
-import { IoEyeOutline } from "react-icons/io5";
-import { MdOutlineRemoveRedEye } from "react-icons/md";
+import axios from "axios";
+import {
+  getInspectionStatusGroupsLabel,
+  getInspectionStatusLabel,
+} from "@/shared/utils/utils";
+import { axiosInstance } from "@/shared/utils/axiosInstance";
 
 const TableList = ({ objFilter }: TableListProps) => {
-  const [allData, setAllData] = useState(() => generateFakeTableData(100));
-
+  const [allData, setAllData] = useState<IGroup[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const response = await axiosInstance.get("/Group");
+        if (response.data?.items) {
+          setAllData(response.data.items);
+        }
+      } catch (error) {
+        console.error("Error al cargar grupos", error);
+      }
+    };
+
+    fetchGroups();
+  }, []);
+
   const filteredData = allData.filter((item) => {
     const matchClient = objFilter.client
-      ? item.client.toLowerCase().includes(objFilter.client.toLowerCase())
+      ? item.name.toLowerCase().includes(objFilter.client.toLowerCase())
       : true;
-    const matchName = objFilter.name
-      ? item.name.toLowerCase().includes(objFilter.name.toLowerCase())
-      : true;
-    const matchStatus = objFilter.status
-      ? item.status.toLowerCase() === objFilter.status.toLowerCase()
-      : true;
-    return matchClient && matchName && matchStatus;
+
+    const matchStatus =
+      objFilter.status !== "" ? item.status === Number(objFilter.status) : true;
+
+    return matchClient && matchStatus;
   });
 
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
@@ -37,32 +51,38 @@ const TableList = ({ objFilter }: TableListProps) => {
     setCurrentPage(1);
   }, [objFilter, rowsPerPage]);
 
+  const getStatusBadge = (status: StatusEnum) => {
+    const label = status === StatusEnum.Active ? "Activo" : "Inactivo";
+    const color =
+      status === StatusEnum.Active ? "badge-success" : "badge-error";
+
+    return <div className={`badge ${color}`}>{label}</div>;
+  };
+
   return (
     <div className="overflow-x-auto space-y-4">
       <table className="table table-fixed w-full">
         <thead>
           <tr>
-            <th className="w-[45%]">Group</th>
-            <th className="w-[15%]">Status</th>
+            <th className="w-[70%]">Group</th>
+            <th className="w-[30%] text-center">Status</th>
           </tr>
         </thead>
         <tbody>
           {currentRows.map((item) => (
-            <tr key={item.id} className="cursor-pointer odd:bg-base-200">
-              <td className="truncate">{item.client}</td>
-              <td className="">
+            <tr key={item.groupId} className="cursor-pointer odd:bg-base-200">
+              <td className="truncate">{item.name}</td>
+              <td className="text-center">
                 <div
                   className={`badge badge-dash ${
-                    item.status === "success"
+                    item.status === 0
                       ? "badge-success"
-                      : item.status === "warning"
+                      : item.status === 1
                       ? "badge-warning"
-                      : item.status === "error"
-                      ? "badge-error "
                       : "badge-neutral"
                   }`}
                 >
-                  {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                  {getInspectionStatusGroupsLabel(item.status)}
                 </div>
               </td>
             </tr>
@@ -71,17 +91,16 @@ const TableList = ({ objFilter }: TableListProps) => {
       </table>
 
       {/* Paginación */}
-      {/* Paginación con inicio y fin */}
       <div className="join flex justify-center py-4">
         <button
-          className="join-item btn font-normal"
+          className="join-item btn"
           onClick={() => changePage(1)}
           disabled={currentPage === 1}
         >
           ««
         </button>
         <button
-          className="join-item btn font-normal"
+          className="join-item btn"
           onClick={() => changePage(currentPage - 1)}
           disabled={currentPage === 1}
         >
@@ -90,7 +109,7 @@ const TableList = ({ objFilter }: TableListProps) => {
         {[...Array(totalPages)].map((_, idx) => (
           <button
             key={idx}
-            className={`join-item btn font-normal ${
+            className={`join-item btn ${
               currentPage === idx + 1 ? "btn-active" : ""
             }`}
             onClick={() => changePage(idx + 1)}
@@ -99,14 +118,14 @@ const TableList = ({ objFilter }: TableListProps) => {
           </button>
         ))}
         <button
-          className="join-item btn font-normal"
+          className="join-item btn"
           onClick={() => changePage(currentPage + 1)}
           disabled={currentPage === totalPages}
         >
           »
         </button>
         <button
-          className="join-item btn font-normal"
+          className="join-item btn"
           onClick={() => changePage(totalPages)}
           disabled={currentPage === totalPages}
         >
