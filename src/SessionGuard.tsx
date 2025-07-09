@@ -2,9 +2,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/shared/stores/useAuthStore";
-import { getCookie } from "cookies-next";
 
-const INACTIVITY_LIMIT = 15 * 60 * 1000; // 15 minutos
+const INACTIVITY_LIMIT = 15 * 60 * 1000; // 15 minutos en ms
 
 export default function SessionGuard({
   children,
@@ -12,60 +11,51 @@ export default function SessionGuard({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { token, user, logout } = useAuthStore();
+  const { token, logout } = useAuthStore();
   const [showModal, setShowModal] = useState(false);
 
-  // 👀 1. Verifica actividad del cursor
   useEffect(() => {
     let inactivityTimer: NodeJS.Timeout;
 
     const resetTimer = () => {
       clearTimeout(inactivityTimer);
       inactivityTimer = setTimeout(() => {
-        logout();
-        setShowModal(true);
+        logout(); // limpia Zustand
+        setShowModal(true); // muestra el modal
       }, INACTIVITY_LIMIT);
     };
 
-    const events = [
+    const activityEvents = [
       "mousemove",
       "mousedown",
       "keydown",
       "scroll",
       "touchstart",
     ];
-    events.forEach((event) => window.addEventListener(event, resetTimer));
-    resetTimer();
+
+    activityEvents.forEach((event) =>
+      window.addEventListener(event, resetTimer)
+    );
+    resetTimer(); // inicializa el timer
 
     return () => {
       clearTimeout(inactivityTimer);
-      events.forEach((event) => window.removeEventListener(event, resetTimer));
+      activityEvents.forEach((event) =>
+        window.removeEventListener(event, resetTimer)
+      );
     };
   }, [logout]);
 
-  // ✅ 2. Suscripción al store de Zustand
   useEffect(() => {
+    // detecta borrado del store
     const unsub = useAuthStore.subscribe((state) => {
       if (!state.token || !state.user) {
         setShowModal(true);
       }
     });
+
     return () => unsub();
   }, []);
-
-  // ✅ 3. Verificación periódica cookies + localStorage
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const token = getCookie("auth-token");
-      const storage = localStorage.getItem("auth-storage");
-      if (!token || !storage) {
-        logout();
-        setShowModal(true);
-      }
-    }, 5000); // cada 5 segundos
-
-    return () => clearInterval(interval);
-  }, [logout]);
 
   const handleLoginRedirect = () => {
     setShowModal(false);

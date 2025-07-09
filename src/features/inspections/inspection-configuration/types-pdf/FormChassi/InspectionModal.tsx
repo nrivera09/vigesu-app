@@ -144,7 +144,7 @@ const InspectionModal: React.FC<Props> = ({ onClose, onSave, templateId }) => {
           }
         : selectedQuestion
     );
-    onSave(question, validAnswers, selectedGroup, selectedQuestion);
+    //onSave(question, validAnswers, selectedGroup, selectedQuestion);
     onClose();
   };
 
