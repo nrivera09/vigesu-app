@@ -18,6 +18,7 @@ interface Props {
     userName: string;
     employeeName: string;
     rol: string;
+    employeeId: string;
   };
   refreshFlag: boolean;
 }

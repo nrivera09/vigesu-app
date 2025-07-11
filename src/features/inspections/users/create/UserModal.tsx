@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { IoMdClose } from "react-icons/io";
 import { AiOutlineSave } from "react-icons/ai";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
+import { UserStatusLabel } from "../../models/UsersTypes";
 
 interface UserModalProps {
   onClose: () => void;
@@ -25,6 +26,7 @@ const UserModal: React.FC<UserModalProps> = ({
   editMode = false,
   defaultData,
 }) => {
+  console.log("defaultData: ", defaultData);
   const [userName, setUserName] = useState(defaultData?.userName || "");
   const [employeeId, setEmployeeId] = useState(defaultData?.employeeId || "");
   const [employeeName, setEmployeeName] = useState(
@@ -44,7 +46,7 @@ const UserModal: React.FC<UserModalProps> = ({
           userId: defaultData.userId,
           userName,
           employeeName,
-          employeeId: defaultData.userId.toString(),
+          employeeId,
           password,
           rol,
         });
@@ -79,7 +81,7 @@ const UserModal: React.FC<UserModalProps> = ({
           />
         </div>
 
-        <div className="mb-3 !hidden">
+        <div className="mb-3">
           <label className="block text-lg font-semibold">Employee ID</label>
           <input
             className="input input-lg w-full"
@@ -114,8 +116,11 @@ const UserModal: React.FC<UserModalProps> = ({
             value={rol}
             onChange={(e) => setRol(Number(e.target.value))}
           >
-            <option value={1}>Admin</option>
-            <option value={0}>Operator</option>
+            {Object.entries(UserStatusLabel).map(([key, label]) => (
+              <option key={key} value={key}>
+                {label}
+              </option>
+            ))}
           </select>
         </div>
 

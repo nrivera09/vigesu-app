@@ -8,6 +8,7 @@ import { FiPlus } from "react-icons/fi";
 import UserModal from "@/features/inspections/users/create/UserModal";
 import UserTable from "@/features/inspections/users/UserTable";
 import BackButton from "@/shared/components/shared/BackButton";
+import { UserStatusLabel } from "@/features/inspections/models/UsersTypes";
 
 const Page = () => {
   const pathname = usePathname();
@@ -20,12 +21,14 @@ const Page = () => {
     userName: "",
     employeeName: "",
     rol: "",
+    employeeId: "",
   });
 
   const [objFilterApplied, setObjFilterApplied] = useState({
     userName: "",
     employeeName: "",
     rol: "",
+    employeeId: "",
   });
 
   const handleSuccess = () => {
@@ -33,7 +36,7 @@ const Page = () => {
   };
 
   const resetFilters = () => {
-    const empty = { userName: "", employeeName: "", rol: "" };
+    const empty = { userName: "", employeeName: "", rol: "", employeeId: "" };
     setObjFilterForm(empty);
     setObjFilterApplied(empty);
   };
@@ -106,9 +109,11 @@ const Page = () => {
                   }
                 >
                   <option value="">Pick a role</option>
-                  <option value="Admin">Admin</option>
-                  <option value="Operator">Operator</option>
-                  <option value="Unauthorized">Unauthorized</option>
+                  {Object.entries(UserStatusLabel).map(([key, label]) => (
+                    <option key={key} value={label}>
+                      {label}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="flex gap-2 items-end">
