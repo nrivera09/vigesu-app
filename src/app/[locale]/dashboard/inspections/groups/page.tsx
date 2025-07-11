@@ -1,4 +1,5 @@
 "use client";
+import GroupModal from "@/features/inspections/groups/create/GroupModal";
 import TableList from "@/features/inspections/groups/TableList";
 import { GroupStatusLabel } from "@/features/inspections/models/GroupTypes";
 import { WorkOrderStatusLabel } from "@/features/inspections/models/inspections.types";
@@ -14,6 +15,13 @@ import { MdOutlineSettingsBackupRestore } from "react-icons/md";
 const Page = () => {
   const pathname = usePathname();
   const pageTitle = usePageTitle();
+
+  const [showModal, setShowModal] = useState(false);
+  const [refreshFlag, setRefreshFlag] = useState(false);
+
+  const handleSuccess = () => {
+    setRefreshFlag(!refreshFlag);
+  };
 
   const [objFilterForm, setObjFilterForm] = useState({
     client: "",
@@ -44,17 +52,17 @@ const Page = () => {
     <>
       <div className="gap-4 flex flex-col  min-h-full ">
         <div className="header-page flex flex-row items-center justify-between min-h-[70px] bg-base-200 px-6 gap-2">
-          <BackButton />
+          <BackButton disableArrow />
           <div className="flex flex-row gap-2">
-            <Link
-              href={`${pathname}/new`}
-              className="btn bg-black rounded-full pr-3 py-6  sm:flex border-none !hidden"
+            <button
+              onClick={() => setShowModal(true)}
+              className="btn bg-black rounded-full pr-3 py-6  sm:flex border-none "
             >
               <FiPlus className="text-xl text-white" />
               <span className="bg-gray-800 py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px]">
                 New
               </span>
-            </Link>
+            </button>
             <button className="btn bg-red-600 rounded-full pr-3 py-6 hidden sm:flex items-center justify-center border-none !hidden !hidden">
               <FiTrash2 className="text-xl text-white" />
               <span className="bg-red-500 py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px] ">
@@ -138,10 +146,20 @@ const Page = () => {
             </fieldset>
           </div>
           <div className="container mt-0 max-w-full">
-            <TableList objFilter={objFilterApplied} />
+            <TableList
+              objFilter={objFilterApplied}
+              refreshFlag={refreshFlag}
+              setRefreshFlag={setRefreshFlag}
+            />
           </div>
         </div>
       </div>
+      {showModal && (
+        <GroupModal
+          onClose={() => setShowModal(false)}
+          onSuccess={handleSuccess}
+        />
+      )}
     </>
   );
 };

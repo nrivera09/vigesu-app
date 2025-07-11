@@ -7,11 +7,26 @@ import {
   getInspectionStatusLabel,
 } from "@/shared/utils/utils";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
+import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
+import { FaRegEdit } from "react-icons/fa";
+import GroupModal from "./create/GroupModal";
 
-const TableList = ({ objFilter }: TableListProps) => {
+const TableList = ({
+  objFilter,
+  refreshFlag,
+  setRefreshFlag,
+}: TableListProps) => {
   const [allData, setAllData] = useState<IGroup[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<IGroup | null>(null);
+
+  const handleSuccess = () => {
+    setSelectedGroup(null); // limpias el grupo seleccionado
+    setShowModal(false); // cierras el modal
+    setRefreshFlag((prev) => !prev); // refrescas la tabla
+  };
 
   useEffect(() => {
     const fetchGroups = async () => {
@@ -26,7 +41,7 @@ const TableList = ({ objFilter }: TableListProps) => {
     };
 
     fetchGroups();
-  }, []);
+  }, [refreshFlag]);
 
   const filteredData = allData.filter((item) => {
     const matchClient = objFilter.client
@@ -60,79 +75,108 @@ const TableList = ({ objFilter }: TableListProps) => {
   };
 
   return (
-    <div className="overflow-x-auto space-y-4">
-      <table className="table table-fixed w-full">
-        <thead>
-          <tr>
-            <th className="w-[70%]">Group</th>
-            <th className="w-[30%] text-center">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {currentRows.map((item) => (
-            <tr key={item.groupId} className="cursor-pointer odd:bg-base-200">
-              <td className="truncate">{item.name}</td>
-              <td className="text-center">
-                <div
-                  className={`badge badge-dash ${
-                    item.status === 0
-                      ? "badge-success"
-                      : item.status === 1
-                      ? "badge-warning"
-                      : "badge-neutral"
-                  }`}
-                >
-                  {getInspectionStatusGroupsLabel(item.status)}
-                </div>
-              </td>
+    <>
+      <div className="overflow-x-auto space-y-4">
+        <table className="table table-fixed w-full">
+          <thead>
+            <tr>
+              <th className="w-[50%]">Group</th>
+              <th className="w-[30%] text-center">Status</th>
+              <th className="w-[20%]"></th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {currentRows.map((item) => (
+              <tr key={item.groupId} className="cursor-pointer odd:bg-base-200">
+                <td className="truncate">{item.name}</td>
+                <td className="text-center">
+                  <div
+                    className={`badge badge-dash ${
+                      item.status === 0
+                        ? "badge-success"
+                        : item.status === 1
+                        ? "badge-warning"
+                        : "badge-neutral"
+                    }`}
+                  >
+                    {getInspectionStatusGroupsLabel(item.status)}
+                  </div>
+                </td>
 
-      {/* Paginación */}
-      <div className="join flex justify-center py-4">
-        <button
-          className="join-item btn"
-          onClick={() => changePage(1)}
-          disabled={currentPage === 1}
-        >
-          ««
-        </button>
-        <button
-          className="join-item btn"
-          onClick={() => changePage(currentPage - 1)}
-          disabled={currentPage === 1}
-        >
-          «
-        </button>
-        {[...Array(totalPages)].map((_, idx) => (
+                <td className="text-right">
+                  <ActionButton
+                    icon={
+                      <FaRegEdit className="w-[20px] h-[20px] opacity-70" />
+                    }
+                    label="Edit"
+                    onClick={() => {
+                      setSelectedGroup(item);
+                      setShowModal(true);
+                    }}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {/* Paginación */}
+        <div className="join flex justify-center py-4">
           <button
-            key={idx}
-            className={`join-item btn ${
-              currentPage === idx + 1 ? "btn-active" : ""
-            }`}
-            onClick={() => changePage(idx + 1)}
+            className="join-item btn"
+            onClick={() => changePage(1)}
+            disabled={currentPage === 1}
           >
-            {idx + 1}
+            ««
           </button>
-        ))}
-        <button
-          className="join-item btn"
-          onClick={() => changePage(currentPage + 1)}
-          disabled={currentPage === totalPages}
-        >
-          »
-        </button>
-        <button
-          className="join-item btn"
-          onClick={() => changePage(totalPages)}
-          disabled={currentPage === totalPages}
-        >
-          »»
-        </button>
+          <button
+            className="join-item btn"
+            onClick={() => changePage(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            «
+          </button>
+          {[...Array(totalPages)].map((_, idx) => (
+            <button
+              key={idx}
+              className={`join-item btn ${
+                currentPage === idx + 1 ? "btn-active" : ""
+              }`}
+              onClick={() => changePage(idx + 1)}
+            >
+              {idx + 1}
+            </button>
+          ))}
+          <button
+            className="join-item btn"
+            onClick={() => changePage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            »
+          </button>
+          <button
+            className="join-item btn"
+            onClick={() => changePage(totalPages)}
+            disabled={currentPage === totalPages}
+          >
+            »»
+          </button>
+        </div>
       </div>
-    </div>
+      {showModal && selectedGroup && (
+        <GroupModal
+          onClose={() => {
+            setShowModal(false);
+            setSelectedGroup(null);
+          }}
+          onSuccess={handleSuccess}
+          editMode={true}
+          defaultValue={selectedGroup.name}
+          defaultStatus={selectedGroup.status}
+          groupIdToEdit={selectedGroup.groupId}
+        />
+      )}
+    </>
   );
 };
 

@@ -4,6 +4,9 @@ export interface TableListProps {
     status: string;
     name: string;
   };
+  refreshFlag?: boolean;
+
+  setRefreshFlag: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export interface ExportedAnswer {
