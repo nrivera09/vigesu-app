@@ -36,9 +36,9 @@ const SignaturePad = forwardRef<SignaturePadRef>((_props, ref) => {
         ref={sigCanvas}
         penColor="black"
         canvasProps={{
-          width: 500,
-          height: 200,
-          className: "border border-gray-400 rounded w-full",
+          width: 1000, // 100% no funciona aquí, debe ser valor fijo en px
+          height: 300,
+          className: "bg-[#f6f3f4] rounded w-full",
         }}
       />
     </div>

@@ -9,6 +9,7 @@ import UserModal from "@/features/inspections/users/create/UserModal";
 import UserTable from "@/features/inspections/users/UserTable";
 import BackButton from "@/shared/components/shared/BackButton";
 import { UserStatusLabel } from "@/features/inspections/models/UsersTypes";
+import Link from "next/link";
 
 const Page = () => {
   const pathname = usePathname();
@@ -46,15 +47,15 @@ const Page = () => {
       <div className="gap-4 flex flex-col min-h-full">
         <div className="header-page flex items-center justify-between min-h-[70px] bg-base-200 px-6 gap-2">
           <BackButton disableArrow />
-          <button
-            onClick={() => setShowModal(true)}
+          <Link
+            href={`${pathname}/create`}
             className="btn bg-black rounded-full pr-3 py-6 border-none"
           >
             <FiPlus className="text-xl text-white" />
             <span className="bg-gray-800 py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px]">
               New
             </span>
-          </button>
+          </Link>
         </div>
 
         {/* FILTROS */}

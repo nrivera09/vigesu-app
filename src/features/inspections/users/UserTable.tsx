@@ -3,6 +3,7 @@ import { axiosInstance } from "@/shared/utils/axiosInstance";
 import { FaRegEdit } from "react-icons/fa";
 import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
 import UserModal from "./create/UserModal";
+import { usePathname, useRouter } from "next/navigation";
 
 interface IUser {
   userId: number;
@@ -25,6 +26,8 @@ interface Props {
 
 const UserTable: FC<Props> = ({ objFilter, refreshFlag }) => {
   const [users, setUsers] = useState<IUser[]>([]);
+  const router = useRouter();
+  const pathname = usePathname();
   const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [localRefreshFlag, setLocalRefreshFlag] = useState(false);
@@ -87,8 +90,7 @@ const UserTable: FC<Props> = ({ objFilter, refreshFlag }) => {
                   icon={<FaRegEdit className="w-[20px] h-[20px] opacity-70" />}
                   label="Edit"
                   onClick={() => {
-                    setSelectedUser(user);
-                    setShowModal(true);
+                    router.push(`${pathname}/edit/${user.userId}`);
                   }}
                 />
               </td>

@@ -1,4 +1,4 @@
-import CreateOrder from "@/features/inspections/groups/create/CreateOrder";
+import CreateOrder from "@/features/inspections/users/create/CreateOrder";
 import { GroupStatusLabel } from "@/features/inspections/models/GroupTypes";
 import BackButton from "@/shared/components/shared/BackButton";
 import React from "react";
