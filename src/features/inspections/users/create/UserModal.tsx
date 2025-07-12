@@ -5,6 +5,8 @@ import { IoMdClose } from "react-icons/io";
 import { AiOutlineSave } from "react-icons/ai";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
 import { UserStatusLabel } from "../../models/UsersTypes";
+import SignaturePad, { SignaturePadRef } from "../SignaturePad";
+import { useRef } from "react";
 
 interface UserModalProps {
   onClose: () => void;
@@ -27,6 +29,8 @@ const UserModal: React.FC<UserModalProps> = ({
   defaultData,
 }) => {
   console.log("defaultData: ", defaultData);
+  const signatureRef = useRef<SignaturePadRef>(null);
+
   const [userName, setUserName] = useState(defaultData?.userName || "");
   const [employeeId, setEmployeeId] = useState(defaultData?.employeeId || "");
   const [employeeName, setEmployeeName] = useState(
@@ -38,27 +42,38 @@ const UserModal: React.FC<UserModalProps> = ({
 
   const handleSubmit = async () => {
     if (!userName || !employeeName)
-      //return alert("Todos los campos son obligatorios");
-      setLoading(true);
+      return alert("Todos los campos son obligatorios");
+    setLoading(true);
+
     try {
+      const formData = new FormData();
+      formData.append("UserName", userName);
+      formData.append("Password", password);
+      formData.append("EmployeeId", employeeId);
+      formData.append("EmployeeName", employeeName);
+      formData.append("Rol", rol.toString());
+
+      const signatureBlob = signatureRef.current?.getImageBlob();
+      if (signatureBlob) {
+        formData.append("SignatureImage", signatureBlob, "signature.png");
+      }
+
       if (editMode && defaultData?.userId !== undefined) {
-        await axiosInstance.put(`/User/${defaultData.userId}`, {
-          userId: defaultData.userId,
-          userName,
-          employeeName,
-          employeeId,
-          password,
-          rol,
+        formData.append("UserId", defaultData.userId.toString());
+
+        await axiosInstance.put(`/User/${defaultData.userId}`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         });
       } else {
-        await axiosInstance.post("/User", {
-          userName,
-          employeeName,
-          employeeId,
-          password,
-          rol,
+        await axiosInstance.post("/User", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         });
       }
+
       onSuccess();
       onClose();
     } catch (error) {
@@ -122,6 +137,20 @@ const UserModal: React.FC<UserModalProps> = ({
               </option>
             ))}
           </select>
+        </div>
+
+        <div className="mb-3">
+          <label className="block text-lg font-semibold">Firma</label>
+          <SignaturePad ref={signatureRef} />
+        </div>
+        <div className="mt-2">
+          <button
+            className="btn btn-sm btn-outline"
+            type="button"
+            onClick={() => signatureRef.current?.clear()}
+          >
+            Limpiar firma
+          </button>
         </div>
 
         <div className="modal-action flex justify-between">
