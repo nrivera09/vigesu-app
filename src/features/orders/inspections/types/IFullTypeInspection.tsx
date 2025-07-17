@@ -6,7 +6,7 @@ export interface IFullTypeInspection {
   templateName: string;
   templateFilePath: string;
   questions: IFullQuestion[];
-  statusInspectionConfig?: false;
+  statusInspectionConfig?: boolean;
 }
 
 export interface IFullQuestion {
@@ -20,7 +20,7 @@ export interface IFullQuestion {
   groupName: string;
   typeInspectionDetailId: number;
   answers: IFullAnswer[];
-  statusInspectionConfig?: false;
+  statusInspectionConfig?: boolean;
 }
 
 export interface IFullAnswer {

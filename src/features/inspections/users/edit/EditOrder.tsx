@@ -11,6 +11,7 @@ import { useParams, useRouter } from "next/navigation";
 
 import Loading from "@/shared/components/shared/Loading"; // ajusta si está en otro path
 import { toast } from "sonner";
+import { DOMAIN } from "@/config/constants";
 
 const schema = z.object({
   userName: z.string().min(1),
@@ -23,6 +24,9 @@ const schema = z.object({
 const EditOrder = () => {
   const router = useRouter();
   const signatureRef = useRef<SignaturePadRef>(null);
+  const [signaturePreview, setSignaturePreview] = useState<string | null>(null);
+  const [modifySign, setModifySign] = useState<boolean>(false);
+
   const { id } = useParams<{ id: string }>();
   const [disablePassword, setDisablePassword] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -43,11 +47,17 @@ const EditOrder = () => {
 
         setForm({
           userName: data.userName || "",
-          password: data.password || "",
+          password: "", // no enviar password actual
           employeeId: data.employeeId || "",
           employeeName: data.employeeName || "",
           rol: data.rol?.toString() || "",
         });
+
+        // Mostrar firma previa si existe
+        if (data.signatureImagePath) {
+          const fullImageUrl = `${data.signatureImagePath}`;
+          setSignaturePreview(fullImageUrl);
+        }
       } catch (error) {
         console.error("Error al cargar usuario:", error);
         alert("Error al cargar datos del usuario");
@@ -179,26 +189,53 @@ const EditOrder = () => {
       </fieldset>
 
       <div className="flex flex-col gap-2">
-        <p className="font-bold">Signature</p>
+        <div className="flex items-center justify-between">
+          <p className="font-bold">Signature</p>
+          {signaturePreview && (
+            <button
+              className="btn"
+              type="button"
+              onClick={() => setModifySign(!modifySign)}
+            >
+              Modify sign
+            </button>
+          )}
+        </div>
         <fieldset className="fieldset border-base-300 rounded-box w-full border mb-0 p-0">
-          <SignaturePad ref={signatureRef} />
+          {!modifySign && signaturePreview && (
+            <img
+              src={`${DOMAIN}${signaturePreview}`}
+              alt="Firma actual"
+              className="max-w-full h-auto p-2"
+            />
+          )}
         </fieldset>
-        <button
-          className="btn"
-          type="button"
-          onClick={() => signatureRef.current?.clear()}
-        >
-          Limpiar firma
-        </button>
+        {modifySign ||
+          (!signaturePreview && (
+            <>
+              <fieldset className="fieldset border-base-300 rounded-box w-full border mb-0 p-0">
+                <SignaturePad ref={signatureRef} />
+              </fieldset>
+              <button
+                className="btn"
+                type="button"
+                onClick={() => signatureRef.current?.clear()}
+              >
+                Limpiar firma
+              </button>
+            </>
+          ))}
       </div>
 
-      <button
-        onClick={handleUpdate}
-        disabled={saving}
-        className="mt-8 btn bg-black text-white rounded-full pr-3 py-6 w-full md:w-[300px] mx-auto"
-      >
-        <span className="py-1 px-2 text-white text-[13px]">Update</span>
-      </button>
+      <div className="flex justify-center items-center">
+        <button
+          onClick={handleUpdate}
+          disabled={saving}
+          className="mt-8 btn bg-black text-white rounded-full pr-3 py-6 w-full md:w-[300px] mx-auto"
+        >
+          <span className="py-1 px-2 text-white text-[13px]">Update</span>
+        </button>
+      </div>
     </>
   );
 };

@@ -1,4 +1,6 @@
 "use client";
+import { DOMAIN } from "@/config/constants";
+import { usePathname } from "next/navigation";
 import React from "react";
 import { useDropzone, FileWithPath } from "react-dropzone";
 
@@ -17,6 +19,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   existingFiles = [],
   onRemoveExistingFile,
 }) => {
+  const pathname = usePathname();
   const onDrop = (acceptedFiles: FileWithPath[]) => {
     const updated = [...files, ...acceptedFiles];
     onFilesChange?.(updated);
@@ -58,7 +61,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
               className="relative border rounded-md overflow-hidden w-[100px] h-[100px] flex-shrink-0"
             >
               <img
-                src={`/${name}`}
+                src={`${DOMAIN}/uploads/workorders/${name}`}
                 alt={`existing-${index}`}
                 className="w-full h-full object-cover"
               />

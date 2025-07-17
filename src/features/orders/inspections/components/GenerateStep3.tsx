@@ -13,6 +13,9 @@ import Lottie from "lottie-react";
 
 import checkLottie from "@/assets/lotties/check.json";
 import { toast } from "sonner";
+import AnswerSign from "./typeQuest/AnswerSign";
+import AnswerText from "./typeQuest/AnswerText";
+import AnswerOptions from "./typeQuest/AnswerOptions";
 
 interface ItemWithQuantity {
   id: string;
@@ -31,7 +34,10 @@ interface ExportedAnswer {
 const GenerateStep3 = () => {
   const { fullInspection, groupName, groupId, titleQuestion, fullQuestion } =
     useInspectionFullStore();
+
   const [selectedTree, setSelectedTree] = useState<IFullAnswer[]>([]);
+  const [isSignValid, setIsSignValid] = useState(false);
+
   const [showItemModal, setShowItemModal] = useState(false);
   const [modalAnswer, setModalAnswer] = useState<IFullAnswer | null>(null);
   const [initialItems, setInitialItems] = useState<ItemWithQuantity[]>([]);
@@ -48,8 +54,10 @@ const GenerateStep3 = () => {
       )
       .flatMap((question) => question.answers) ?? [];
 
+  const isSingle = fullQuestion?.typeQuestion === TypeQuestion.SingleChoice;
   const isMultiple = fullQuestion?.typeQuestion === TypeQuestion.MultipleChoice;
   const isText = fullQuestion?.typeQuestion === TypeQuestion.TextInput;
+  const isSign = fullQuestion?.typeQuestion === TypeQuestion.Sign;
 
   const openItemModal2 = (answer: IFullAnswer) => {
     const findAnswerInTree = (tree: IFullAnswer[]): IFullAnswer | null => {
@@ -328,6 +336,39 @@ const GenerateStep3 = () => {
     }));
   };
 
+  const completeSign = () => {
+    const store = useInspectionFullStore.getState();
+    const current = store.fullInspection;
+    const fullQuestion = store.fullQuestion;
+
+    if (!current || !fullQuestion) {
+      console.warn("❌ Datos incompletos, no se puede continuar.");
+      return;
+    }
+
+    const updatedQuestions = current.questions.map((q) => {
+      const match =
+        q.typeInspectionDetailId === fullQuestion.typeInspectionDetailId;
+
+      if (match) {
+        console.log("✅ Actualizando statusInspectionConfig de:", q);
+        return {
+          ...q,
+          statusInspectionConfig: true,
+        };
+      }
+
+      return q;
+    });
+
+    store.setFullInspection({
+      ...current,
+      questions: updatedQuestions,
+    });
+
+    store.setStepWizard(2); // ← vuelve al paso 2
+  };
+
   useEffect(() => {
     console.log("📡 TREE RESPUESTAS EN TIEMPO REAL:", exportTree(selectedTree));
   }, [selectedTree]);
@@ -346,33 +387,24 @@ const GenerateStep3 = () => {
           </label>
         </div>
 
-        {isText ? (
-          <div className="mt-6">
-            <textarea
-              className="textarea textarea-bordered w-full"
-              placeholder="Escribe tu respuesta..."
-              value={textResponse}
-              onChange={(e) => setTextResponse(e.target.value)}
-            />
-          </div>
-        ) : (
-          <div className="mt-4 flex flex-row gap-4 flex-nowrap overflow-x-auto">
-            {currentAnswers.map((answer) => (
-              <div
-                key={answer.typeInspectionDetailAnswerId}
-                className="flex flex-col items-center"
-              >
-                {renderAnswerRecursive(answer, 0)}
-              </div>
-            ))}
-          </div>
+        {isSign && <AnswerSign onComplete={(valid) => setIsSignValid(valid)} />}
+
+        {isText && (
+          <AnswerText value={textResponse} onChange={setTextResponse} />
+        )}
+
+        {(isSingle || isMultiple) && (
+          <AnswerOptions
+            answers={currentAnswers}
+            renderAnswer={renderAnswerRecursive}
+          />
         )}
 
         <div className="text-center mt-6">
-          {isText ? (
+          {isText && (
             <button
               disabled={textResponse.length === 0}
-              className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto"
+              className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px]"
               onClick={() => {
                 useInspectionFullStore.getState().setCompleteStep3(true);
                 useInspectionFullStore.getState().setStepWizard(4);
@@ -385,18 +417,31 @@ const GenerateStep3 = () => {
             >
               Continue
             </button>
-          ) : (
+          )}
+          {isSingle ||
+            (isMultiple && (
+              <button
+                disabled={exportTree(selectedTree).length === 0}
+                className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px]"
+                onClick={() => {
+                  useInspectionFullStore.getState().setCompleteStep3(true);
+                  useInspectionFullStore.getState().setStepWizard(4);
+                  /*if (isText) {
+                    console.log("✏️ TEXT RESPONSE:", textResponse);
+                  } else {
+                    console.log("🚀 JSON FINAL TREE:", exportTree(selectedTree));
+                  }*/
+                }}
+              >
+                Continue
+              </button>
+            ))}
+          {isSign && (
             <button
-              disabled={exportTree(selectedTree).length === 0}
-              className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto"
+              disabled={!isSignValid}
+              className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px]"
               onClick={() => {
-                useInspectionFullStore.getState().setCompleteStep3(true);
-                useInspectionFullStore.getState().setStepWizard(4);
-                /*if (isText) {
-                  console.log("✏️ TEXT RESPONSE:", textResponse);
-                } else {
-                  console.log("🚀 JSON FINAL TREE:", exportTree(selectedTree));
-                }*/
+                completeSign();
               }}
             >
               Continue

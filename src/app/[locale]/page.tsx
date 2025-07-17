@@ -12,6 +12,7 @@ import { axiosInstance } from "@/shared/utils/axiosInstance";
 import { useAuthStore } from "@/shared/stores/useAuthStore";
 
 import { setCookie, getCookie, deleteCookie } from "cookies-next";
+import { toast } from "sonner";
 
 const loginSchema = z.object({
   userName: z.string().min(1, "El usuario es obligatorio"),
@@ -55,9 +56,10 @@ export default function Home() {
           user: res.data.user,
         });
 
+        toast.success("¡Login correcto!");
         router.push("/dashboard");
       } else {
-        setErrorMessage("Respuesta inválida del servidor");
+        toast.error("Respuesta inválida del servidor");
       }
     } catch (err: unknown) {
       const error = err as {
@@ -70,9 +72,9 @@ export default function Home() {
 
       const backendErrors = error?.response?.data?.errors;
       if (Array.isArray(backendErrors) && backendErrors.length) {
-        setErrorMessage(backendErrors[0].value?.join(", "));
+        toast.error(backendErrors[0].value?.join(", "));
       } else {
-        setErrorMessage("Error desconocido al iniciar sesión");
+        toast.error("Error desconocido al iniciar sesión");
       }
     } finally {
       setLoading(false);

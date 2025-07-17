@@ -8,6 +8,8 @@ import {
 } from "../types/IFullTypeInspection";
 import Lottie from "lottie-react";
 import checkLottie from "@/assets/lotties/check.json";
+import { FaCheckCircle } from "react-icons/fa";
+import clsx from "clsx";
 
 const GenerateStep2 = () => {
   const { fullInspection, groupName, groupId } = useInspectionFullStore();
@@ -35,20 +37,26 @@ const GenerateStep2 = () => {
         .map((item, index) => (
           <button
             onClick={() => goStep(item)}
-            className="w-full flex flex-row card lg:card-side bg-black/80 shadow-sm overflow-hidden cursor-pointer transition-all hover:shadow-lg mb-5 hover:bg-[#191917] text-white hover:text-white/80"
+            className={clsx(
+              `w-full flex flex-row card lg:card-side  shadow-sm overflow-hidden cursor-pointer transition-all hover:shadow-lg mb-5  text-white `,
+              !item.statusInspectionConfig
+                ? `bg-black/80 hover:bg-[#191917] hover:text-white/80`
+                : `bg-green-800/80 hover:bg-green-800 hover:text-white/80`
+            )}
             key={index}
           >
-            {fullInspection.statusInspectionConfig ? (
-              <Lottie
-                animationData={checkLottie}
-                style={{ width: 35, height: 35 }}
-                loop={false}
-              />
-            ) : (
-              <div className="bg-[#191917] w-fit flex items-center justify-center p-2">
-                <BsQuestionCircle className="w-[20px] h-[20px]  text-white" />
-              </div>
-            )}
+            <div
+              className={clsx(
+                ` w-fit flex items-center justify-center p-2`,
+                item.statusInspectionConfig ? `bg-green-800` : `bg-[#191917]`
+              )}
+            >
+              {item.statusInspectionConfig ? (
+                <FaCheckCircle className="w-[20px] h-[20px]  text-green-400 mx-auto" />
+              ) : (
+                <BsQuestionCircle className="w-[20px] h-[20px]  text-white mx-auto" />
+              )}
+            </div>
 
             <div className="card-body flex flex-row justify-between gap-5">
               <div>

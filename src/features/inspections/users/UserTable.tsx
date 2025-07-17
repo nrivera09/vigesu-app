@@ -25,6 +25,9 @@ interface Props {
 }
 
 const UserTable: FC<Props> = ({ objFilter, refreshFlag }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
   const [users, setUsers] = useState<IUser[]>([]);
   const router = useRouter();
   const pathname = usePathname();
@@ -51,16 +54,22 @@ const UserTable: FC<Props> = ({ objFilter, refreshFlag }) => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await axiosInstance.get("/User");
+        const res = await axiosInstance.get(
+          `/User?pageNumber=${currentPage}&pageSize=10`
+        );
         console.log("Usuarios cargados:", res.data.items);
 
-        if (res.data?.items) setUsers(res.data.items);
+        if (res.data?.items) {
+          setUsers(res.data.items);
+          setTotalPages(res.data.totalPages);
+        }
       } catch (err) {
         console.error("Error cargando usuarios", err);
       }
     };
+
     fetchUsers();
-  }, [refreshFlag, localRefreshFlag]);
+  }, [refreshFlag, localRefreshFlag, currentPage]); // ✅ IMPORTANTE
 
   const handleSuccess = () => {
     setShowModal(false);
@@ -98,6 +107,50 @@ const UserTable: FC<Props> = ({ objFilter, refreshFlag }) => {
           ))}
         </tbody>
       </table>
+
+      <div className="join flex justify-center py-4">
+        <button
+          className="join-item btn"
+          onClick={() => setCurrentPage(1)}
+          disabled={currentPage === 1}
+        >
+          ««
+        </button>
+        <button
+          className="join-item btn"
+          onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+          disabled={currentPage === 1}
+        >
+          «
+        </button>
+        {[...Array(totalPages)].map((_, idx) => (
+          <button
+            key={idx}
+            className={`join-item btn ${
+              currentPage === idx + 1 ? "btn-active" : ""
+            }`}
+            onClick={() => setCurrentPage(idx + 1)}
+          >
+            {idx + 1}
+          </button>
+        ))}
+        <button
+          className="join-item btn"
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+          }
+          disabled={currentPage === totalPages}
+        >
+          »
+        </button>
+        <button
+          className="join-item btn"
+          onClick={() => setCurrentPage(totalPages)}
+          disabled={currentPage === totalPages}
+        >
+          »»
+        </button>
+      </div>
 
       {showModal ? (
         <UserModal
