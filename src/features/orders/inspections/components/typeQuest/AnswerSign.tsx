@@ -16,7 +16,7 @@ interface AnswerSign {
 }
 
 interface Props {
-  onComplete: (isValid: boolean) => void;
+  onComplete: (isValid: boolean, url?: string) => void;
 }
 
 const AnswerSign = ({ onComplete }: Props) => {

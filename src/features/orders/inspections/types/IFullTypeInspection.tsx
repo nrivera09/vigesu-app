@@ -21,6 +21,7 @@ export interface IFullQuestion {
   typeInspectionDetailId: number;
   answers: IFullAnswer[];
   statusInspectionConfig?: boolean;
+  finalResponse?: string;
 }
 
 export interface IFullAnswer {

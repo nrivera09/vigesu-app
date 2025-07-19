@@ -38,6 +38,8 @@ const GenerateStep3 = () => {
   const [selectedTree, setSelectedTree] = useState<IFullAnswer[]>([]);
   const [isSignValid, setIsSignValid] = useState(false);
 
+  const [signUrl, setSignUrl] = useState<string | undefined>(undefined);
+
   const [showItemModal, setShowItemModal] = useState(false);
   const [modalAnswer, setModalAnswer] = useState<IFullAnswer | null>(null);
   const [initialItems, setInitialItems] = useState<ItemWithQuantity[]>([]);
@@ -369,6 +371,99 @@ const GenerateStep3 = () => {
     store.setStepWizard(2); // ← vuelve al paso 2
   };
 
+  const completeCurrentQuestion2 = (responseValue: string | null = null) => {
+    const store = useInspectionFullStore.getState();
+    const current = store.fullInspection;
+    const fullQuestion = store.fullQuestion;
+
+    if (!current || !fullQuestion) return;
+
+    const updatedQuestions = current.questions.map((q) => {
+      if (q.typeInspectionDetailId === fullQuestion.typeInspectionDetailId) {
+        return {
+          ...q,
+          finalResponse: responseValue ?? q.finalResponse ?? "",
+          statusInspectionConfig: true,
+          answers: selectedTree.length > 0 ? selectedTree : q.answers,
+        };
+      }
+      return q;
+    });
+
+    store.setFullInspection({ ...current, questions: updatedQuestions });
+
+    const nextUnanswered = updatedQuestions.find(
+      (q) => !q.statusInspectionConfig
+    );
+    if (nextUnanswered) {
+      store.setFullQuestion(nextUnanswered);
+      store.setGroupId(nextUnanswered.groupId);
+      store.setGroupName(nextUnanswered.groupName);
+      store.setTitleQuestion(nextUnanswered.question);
+      store.setStepWizard(3);
+    } else {
+      store.setStepWizard(2);
+    }
+  };
+
+  const completeCurrentQuestion = (responseValue: string | null = null) => {
+    const store = useInspectionFullStore.getState();
+    const current = store.fullInspection;
+    const fullQuestion = store.fullQuestion;
+
+    if (!current || !fullQuestion) return;
+
+    const updatedQuestions = current.questions.map((q) => {
+      if (q.typeInspectionDetailId === fullQuestion.typeInspectionDetailId) {
+        const updated = {
+          ...q,
+          finalResponse: responseValue ?? q.finalResponse ?? "",
+          statusInspectionConfig: true,
+          answers: selectedTree.length > 0 ? selectedTree : q.answers,
+        };
+        console.log("✅ Respuesta guardada:", updated);
+        return updated;
+      }
+      return q;
+    });
+
+    store.setFullInspection({ ...current, questions: updatedQuestions });
+
+    // 🔍 Verifica si quedan preguntas sin responder en el MISMO GRUPO
+    const remainingInGroup = updatedQuestions.find(
+      (q) =>
+        !q.statusInspectionConfig &&
+        q.groupId === fullQuestion.groupId &&
+        q.groupName === fullQuestion.groupName
+    );
+
+    if (remainingInGroup) {
+      store.setFullQuestion(remainingInGroup);
+      store.setGroupId(remainingInGroup.groupId);
+      store.setGroupName(remainingInGroup.groupName);
+      store.setTitleQuestion(remainingInGroup.question);
+      store.setStepWizard(3);
+    } else {
+      // ✅ Grupo completado: mostrar alerta + data completa
+      alert("✅ Terminaste este grupo.");
+
+      const questionsOfGroup = updatedQuestions.filter(
+        (q) =>
+          q.groupId === fullQuestion.groupId &&
+          q.groupName === fullQuestion.groupName
+      );
+
+      const result = {
+        groupId: fullQuestion.groupId,
+        groupName: fullQuestion.groupName,
+        questions: questionsOfGroup,
+      };
+
+      console.log("🧠 Objeto completo de este grupo:", result);
+      store.setStepWizard(2);
+    }
+  };
+
   useEffect(() => {
     console.log("📡 TREE RESPUESTAS EN TIEMPO REAL:", exportTree(selectedTree));
   }, [selectedTree]);
@@ -387,7 +482,14 @@ const GenerateStep3 = () => {
           </label>
         </div>
 
-        {isSign && <AnswerSign onComplete={(valid) => setIsSignValid(valid)} />}
+        {isSign && (
+          <AnswerSign
+            onComplete={(valid, url) => {
+              setIsSignValid(valid);
+              setSignUrl(url);
+            }}
+          />
+        )}
 
         {isText && (
           <AnswerText value={textResponse} onChange={setTextResponse} />
@@ -405,44 +507,27 @@ const GenerateStep3 = () => {
             <button
               disabled={textResponse.length === 0}
               className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px]"
-              onClick={() => {
-                useInspectionFullStore.getState().setCompleteStep3(true);
-                useInspectionFullStore.getState().setStepWizard(4);
-                /*if (isText) {
-                  console.log("✏️ TEXT RESPONSE:", textResponse);
-                } else {
-                  console.log("🚀 JSON FINAL TREE:", exportTree(selectedTree));
-                }*/
-              }}
+              onClick={() => completeCurrentQuestion(textResponse)}
             >
               Continue
             </button>
           )}
-          {isSingle ||
-            (isMultiple && (
-              <button
-                disabled={exportTree(selectedTree).length === 0}
-                className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px]"
-                onClick={() => {
-                  useInspectionFullStore.getState().setCompleteStep3(true);
-                  useInspectionFullStore.getState().setStepWizard(4);
-                  /*if (isText) {
-                    console.log("✏️ TEXT RESPONSE:", textResponse);
-                  } else {
-                    console.log("🚀 JSON FINAL TREE:", exportTree(selectedTree));
-                  }*/
-                }}
-              >
-                Continue
-              </button>
-            ))}
+
+          {(isSingle || isMultiple) && (
+            <button
+              disabled={selectedTree.length === 0}
+              className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px]"
+              onClick={() => completeCurrentQuestion()}
+            >
+              Continue
+            </button>
+          )}
+
           {isSign && (
             <button
               disabled={!isSignValid}
               className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px]"
-              onClick={() => {
-                completeSign();
-              }}
+              onClick={() => completeCurrentQuestion(signUrl)}
             >
               Continue
             </button>
