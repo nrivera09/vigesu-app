@@ -56,7 +56,7 @@ const Wizard = () => {
       </li>
       <li
         onClick={() => goToStep(4)}
-        className={`step transition-all ${
+        className={`step transition-all !hidden ${
           stepWizard >= 4 ? "step-neutral" : ""
         } ${completeStep3 ? "cursor-pointer" : "cursor-not-allowed"}`}
       >

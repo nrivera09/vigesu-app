@@ -421,7 +421,10 @@ const GenerateStep3 = () => {
           statusInspectionConfig: true,
           answers: selectedTree.length > 0 ? selectedTree : q.answers,
         };
-        console.log("✅ Respuesta guardada:", updated);
+        if (!isLastQuestionInGroup) {
+          toast.info("✅ Respuesta guardada:");
+        }
+
         return updated;
       }
       return q;
@@ -445,7 +448,7 @@ const GenerateStep3 = () => {
       store.setStepWizard(3);
     } else {
       // ✅ Grupo completado: mostrar alerta + data completa
-      alert("✅ Terminaste este grupo.");
+      toast.success("✅ Terminaste este grupo.");
 
       const questionsOfGroup = updatedQuestions.filter(
         (q) =>
@@ -464,9 +467,43 @@ const GenerateStep3 = () => {
     }
   };
 
+  const isLastQuestionInGroup = fullInspection?.questions
+    .filter(
+      (q) =>
+        q.groupId === fullQuestion?.groupId &&
+        q.groupName === fullQuestion?.groupName
+    )
+    .every(
+      (q) =>
+        q.statusInspectionConfig ||
+        q.typeInspectionDetailId === fullQuestion?.typeInspectionDetailId
+    );
+
   useEffect(() => {
     console.log("📡 TREE RESPUESTAS EN TIEMPO REAL:", exportTree(selectedTree));
   }, [selectedTree]);
+
+  useEffect(() => {
+    if (!fullQuestion || !fullInspection) return;
+
+    // Buscar la pregunta actual en el store
+    const q = fullInspection.questions.find(
+      (q) => q.typeInspectionDetailId === fullQuestion.typeInspectionDetailId
+    );
+
+    // Hidratar estados si ya hay data guardada
+    if (q) {
+      setSelectedTree(q.answers ?? []);
+      setTextResponse(q.finalResponse ?? "");
+      setSignUrl(q.finalResponse ?? "");
+      setIsSignValid(!!q.finalResponse); // valida solo si hay firma (url)
+    } else {
+      setSelectedTree([]);
+      setTextResponse("");
+      setSignUrl("");
+      setIsSignValid(false);
+    }
+  }, [fullQuestion?.typeInspectionDetailId]);
 
   return (
     <>
@@ -509,7 +546,7 @@ const GenerateStep3 = () => {
               className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px]"
               onClick={() => completeCurrentQuestion(textResponse)}
             >
-              Continue
+              {isLastQuestionInGroup ? "Save" : "Continue"}
             </button>
           )}
 
@@ -519,7 +556,7 @@ const GenerateStep3 = () => {
               className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px]"
               onClick={() => completeCurrentQuestion()}
             >
-              Continue
+              {isLastQuestionInGroup ? "Save" : "Continue"}
             </button>
           )}
 
@@ -529,7 +566,7 @@ const GenerateStep3 = () => {
               className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px]"
               onClick={() => completeCurrentQuestion(signUrl)}
             >
-              Continue
+              {isLastQuestionInGroup ? "Save" : "Continue"}
             </button>
           )}
         </div>
