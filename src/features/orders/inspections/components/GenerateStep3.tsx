@@ -422,7 +422,7 @@ const GenerateStep3 = () => {
           answers: selectedTree.length > 0 ? selectedTree : q.answers,
         };
         if (!isLastQuestionInGroup) {
-          toast.info("✅ Respuesta guardada:");
+          toast.info("Respuesta guardada.");
         }
 
         return updated;
@@ -448,7 +448,7 @@ const GenerateStep3 = () => {
       store.setStepWizard(3);
     } else {
       // ✅ Grupo completado: mostrar alerta + data completa
-      toast.success("✅ Terminaste este grupo.");
+      toast.success("Terminaste este grupo.");
 
       const questionsOfGroup = updatedQuestions.filter(
         (q) =>
@@ -509,9 +509,11 @@ const GenerateStep3 = () => {
     <>
       <Wizard />
       <div className="card bg-base-200 p-6 shadow-xs">
-        <div className="flex flex-row justify-between items-center">
-          <h1 className="text-2xl font-bold">Question: {titleQuestion}</h1>
-          <label className="rounded-full bg-red-400 hidden md:flex items-center justify-center text-white overflow-hidden px-3 gap-1 py-1">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
+          <h1 className="text-2xl font-bold order-2 md:order-1">
+            Question: {titleQuestion}
+          </h1>
+          <label className="rounded-full bg-red-400 order-1 md:order-2  md:flex items-center justify-center text-white overflow-hidden px-3 gap-1 py-1  md:min-w-fit flex-row flex">
             <IoIosInformationCircleOutline className="size-6" />
             {fullQuestion?.typeQuestion !== undefined
               ? TypeQuestionLabel[fullQuestion.typeQuestion as TypeQuestion]

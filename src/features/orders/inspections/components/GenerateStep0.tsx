@@ -319,7 +319,7 @@ const GenerateStep0 = () => {
                   </div>
                   <div className="card-body flex flex-row justify-between gap-5">
                     <div className="flex flex-col items-start">
-                      <h2 className="card-title">{groupName} </h2>
+                      <h2 className="card-title text-left">{groupName} </h2>
                       <p className="text-lg text-left">
                         {inspectionData.description}
                       </p>
