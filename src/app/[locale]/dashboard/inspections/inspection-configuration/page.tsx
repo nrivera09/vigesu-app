@@ -34,6 +34,12 @@ const Page = () => {
     name: "",
   });
 
+  const [refreshFlag, setRefreshFlag] = useState(false);
+
+  const handleSuccess = () => {
+    setRefreshFlag(!refreshFlag);
+  };
+
   const resetTableList = () => {
     setObjFilterForm({
       client: "",
@@ -228,7 +234,10 @@ const Page = () => {
             </fieldset>
           </div>
           <div className="container mt-0 max-w-full">
-            <TableList objFilter={objFilterApplied} />
+            <TableList
+              objFilter={objFilterApplied}
+              setRefreshFlag={setRefreshFlag}
+            />
           </div>
         </div>
       </div>
