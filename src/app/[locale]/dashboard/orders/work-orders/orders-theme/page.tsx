@@ -13,6 +13,12 @@ const Page = () => {
   const pathname = usePathname();
   const pageTitle = usePageTitle();
 
+  const [refreshFlag, setRefreshFlag] = useState(false);
+
+  const handleSuccess = () => {
+    setRefreshFlag(!refreshFlag);
+  };
+
   const [objFilterForm, setObjFilterForm] = useState({
     client: "",
     status: "",
@@ -118,7 +124,10 @@ const Page = () => {
             </fieldset>
           </div>
           <div className="container mt-0 max-w-full">
-            <TableList objFilter={objFilterApplied} />
+            <TableList
+              objFilter={objFilterApplied}
+              setRefreshFlag={setRefreshFlag}
+            />
           </div>
         </div>
       </div>
