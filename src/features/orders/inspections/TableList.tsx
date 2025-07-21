@@ -66,9 +66,9 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
             <th className="w-[20%]">Inspection #</th>
             <th className="w-[15%]">Cliente</th>
             <th className="w-[15%]">Empleado</th>
-            <th className="w-[10%]">Fecha</th>
+            <th className="w-[15%]">Fecha</th>
             <th className="w-[10%]">Estado</th>
-            <th className="w-[20%]"></th>
+            <th className="w-[10%]"></th>
           </tr>
         </thead>
         <tbody>
@@ -110,6 +110,7 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
                     onClick={() =>
                       router.push(`${pathname}/workorder/${item.inspectionId}`)
                     }
+                    className="!hidden"
                   />
                   {item.status !== 1 && (
                     <ActionButton

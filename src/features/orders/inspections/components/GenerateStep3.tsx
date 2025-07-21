@@ -501,11 +501,11 @@ const GenerateStep3 = () => {
     );
 
     // Hidratar estados si ya hay data guardada
-    if (q) {
+    if (q?.statusInspectionConfig) {
       setSelectedTree(q.answers ?? []);
       setTextResponse(q.finalResponse ?? "");
       setSignUrl(q.finalResponse ?? "");
-      setIsSignValid(!!q.finalResponse); // valida solo si hay firma (url)
+      setIsSignValid(!!q.finalResponse);
     } else {
       setSelectedTree([]);
       setTextResponse("");

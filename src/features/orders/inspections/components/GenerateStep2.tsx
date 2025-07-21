@@ -12,6 +12,7 @@ import { FaCheckCircle } from "react-icons/fa";
 import clsx from "clsx";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { axiosInstance } from "@/shared/utils/axiosInstance";
 
 const GenerateStep2 = () => {
   const router = useRouter();
@@ -64,18 +65,8 @@ const GenerateStep2 = () => {
     console.log("📤 Enviando payload a API:", payload);
 
     try {
-      const res = await fetch(
-        "https://ronnyruiz-001-site1.qtempurl.com/api/Inspection",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+      const response = await axiosInstance.post("/Inspection", payload);
 
-      if (!res.ok) throw new Error("Falló el envío");
       toast.success("✅ Inspección enviada correctamente");
 
       // ✅ RESET COMPLETO
