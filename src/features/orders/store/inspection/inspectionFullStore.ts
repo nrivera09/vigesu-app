@@ -19,7 +19,9 @@ interface InspectionFullState {
   completeStep3: boolean;
   completeStep4: boolean;
   groupedQuestions: Record<string, IFullTypeInspection[]>;
+  resetTrigger: number; // 👈 NUEVO
   setGroupedQuestions: (data: Record<string, IFullTypeInspection[]>) => void;
+  incrementResetTrigger: () => void; // 👈 NUEVO
 
   setCompleteStep1: (complete: boolean) => void;
   setCompleteStep2: (complete: boolean) => void;
@@ -47,8 +49,14 @@ export const useInspectionFullStore = create<InspectionFullState>()(
       completeStep2: false,
       completeStep3: false,
       completeStep4: false,
-      groupedQuestions: {}, // ✅ inicialización
-      setGroupedQuestions: (data) => set({ groupedQuestions: data }), // ✅ setter
+      groupedQuestions: {},
+
+      resetTrigger: 0, // 👈 NUEVO
+
+      setGroupedQuestions: (data) => set({ groupedQuestions: data }),
+      incrementResetTrigger: () =>
+        set((state) => ({ resetTrigger: state.resetTrigger + 1 })), // 👈 NUEVO
+
       setCompleteStep1: (complete: boolean) => set({ completeStep1: complete }),
       setCompleteStep2: (complete: boolean) => set({ completeStep2: complete }),
       setCompleteStep3: (complete: boolean) => set({ completeStep3: complete }),
@@ -75,8 +83,9 @@ export const useInspectionFullStore = create<InspectionFullState>()(
       setGroupName: (name: string) => set({ groupName: name }),
       setGroupId: (id: number) => set({ groupId: id }),
       setStepWizard: (step: number) => set({ stepWizard: step }),
+
       resetFullInspection: () =>
-        set({
+        set((state) => ({
           fullInspection: null,
           fullQuestion: null,
           groupName: "",
@@ -87,8 +96,9 @@ export const useInspectionFullStore = create<InspectionFullState>()(
           completeStep2: false,
           completeStep3: false,
           completeStep4: false,
-          groupedQuestions: {}, // ✅ también se limpia al resetear
-        }),
+          groupedQuestions: {},
+          resetTrigger: state.resetTrigger + 1, // 👈 también reinicia estados reactivos
+        })),
     }),
     {
       name: "inspection-full-storage",

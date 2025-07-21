@@ -77,7 +77,10 @@ const GenerateStep2 = () => {
 
       if (!res.ok) throw new Error("Falló el envío");
       toast.success("✅ Inspección enviada correctamente");
-      /*store.setStepWizard(2);*/
+
+      // ✅ RESET COMPLETO
+      useInspectionFullStore.getState().resetFullInspection();
+
       router.push("./");
     } catch (error) {
       toast.error("❌ Error al enviar inspección");

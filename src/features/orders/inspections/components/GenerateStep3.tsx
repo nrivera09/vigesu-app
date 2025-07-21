@@ -45,6 +45,15 @@ const GenerateStep3 = () => {
   const [initialItems, setInitialItems] = useState<ItemWithQuantity[]>([]);
   const [textResponse, setTextResponse] = useState("");
 
+  const { resetTrigger } = useInspectionFullStore();
+
+  useEffect(() => {
+    setSelectedTree([]);
+    setTextResponse("");
+    setSignUrl(undefined);
+    setIsSignValid(false);
+  }, [resetTrigger]);
+
   const currentAnswers =
     fullInspection?.questions
       .filter(

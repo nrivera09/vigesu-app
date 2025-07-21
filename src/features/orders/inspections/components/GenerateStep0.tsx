@@ -144,6 +144,8 @@ const GenerateStep0 = () => {
   ) => {
     try {
       setIsLoading(true);
+      useInspectionFullStore.getState().resetFullInspection(); // ✅ Reset antes de todo
+
       const res = await axiosInstance.get<IFullTypeInspection>(
         `/TypeInspection/GetFullTypeInspectionId?TypeInspectionId=${typeInspectionId}`
       );
