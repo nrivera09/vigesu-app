@@ -34,7 +34,6 @@ interface ExportedAnswer {
 const GenerateStep3 = () => {
   const { fullInspection, groupName, groupId, titleQuestion, fullQuestion } =
     useInspectionFullStore();
-
   const [selectedTree, setSelectedTree] = useState<IFullAnswer[]>([]);
   const [isSignValid, setIsSignValid] = useState(false);
 
@@ -124,47 +123,80 @@ const GenerateStep3 = () => {
     answer: IFullAnswer,
     parentId?: string
   ): IFullAnswer[] => {
-    if (!parentId) {
-      if (!isMultiple) {
+    const isRoot = !parentId;
+
+    // ✅ SINGLE CHOICE: Solo 1 rama
+    if (!isMultiple) {
+      if (isRoot) {
         return [{ ...answer, subAnswers: [] }];
       }
-      const exists = tree.find(
-        (a) =>
-          a.typeInspectionDetailAnswerId === answer.typeInspectionDetailAnswerId
-      );
-      return exists
-        ? tree.filter(
+
+      // Solo permite una subrespuesta por nivel
+      return tree.map((node) => {
+        if (String(node.typeInspectionDetailAnswerId) === parentId) {
+          return {
+            ...node,
+            subAnswers: [{ ...answer, subAnswers: [] }],
+          };
+        }
+        if (node.subAnswers?.length) {
+          return {
+            ...node,
+            subAnswers: toggleAnswer(node.subAnswers, answer, parentId),
+          };
+        }
+        return node;
+      });
+    }
+
+    // ✅ MULTIPLE CHOICE: una raíz + múltiples ramas
+    if (isMultiple) {
+      if (isRoot) {
+        const exists = tree.find(
+          (a) =>
+            a.typeInspectionDetailAnswerId ===
+            answer.typeInspectionDetailAnswerId
+        );
+        if (exists) {
+          return tree.filter(
             (a) =>
               a.typeInspectionDetailAnswerId !==
               answer.typeInspectionDetailAnswerId
-          )
-        : [...tree, { ...answer, subAnswers: [] }];
+          );
+        } else {
+          // Si ya hay otra raíz, la reemplaza (solo 1 raíz)
+          return [{ ...answer, subAnswers: [] }];
+        }
+      }
+
+      // Para subniveles, sí permite múltiples
+      return tree.map((node) => {
+        if (String(node.typeInspectionDetailAnswerId) === parentId) {
+          const exists = node.subAnswers?.some(
+            (sub) =>
+              sub.typeInspectionDetailAnswerId ===
+              answer.typeInspectionDetailAnswerId
+          );
+          const newSubs = exists
+            ? node.subAnswers!.filter(
+                (sub) =>
+                  sub.typeInspectionDetailAnswerId !==
+                  answer.typeInspectionDetailAnswerId
+              )
+            : [...(node.subAnswers ?? []), { ...answer, subAnswers: [] }];
+          return { ...node, subAnswers: newSubs };
+        }
+        if (node.subAnswers?.length) {
+          return {
+            ...node,
+            subAnswers: toggleAnswer(node.subAnswers, answer, parentId),
+          };
+        }
+        return node;
+      });
     }
 
-    return tree.map((node) => {
-      if (String(node.typeInspectionDetailAnswerId) === parentId) {
-        const exists = node.subAnswers?.some(
-          (sub) =>
-            sub.typeInspectionDetailAnswerId ===
-            answer.typeInspectionDetailAnswerId
-        );
-        const newSubs = exists
-          ? node.subAnswers!.filter(
-              (sub) =>
-                sub.typeInspectionDetailAnswerId !==
-                answer.typeInspectionDetailAnswerId
-            )
-          : [...(node.subAnswers ?? []), { ...answer, subAnswers: [] }];
-        return { ...node, subAnswers: newSubs };
-      }
-      if (node.subAnswers?.length) {
-        return {
-          ...node,
-          subAnswers: toggleAnswer(node.subAnswers, answer, parentId),
-        };
-      }
-      return node;
-    });
+    return tree;
   };
 
   const getAnswerFromTree = (

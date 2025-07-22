@@ -8,6 +8,7 @@ interface Props {
 }
 
 const AnswerOptions = ({ answers, renderAnswer }: Props) => {
+  console.log("datita: ", answers, renderAnswer);
   return (
     <div className="mt-4 flex flex-row gap-4 flex-nowrap overflow-x-auto">
       {answers.map((answer) => (

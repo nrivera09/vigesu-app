@@ -25,11 +25,9 @@ const AnswerSign = ({ onComplete }: Props) => {
 
   const user = useAuthStore((state) => state.user);
   const token = useAuthStore((state) => state.token);
-  debugger;
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        debugger;
         setLoading(true);
         const res = await axiosInstance.get(
           `/User/GetUserId?UserId=${user?.userId}`
