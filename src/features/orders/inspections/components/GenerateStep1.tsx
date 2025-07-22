@@ -22,6 +22,9 @@ import Wizard from "./Wizard";
 import Lottie from "lottie-react";
 
 import checkLottie from "@/assets/lotties/check.json";
+import { FaCheckCircle } from "react-icons/fa";
+import clsx from "clsx";
+import { BsQuestionCircle } from "react-icons/bs";
 
 const GenerateStep1 = () => {
   const router = useRouter();
@@ -87,19 +90,20 @@ const GenerateStep1 = () => {
                     className="w-full card lg:card-side bg-black/80 shadow-sm overflow-hidden cursor-pointer transition-all hover:shadow-lg  hover:bg-[#191917] text-white hover:text-white/80 flex flex-row"
                     key={groupName}
                   >
-                    {fullInspection.statusInspectionConfig ? (
-                      <div className="bg-[#191917] w-fit flex items-center justify-center p-2">
-                        <Lottie
-                          animationData={checkLottie}
-                          style={{ width: 35, height: 35 }}
-                          loop={false}
-                        />
-                      </div>
-                    ) : (
-                      <div className="bg-[#191917] w-fit flex items-center justify-center p-2">
-                        <GiAutoRepair className="w-[25px] h-[25px]  text-white" />
-                      </div>
-                    )}
+                    <div
+                      className={clsx(
+                        ` w-fit flex items-center justify-center p-2`,
+                        fullInspection.statusInspectionConfig
+                          ? `bg-green-800`
+                          : `bg-[#191917]`
+                      )}
+                    >
+                      {fullInspection.statusInspectionConfig ? (
+                        <FaCheckCircle className="w-[20px] h-[20px]  text-green-400 mx-auto" />
+                      ) : (
+                        <BsQuestionCircle className="w-[20px] h-[20px]  text-white mx-auto" />
+                      )}
+                    </div>
                     <div className="card-body flex flex-row justify-between gap-5">
                       <div className="flex flex-col items-start">
                         <h2 className="card-title text-left">{groupName} </h2>

@@ -99,6 +99,13 @@ const GenerateStep0 = () => {
     setObjFilterForm({ client: option.name });
     setShowCustomerDropdown(false);
     setCustomerOptions([]);
+
+    // 🔄 Limpiar selección anterior
+    setSelectedType(null);
+    setInspectionData(null);
+    setTypeOptions([]);
+
+    // Cargar nuevos tipos
     fetchTypeInspections(option.id);
   };
 
@@ -117,11 +124,11 @@ const GenerateStep0 = () => {
   };
 
   const handleTypeChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setInspectionData(null);
     const found = typeOptions.find(
       (type) => type.typeInspectionId === parseInt(e.target.value)
     );
     setSelectedType(found ?? null);
-
     if (found) {
       try {
         const res = await axiosInstance.get<IFullTypeInspection>(
@@ -144,7 +151,6 @@ const GenerateStep0 = () => {
   ) => {
     try {
       setIsLoading(true);
-      useInspectionFullStore.getState().resetFullInspection(); // ✅ Reset antes de todo
 
       const res = await axiosInstance.get<IFullTypeInspection>(
         `/TypeInspection/GetFullTypeInspectionId?TypeInspectionId=${typeInspectionId}`
@@ -253,6 +259,7 @@ const GenerateStep0 = () => {
             <select
               className="select w-full text-lg input-lg disabled:border-gray-200"
               disabled={!typeOptions.length}
+              value={selectedType?.typeInspectionId || ""}
               onChange={handleTypeChange}
             >
               <option value="">Seleccione una opción</option>
@@ -294,9 +301,9 @@ const GenerateStep0 = () => {
       </fieldset>
 
       <div className="!hidden">
-        {!inspectionData && (
+        {/*!inspectionData && (
           <Loading height="h-[300px]" label="Esperando configuración ..." />
-        )}
+        )*/}
         {/* Grupos (cards) */}
         <div className="cont my-5 flex flex-col gap-4">
           {inspectionData &&
@@ -354,9 +361,9 @@ const GenerateStep0 = () => {
           {stepWizard === 4 && <GenerateStep4 />}
         </div>
       )}
-      {isLoading && (
-        <Loading className="absolute top-0 left-0 h-full bg-[#00000017] z-50" />
-      )}
+      {/*isLoading && (
+        <Loading className="absolute top-0 left-0 h-full bg-white z-50" />
+      )*/}
     </>
   );
 };

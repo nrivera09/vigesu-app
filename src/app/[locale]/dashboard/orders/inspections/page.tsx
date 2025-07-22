@@ -84,7 +84,7 @@ const Page = () => {
           <BackButton title={!title ? "Inspections" : title} disableArrow />
           <div className="flex flex-row gap-2">
             <Link
-              href={`${pathname}/workorder/`}
+              href={`${pathname}/create/`}
               className="btn bg-black rounded-full pr-3 py-6  sm:flex border-none"
             >
               <FiPlus className="text-xl text-white" />
