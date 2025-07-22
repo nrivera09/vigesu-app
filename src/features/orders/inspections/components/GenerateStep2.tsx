@@ -33,6 +33,8 @@ const GenerateStep2 = () => {
       )
       .filter((item) => item.statusInspectionConfig === false).length ?? 0;
 
+  console.log("enableFinalButton : ", enableFinalButton);
+
   const handleFinalSubmit = async () => {
     if (!fullInspection) return;
 
@@ -122,13 +124,18 @@ const GenerateStep2 = () => {
           </button>
         ))}
       <div className="text-center mt-9">
-        <button
-          className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px]"
-          disabled={enableFinalButton > 0 ? true : false}
-          onClick={handleFinalSubmit}
-        >
-          Complete and save inspection
-        </button>
+        {enableFinalButton == 0 && (
+          <button
+            disabled={enableFinalButton > 0}
+            className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-fit mx-auto text-[13px]"
+            onClick={() => useInspectionFullStore.getState().setStepWizard(1)}
+          >
+            You have completed all the questions,{" "}
+            <span className="underline text-red-400">
+              click and go to the next group
+            </span>
+          </button>
+        )}
       </div>
     </>
   );

@@ -152,10 +152,31 @@ const GenerateStep0 = () => {
     try {
       setIsLoading(true);
 
+      const store = useInspectionFullStore.getState();
+      const previous = store.fullInspection;
+
       const res = await axiosInstance.get<IFullTypeInspection>(
         `/TypeInspection/GetFullTypeInspectionId?TypeInspectionId=${typeInspectionId}`
       );
-      useInspectionFullStore.getState().setFullInspection(res.data);
+
+      // fusiona respuestas anteriores si existen
+      const mergedQuestions = res.data.questions.map((q) => {
+        const prev = previous?.questions.find(
+          (pq) => pq.typeInspectionDetailId === q.typeInspectionDetailId
+        );
+        return {
+          ...q,
+          answers: prev?.answers ?? q.answers,
+          finalResponse: prev?.finalResponse ?? "",
+          statusInspectionConfig: prev?.statusInspectionConfig ?? false,
+        };
+      });
+
+      store.setFullInspection({
+        ...res.data,
+        questions: mergedQuestions,
+      });
+
       useInspectionFullStore.getState().setGroupName(groupName);
       useInspectionFullStore.getState().setGroupId(groupId);
       useInspectionFullStore.getState().setStepWizard(1);

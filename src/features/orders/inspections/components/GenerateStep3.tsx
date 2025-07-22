@@ -389,41 +389,6 @@ const GenerateStep3 = () => {
 
     const updatedQuestions = current.questions.map((q) => {
       if (q.typeInspectionDetailId === fullQuestion.typeInspectionDetailId) {
-        return {
-          ...q,
-          finalResponse: responseValue ?? q.finalResponse ?? "",
-          statusInspectionConfig: true,
-          answers: selectedTree.length > 0 ? selectedTree : q.answers,
-        };
-      }
-      return q;
-    });
-
-    store.setFullInspection({ ...current, questions: updatedQuestions });
-
-    const nextUnanswered = updatedQuestions.find(
-      (q) => !q.statusInspectionConfig
-    );
-    if (nextUnanswered) {
-      store.setFullQuestion(nextUnanswered);
-      store.setGroupId(nextUnanswered.groupId);
-      store.setGroupName(nextUnanswered.groupName);
-      store.setTitleQuestion(nextUnanswered.question);
-      store.setStepWizard(3);
-    } else {
-      store.setStepWizard(2);
-    }
-  };
-
-  const completeCurrentQuestion = (responseValue: string | null = null) => {
-    const store = useInspectionFullStore.getState();
-    const current = store.fullInspection;
-    const fullQuestion = store.fullQuestion;
-
-    if (!current || !fullQuestion) return;
-
-    const updatedQuestions = current.questions.map((q) => {
-      if (q.typeInspectionDetailId === fullQuestion.typeInspectionDetailId) {
         const updated = {
           ...q,
           finalResponse: responseValue ?? q.finalResponse ?? "",
@@ -474,6 +439,63 @@ const GenerateStep3 = () => {
       console.log("🧠 Objeto completo de este grupo:", result);
       store.setStepWizard(2);
     }
+  };
+
+  const completeCurrentQuestion = (responseValue: string | null = null) => {
+    const store = useInspectionFullStore.getState();
+    const current = store.fullInspection;
+    const fullQuestion = store.fullQuestion;
+
+    if (!current || !fullQuestion) return;
+
+    const updatedQuestions = current.questions.map((q) => {
+      if (q.typeInspectionDetailId === fullQuestion.typeInspectionDetailId) {
+        return {
+          ...q,
+          finalResponse: responseValue ?? q.finalResponse ?? "",
+          statusInspectionConfig: true,
+          answers: selectedTree.length > 0 ? selectedTree : q.answers,
+        };
+      }
+      return q;
+    });
+
+    const currentGroupQuestions = updatedQuestions.filter(
+      (q) =>
+        q.groupId === fullQuestion.groupId &&
+        q.groupName === fullQuestion.groupName
+    );
+
+    const groupCompleted = currentGroupQuestions.every(
+      (q) => q.statusInspectionConfig
+    );
+
+    const updatedInspection = {
+      ...current,
+      questions: updatedQuestions,
+      statusInspectionConfig: updatedQuestions.every(
+        (q) => q.statusInspectionConfig
+      ),
+    };
+
+    store.setFullInspection(updatedInspection);
+
+    if (!groupCompleted) {
+      const nextUnanswered = currentGroupQuestions.find(
+        (q) => !q.statusInspectionConfig
+      );
+      if (nextUnanswered) {
+        store.setFullQuestion(nextUnanswered);
+        store.setGroupId(nextUnanswered.groupId);
+        store.setGroupName(nextUnanswered.groupName);
+        store.setTitleQuestion(nextUnanswered.question);
+        store.setStepWizard(3);
+        return;
+      }
+    }
+
+    toast.success("✅ Grupo finalizado correctamente.");
+    store.setStepWizard(2);
   };
 
   const isLastQuestionInGroup = fullInspection?.questions

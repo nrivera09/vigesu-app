@@ -25,6 +25,7 @@ import checkLottie from "@/assets/lotties/check.json";
 import { FaCheckCircle } from "react-icons/fa";
 import clsx from "clsx";
 import { BsQuestionCircle } from "react-icons/bs";
+import { toast } from "sonner";
 
 const GenerateStep1 = () => {
   const router = useRouter();
@@ -43,10 +44,31 @@ const GenerateStep1 = () => {
     groupId: number
   ) => {
     try {
+      const store = useInspectionFullStore.getState();
+      const previous = store.fullInspection;
+
       const res = await axiosInstance.get<IFullTypeInspection>(
         `/TypeInspection/GetFullTypeInspectionId?TypeInspectionId=${typeInspectionId}`
       );
-      useInspectionFullStore.getState().setFullInspection(res.data);
+
+      // fusiona respuestas anteriores si existen
+      const mergedQuestions = res.data.questions.map((q) => {
+        const prev = previous?.questions.find(
+          (pq) => pq.typeInspectionDetailId === q.typeInspectionDetailId
+        );
+        return {
+          ...q,
+          answers: prev?.answers ?? q.answers,
+          finalResponse: prev?.finalResponse ?? "",
+          statusInspectionConfig: prev?.statusInspectionConfig ?? false,
+        };
+      });
+
+      store.setFullInspection({
+        ...res.data,
+        questions: mergedQuestions,
+      });
+
       useInspectionFullStore.getState().setGroupName(groupName);
       useInspectionFullStore.getState().setGroupId(groupId);
       /* const grouped = res.data.questions.reduce((acc, question) => {
@@ -58,6 +80,52 @@ const GenerateStep1 = () => {
       setStepWizard(2);
     } catch (err) {
       console.error("Error al obtener datos completos de inspección", err);
+    }
+  };
+
+  const handleFinalSubmit = async () => {
+    if (!fullInspection) return;
+
+    const payload = {
+      typeInspectionId: fullInspection.typeInspectionId,
+      customerId: fullInspection.customerId,
+      employeeId: "empleado-123", // puedes reemplazar esto con el real
+      customerName: "Cliente Prueba", // idem
+      employeeName: "Empleado QA", // idem
+      dateOfInspection: new Date().toISOString(),
+      inspectionDetails: fullInspection.questions.map((q) => ({
+        typeInspectionDetailId: q.typeInspectionDetailId,
+        typeInspectionDetailAnswerId:
+          q.answers[0]?.typeInspectionDetailAnswerId ?? 0,
+        finalResponse: q.finalResponse ?? "",
+        inspectionDetailAnswers: q.answers.map((a) => ({
+          typeInspectionDetailAnswerId: a.typeInspectionDetailAnswerId,
+          finalResponse: a.response,
+          inspectionDetailAnswerItem: (a.selectedItems ?? []).map((item) => ({
+            itemId: item.id,
+            itemName: item.name,
+            quantity: item.quantity,
+            price: item.unitPrice,
+          })),
+        })),
+      })),
+      inspectionPhotos: [], // puedes completar luego si usas fotos
+    };
+
+    console.log("📤 Enviando payload a API:", payload);
+
+    try {
+      const response = await axiosInstance.post("/Inspection", payload);
+
+      toast.success("✅ Inspección enviada correctamente");
+
+      // ✅ RESET COMPLETO
+      useInspectionFullStore.getState().resetFullInspection();
+
+      router.push("./");
+    } catch (error) {
+      toast.error("❌ Error al enviar inspección");
+      console.error(error);
     }
   };
 
@@ -87,18 +155,23 @@ const GenerateStep1 = () => {
                         groupId
                       )
                     }
-                    className="w-full card lg:card-side bg-black/80 shadow-sm overflow-hidden cursor-pointer transition-all hover:shadow-lg  hover:bg-[#191917] text-white hover:text-white/80 flex flex-row"
+                    className={clsx(
+                      `w-full flex flex-row card lg:card-side  shadow-sm overflow-hidden cursor-pointer transition-all hover:shadow-lg mb-5  text-white `,
+                      questions.every((q) => q.statusInspectionConfig)
+                        ? `bg-green-800/80 hover:bg-green-800 hover:text-white/80`
+                        : `bg-black/80 hover:bg-[#191917] hover:text-white/80`
+                    )}
                     key={groupName}
                   >
                     <div
                       className={clsx(
                         ` w-fit flex items-center justify-center p-2`,
-                        fullInspection.statusInspectionConfig
+                        questions.every((q) => q.statusInspectionConfig)
                           ? `bg-green-800`
                           : `bg-[#191917]`
                       )}
                     >
-                      {fullInspection.statusInspectionConfig ? (
+                      {questions.every((q) => q.statusInspectionConfig) ? (
                         <FaCheckCircle className="w-[20px] h-[20px]  text-green-400 mx-auto" />
                       ) : (
                         <BsQuestionCircle className="w-[20px] h-[20px]  text-white mx-auto" />
@@ -137,6 +210,17 @@ const GenerateStep1 = () => {
               })}
           </div>
         )}
+      </div>
+      <div className="text-center mt-9">
+        <button
+          className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px]"
+          disabled={
+            !fullInspection?.questions.every((q) => q.statusInspectionConfig)
+          }
+          onClick={() => handleFinalSubmit()}
+        >
+          Complete and save inspection
+        </button>
       </div>
     </>
   );
