@@ -9,13 +9,6 @@ const Wizard = () => {
     completeStep3,
     setStepWizard,
   } = useInspectionFullStore();
-  console.log(
-    "wizard: ",
-    stepWizard,
-    completeStep1,
-    completeStep2,
-    completeStep3
-  );
   const goToStep = (step: number) => {
     const store = useInspectionFullStore.getState();
     switch (step) {

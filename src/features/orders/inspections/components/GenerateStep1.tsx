@@ -76,7 +76,7 @@ const GenerateStep1 = () => {
           acc[question.groupName].push(question);
           return acc;
         }, {} as Record<string, IFullQuestion[]>);*/
-      setCompleteStep1(true);
+      setCompleteStep1(false);
       setStepWizard(2);
     } catch (err) {
       console.error("Error al obtener datos completos de inspección", err);
