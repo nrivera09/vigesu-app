@@ -1,4 +1,4 @@
-// ✅ Nuevo formulario con Zod y react-hook-form para validación cruzada
+//  Nuevo formulario con Zod y react-hook-form para validación cruzada
 "use client";
 
 import { COMPANY_INFO } from "@/config/constants";
@@ -185,7 +185,7 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
 
     try {
       const res = await axiosInstance.post("/TypeInspection", payload);
-      //console.log("✅ Enviado correctamente:", res.data);
+      //console.log(" Enviado correctamente:", res.data);
 
       toast.success("Inspection order creado correctamente!");
       router.push("../");

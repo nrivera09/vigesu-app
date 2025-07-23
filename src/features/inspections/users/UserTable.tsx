@@ -69,7 +69,7 @@ const UserTable: FC<Props> = ({ objFilter, refreshFlag }) => {
     };
 
     fetchUsers();
-  }, [refreshFlag, localRefreshFlag, currentPage]); // ✅ IMPORTANTE
+  }, [refreshFlag, localRefreshFlag, currentPage]); //  IMPORTANTE
 
   const handleSuccess = () => {
     setShowModal(false);

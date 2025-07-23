@@ -69,9 +69,9 @@ const GenerateStep2 = () => {
     try {
       const response = await axiosInstance.post("/Inspection", payload);
 
-      toast.success("✅ Inspección enviada correctamente");
+      toast.success("Inspección enviada correctamente");
 
-      // ✅ RESET COMPLETO
+      //  RESET COMPLETO
       useInspectionFullStore.getState().resetFullInspection();
 
       router.push("./");

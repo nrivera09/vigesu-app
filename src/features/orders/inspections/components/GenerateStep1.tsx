@@ -159,19 +159,18 @@ const GenerateStep1 = () => {
 
     console.log("📤 Enviando payload a API:", payload);
 
-    try {
-      /*const response = await axiosInstance.post("/Inspection", payload);
+    /*try {
+      const response = await axiosInstance.post("/Inspection", payload);
 
-      toast.success("✅ Inspección enviada correctamente");
+      toast.success("Inspección enviada correctamente");
 
-      
       useInspectionFullStore.getState().resetFullInspection();
 
-      router.push("./");*/
+      router.push("./");
     } catch (error) {
       toast.error("❌ Error al enviar inspección");
       console.error(error);
-    }
+    }*/
   };
 
   return (

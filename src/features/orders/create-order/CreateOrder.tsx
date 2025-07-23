@@ -288,7 +288,7 @@ const CreateOrder = () => {
       const response = await axiosInstance.post("/WorkOrder", payload);
       const workOrderId = response.data;
 
-      console.log("✅ WorkOrder creado:", workOrderId);
+      console.log(" WorkOrder creado:", workOrderId);
 
       // Ahora validamos si hay archivos para subir
       if (files.length > 0) {
@@ -306,7 +306,7 @@ const CreateOrder = () => {
           headers: { "Content-Type": "multipart/form-data" },
         });
 
-        console.log("✅ Archivos subidos correctamente");
+        console.log(" Archivos subidos correctamente");
       }
 
       console.log("🎯 Todo OK - proceso finalizado");

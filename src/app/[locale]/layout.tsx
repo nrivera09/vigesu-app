@@ -41,7 +41,7 @@ export default async function RootLayout({
           <LanguageSwitcher />
           */}
             {children}
-            <Toaster richColors position="bottom-center" />
+            <Toaster richColors position="bottom-right" />
           </NextIntlClientProvider>
         </body>
       </html>

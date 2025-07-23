@@ -1,4 +1,4 @@
-// ✅ Nuevo formulario con Zod y react-hook-form para validación cruzada
+//  Nuevo formulario con Zod y react-hook-form para validación cruzada
 "use client";
 
 import { COMPANY_INFO } from "@/config/constants";
@@ -241,7 +241,7 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
     }
 
     const payload = {
-      typeInspectionId: Number(id), // ✅ aquí lo agregamos
+      typeInspectionId: Number(id), //  aquí lo agregamos
       templateInspectionId: Number(currentTemplateId),
       customerId: String(selectedCustomer?.id ?? ""),
       customerName: data.client,

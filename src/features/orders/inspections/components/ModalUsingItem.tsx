@@ -34,7 +34,7 @@ const ModalUsingItem = ({
   const [quantity, setQuantity] = useState<number>(1);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // ✅ Debounced search function usando useRef como en tu ejemplo
+  //  Debounced search function usando useRef como en tu ejemplo
   const debouncedFetch = useRef(
     debounce(async (term: string) => {
       if (term.length < 3) return;

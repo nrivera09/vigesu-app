@@ -34,7 +34,7 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
   const [totalOrders, setTotalOrders] = useState<number | null>(null);
   const [totalInspections, setTotalInspections] = useState<number | null>(null);
 
-  // ✅ Todas tus rutas reales definidas abajo
+  //  Todas tus rutas reales definidas abajo
   const ordersLinks =
     rol === 1
       ? [

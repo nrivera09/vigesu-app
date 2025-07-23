@@ -1,4 +1,4 @@
-// ✅ Versión corregida: guarda todas las respuestas seleccionadas por nivel correctamente y respeta subAnswers anidados
+//  Versión corregida: guarda todas las respuestas seleccionadas por nivel correctamente y respeta subAnswers anidados
 import React, { useEffect, useState } from "react";
 import { useInspectionFullStore } from "../../store/inspection/inspectionFullStore";
 import { isColorLight } from "@/shared/utils/utils";
@@ -125,7 +125,7 @@ const GenerateStep3 = () => {
   ): IFullAnswer[] => {
     const isRoot = !parentId;
 
-    // ✅ SINGLE CHOICE: Solo 1 rama
+    //  SINGLE CHOICE: Solo 1 rama
     if (!isMultiple) {
       if (isRoot) {
         return [{ ...answer, subAnswers: [] }];
@@ -149,7 +149,7 @@ const GenerateStep3 = () => {
       });
     }
 
-    // ✅ MULTIPLE CHOICE: una raíz + múltiples ramas
+    //  MULTIPLE CHOICE: una raíz + múltiples ramas
     if (isMultiple) {
       if (isRoot) {
         const exists = tree.find(
@@ -394,7 +394,7 @@ const GenerateStep3 = () => {
         q.typeInspectionDetailId === fullQuestion.typeInspectionDetailId;
 
       if (match) {
-        console.log("✅ Actualizando statusInspectionConfig de:", q);
+        console.log(" Actualizando statusInspectionConfig de:", q);
         return {
           ...q,
           statusInspectionConfig: true,
@@ -453,7 +453,7 @@ const GenerateStep3 = () => {
       store.setTitleQuestion(remainingInGroup.question);
       store.setStepWizard(3);
     } else {
-      // ✅ Grupo completado: mostrar alerta + data completa
+      //  Grupo completado: mostrar alerta + data completa
       toast.success("Terminaste este grupo.");
 
       const questionsOfGroup = updatedQuestions.filter(
@@ -526,7 +526,7 @@ const GenerateStep3 = () => {
       }
     }
 
-    toast.success("✅ Grupo finalizado correctamente.");
+    toast.success("Grupo finalizado correctamente.");
     store.setStepWizard(2);
   };
 

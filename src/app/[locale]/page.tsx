@@ -47,10 +47,10 @@ export default function Home() {
       const res = await axiosInstance.post("/Auth/login", data);
 
       if (res.data?.token && res.data?.user) {
-        // ✅ Guarda el token en cookies
+        //  Guarda el token en cookies
         setCookie("auth-token", res.data.token, { path: "/" });
 
-        // ✅ Guarda en Zustand
+        //  Guarda en Zustand
         setAuth({
           token: res.data.token,
           user: res.data.user,

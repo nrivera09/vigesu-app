@@ -1,4 +1,4 @@
-// ✅ Tabla dinámica para Inspections Configuration con API real
+//  Tabla dinámica para Inspections Configuration con API real
 "use client";
 
 import { useEffect, useState } from "react";
@@ -30,7 +30,7 @@ const TableList = ({ objFilter }: TableListProps) => {
     setLoading(true);
     try {
       const { items, totalCount } = await getTypeInspections({
-        Name: objFilter.name, // ✅ Solo esto es válido según Swagger
+        Name: objFilter.name, //  Solo esto es válido según Swagger
         PageNumber: currentPage,
         PageSize: rowsPerPage,
       });
