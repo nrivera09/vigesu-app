@@ -9,6 +9,7 @@ import {
 } from "@/features/orders/inspections/types/IInspectionSelect";
 import { debounce } from "lodash";
 import {
+  IFullAnswer,
   IFullQuestion,
   IFullTypeInspection,
 } from "../types/IFullTypeInspection";
@@ -83,15 +84,28 @@ const GenerateStep1 = () => {
     }
   };
 
+  const extractAnswerRecursiveArray = (
+    answers: IFullAnswer[]
+  ): IFullAnswer[] => {
+    return answers.flatMap((answer) => [
+      {
+        ...answer,
+      },
+      ...(answer.subAnswers
+        ? extractAnswerRecursiveArray(answer.subAnswers)
+        : []),
+    ]);
+  };
+
   const handleFinalSubmit = async () => {
     if (!fullInspection) return;
 
-    const payload = {
+    /* const payload = {
       typeInspectionId: fullInspection.typeInspectionId,
       customerId: fullInspection.customerId,
-      employeeId: "empleado-123", // puedes reemplazar esto con el real
-      customerName: "Cliente Prueba", // idem
-      employeeName: "Empleado QA", // idem
+      employeeId: "empleado-123", 
+      customerName: "Cliente Prueba", 
+      employeeName: "Empleado QA", 
       dateOfInspection: new Date().toISOString(),
       inspectionDetails: fullInspection.questions.map((q) => ({
         typeInspectionDetailId: q.typeInspectionDetailId,
@@ -109,20 +123,51 @@ const GenerateStep1 = () => {
           })),
         })),
       })),
-      inspectionPhotos: [], // puedes completar luego si usas fotos
+      inspectionPhotos: [],
+    };*/
+
+    const payload = {
+      typeInspectionId: fullInspection.typeInspectionId,
+      customerId: fullInspection.customerId,
+      employeeId: "empleado-123",
+      customerName: "Cliente Prueba",
+      employeeName: "Empleado QA",
+      dateOfInspection: new Date().toISOString(),
+      inspectionDetails: fullInspection.questions.map((q) => {
+        // 🔎 Obtenemos todas las respuestas recursivas
+        const flatAnswers = extractAnswerRecursiveArray(q.answers ?? []);
+
+        return {
+          typeInspectionDetailId: q.typeInspectionDetailId,
+          typeInspectionDetailAnswerId:
+            flatAnswers[0]?.typeInspectionDetailAnswerId ?? 0,
+          finalResponse: q.finalResponse ?? "",
+          inspectionDetailAnswers: flatAnswers.map((a) => ({
+            typeInspectionDetailAnswerId: a.typeInspectionDetailAnswerId,
+            finalResponse: a.response,
+            inspectionDetailAnswerItem: (a.selectedItems ?? []).map((item) => ({
+              itemId: item.id,
+              itemName: item.name,
+              quantity: item.quantity,
+              price: item.unitPrice,
+            })),
+          })),
+        };
+      }),
+      inspectionPhotos: [],
     };
 
     console.log("📤 Enviando payload a API:", payload);
 
     try {
-      const response = await axiosInstance.post("/Inspection", payload);
+      /*const response = await axiosInstance.post("/Inspection", payload);
 
       toast.success("✅ Inspección enviada correctamente");
 
-      // ✅ RESET COMPLETO
+      
       useInspectionFullStore.getState().resetFullInspection();
 
-      router.push("./");
+      router.push("./");*/
     } catch (error) {
       toast.error("❌ Error al enviar inspección");
       console.error(error);

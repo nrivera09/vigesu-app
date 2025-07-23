@@ -46,9 +46,9 @@ const AnswerSign = ({ onComplete }: Props) => {
 
   useEffect(() => {
     if (dataUser?.signatureImagePath) {
-      onComplete(true);
+      onComplete(true, `${dataUser.signatureImagePath}`);
     } else {
-      onComplete(false);
+      onComplete(false, undefined);
     }
   }, [dataUser?.signatureImagePath]);
 
