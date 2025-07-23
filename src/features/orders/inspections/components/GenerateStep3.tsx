@@ -54,20 +54,15 @@ const GenerateStep3 = () => {
   }, [resetTrigger]);
 
   const currentAnswers =
-    fullInspection?.questions
-      .filter(
-        (item) =>
-          item.groupName === groupName &&
-          item.groupId === groupId &&
-          item.templateInspectionQuestionId ===
-            fullQuestion?.templateInspectionQuestionId
-      )
-      .flatMap((question) => question.answers) ?? [];
+    fullQuestion?.originalAnswers ?? fullQuestion?.answers ?? [];
 
   const isSingle = fullQuestion?.typeQuestion === TypeQuestion.SingleChoice;
   const isMultiple = fullQuestion?.typeQuestion === TypeQuestion.MultipleChoice;
   const isText = fullQuestion?.typeQuestion === TypeQuestion.TextInput;
   const isSign = fullQuestion?.typeQuestion === TypeQuestion.Sign;
+
+  console.log("Respuestas originales:", fullQuestion?.originalAnswers);
+  console.log("Respuestas seleccionadas:", fullQuestion?.answers);
 
   const openItemModal2 = (answer: IFullAnswer) => {
     const findAnswerInTree = (tree: IFullAnswer[]): IFullAnswer | null => {
@@ -261,6 +256,7 @@ const GenerateStep3 = () => {
     const hasItems =
       treeAnswer?.selectedItems?.length && treeAnswer.selectedItems.length > 0;
 
+    console.log("answer: ", answer);
     return (
       <div
         key={answer.typeInspectionDetailAnswerId}
@@ -349,8 +345,15 @@ const GenerateStep3 = () => {
               )}
           </div>
 
-          {selected && answer.subAnswers?.length > 0 && (
-            <div className="mt-4 flex flex-row gap-4 border-t pt-4 border-black/10">
+          {answer.subAnswers?.length > 0 && (
+            <div
+              className={clsx(
+                "mt-4 flex flex-row gap-4 pt-4",
+                selected
+                  ? "border-t border-black/10"
+                  : "opacity-40 pointer-events-none"
+              )}
+            >
               {answer.subAnswers.map((sub) => (
                 <div
                   key={sub.typeInspectionDetailAnswerId}
@@ -426,6 +429,8 @@ const GenerateStep3 = () => {
           finalResponse: responseValue ?? q.finalResponse ?? "",
           statusInspectionConfig: true,
           answers: selectedTree.length > 0 ? selectedTree : q.answers,
+          originalAnswers:
+            fullQuestion?.originalAnswers ?? fullQuestion?.answers ?? [],
         };
         if (!isLastQuestionInGroup) {
           toast.info("Respuesta guardada.");
@@ -549,18 +554,29 @@ const GenerateStep3 = () => {
   useEffect(() => {
     if (!fullQuestion || !fullInspection) return;
 
-    // Buscar la pregunta actual en el store
+    // Buscar la pregunta actual
     const q = fullInspection.questions.find(
       (q) => q.typeInspectionDetailId === fullQuestion.typeInspectionDetailId
     );
 
-    // Hidratar estados si ya hay data guardada
+    // ✅ Siempre hidrata originalAnswers si no existe
+    if (q && !q.originalAnswers && fullQuestion.answers) {
+      q.originalAnswers = structuredClone(fullQuestion.answers);
+    }
+
+    // ✅ Asegúrate de que esté en memoria también
+    if (q?.originalAnswers) {
+      fullQuestion.originalAnswers = q.originalAnswers;
+    }
+
+    // ✅ Hidratar estado visible si ya respondido
     if (q?.statusInspectionConfig) {
       setSelectedTree(q.answers ?? []);
       setTextResponse(q.finalResponse ?? "");
       setSignUrl(q.finalResponse ?? "");
       setIsSignValid(!!q.finalResponse);
     } else {
+      // Si es una nueva pregunta, limpiar campos pero usar originalAnswers
       setSelectedTree([]);
       setTextResponse("");
       setSignUrl("");

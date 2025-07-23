@@ -158,7 +158,7 @@ const GenerateStep1 = () => {
     };
 
     console.log("📤 Enviando payload a API:", payload);
-
+    useInspectionFullStore.getState().resetFullInspection();
     /*try {
       const response = await axiosInstance.post("/Inspection", payload);
 

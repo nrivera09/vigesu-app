@@ -22,6 +22,8 @@ export interface IFullQuestion {
   answers: IFullAnswer[];
   statusInspectionConfig?: boolean;
   finalResponse?: string;
+  selectedAnswers?: IFullAnswer[];
+  originalAnswers?: IFullAnswer[]; // 👈 nuevo campo
 }
 
 export interface IFullAnswer {
@@ -38,4 +40,8 @@ export interface IFullAnswer {
     quantity: number;
   }[];
   parentRootId?: string; //  Agrega esta línea
+}
+
+export interface IFullAnswerHydrated extends IFullAnswer {
+  wasSelected?: boolean;
 }
