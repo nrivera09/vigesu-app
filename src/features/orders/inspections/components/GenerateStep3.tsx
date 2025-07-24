@@ -658,11 +658,7 @@ const GenerateStep3 = () => {
               disabled={selectedTree.length === 0}
               className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px]"
               onClick={() => {
-                if (isMultiple && hasRootWithChildren(selectedTree)) {
-                  setShowRootPicker(true);
-                  return;
-                }
-                completeCurrentQuestion();
+                setShowRootPicker(true);
               }}
             >
               {isLastQuestionInGroup ? "Save" : "Continue"}
@@ -679,6 +675,15 @@ const GenerateStep3 = () => {
             </button>
           )}
         </div>
+      </div>
+
+      <div className="flex items-center justify-center mt-5">
+        <button
+          className="btn font-normal bg-red-600 text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:max-w-[300px] mx-auto text-[13px]"
+          onClick={() => useInspectionFullStore.getState().setStepWizard(2)}
+        >
+          Cancelar
+        </button>
       </div>
 
       {showItemModal && modalAnswer && (
