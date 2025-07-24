@@ -121,7 +121,7 @@ const GenerateStep2 = () => {
             </div>
           </button>
         ))}
-      <div className="text-center mt-9">
+      <div className="text-center mt-5">
         {enableFinalButton == 0 && (
           <button
             disabled={enableFinalButton > 0}

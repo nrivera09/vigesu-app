@@ -326,7 +326,7 @@ const GenerateStep0 = () => {
           <Loading height="h-[300px]" label="Esperando configuración ..." />
         )*/}
         {/* Grupos (cards) */}
-        <div className="cont my-5 flex flex-col gap-4">
+        <div className="cont my-5 flex flex-col gap-1">
           {inspectionData &&
             Object.entries(
               inspectionData.questions.reduce((acc, question) => {

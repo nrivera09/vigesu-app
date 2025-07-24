@@ -27,8 +27,11 @@ import { FaCheckCircle } from "react-icons/fa";
 import clsx from "clsx";
 import { BsQuestionCircle } from "react-icons/bs";
 import { toast } from "sonner";
+import ImageUploader from "../../create-order/ImageUploader";
 
 const GenerateStep1 = () => {
+  const [inspectionFiles, setInspectionFiles] = useState<File[]>([]);
+
   const router = useRouter();
   const pathname = usePathname();
   const {
@@ -100,32 +103,8 @@ const GenerateStep1 = () => {
   const handleFinalSubmit = async () => {
     if (!fullInspection) return;
 
-    /* const payload = {
-      typeInspectionId: fullInspection.typeInspectionId,
-      customerId: fullInspection.customerId,
-      employeeId: "empleado-123", 
-      customerName: "Cliente Prueba", 
-      employeeName: "Empleado QA", 
-      dateOfInspection: new Date().toISOString(),
-      inspectionDetails: fullInspection.questions.map((q) => ({
-        typeInspectionDetailId: q.typeInspectionDetailId,
-        typeInspectionDetailAnswerId:
-          q.answers[0]?.typeInspectionDetailAnswerId ?? 0,
-        finalResponse: q.finalResponse ?? "",
-        inspectionDetailAnswers: q.answers.map((a) => ({
-          typeInspectionDetailAnswerId: a.typeInspectionDetailAnswerId,
-          finalResponse: a.response,
-          inspectionDetailAnswerItem: (a.selectedItems ?? []).map((item) => ({
-            itemId: item.id,
-            itemName: item.name,
-            quantity: item.quantity,
-            price: item.unitPrice,
-          })),
-        })),
-      })),
-      inspectionPhotos: [],
-    };*/
-
+    // Generar lista de nombres de archivos
+    const inspectionPhotoNames = inspectionFiles.map((f) => f.name);
     const payload = {
       typeInspectionId: fullInspection.typeInspectionId,
       customerId: fullInspection.customerId,
@@ -154,17 +133,44 @@ const GenerateStep1 = () => {
           })),
         };
       }),
-      inspectionPhotos: [],
+      inspectionPhotos: inspectionFiles.map((f) => ({
+        name: f.name,
+        photoUrl: f.name,
+      })),
     };
 
-    //console.log("📤 Enviando payload a API:", payload);
+    console.log("📤 Enviando payload a API:", payload);
     try {
-      const response = await axiosInstance.post("/Inspection", payload);
+      /*const response = await axiosInstance.post("/Inspection", payload);
 
       toast.success("Inspección enviada correctamente");
 
       useInspectionFullStore.getState().resetFullInspection();
 
+      router.push("./");*/
+      const response = await axiosInstance.post("/Inspection", payload);
+      const inspectionId = response.data; // ✅ número entero simple, como mencionaste
+
+      // 2️⃣ Subir archivos si existen
+      if (inspectionFiles.length > 0) {
+        const formData = new FormData();
+        formData.append("InspectionId", inspectionId.toString()); // ✅ ahora sí se pasa correctamente
+        inspectionFiles.forEach((file) => {
+          formData.append("Files", file); // ✅ debe coincidir con lo que espera el backend
+        });
+
+        await axiosInstance.post(
+          "/Inspection/UploadInspectionPhotos",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+      }
+      toast.success("Inspección enviada correctamente");
+      useInspectionFullStore.getState().resetFullInspection();
       router.push("./");
     } catch (error) {
       toast.error("❌ Error al enviar inspección");
@@ -179,7 +185,7 @@ const GenerateStep1 = () => {
         {!groupedQuestions ? (
           <Loading height="h-[300px]" label="Esperando configuración ..." />
         ) : (
-          <div className="cont my-5 flex flex-col gap-4">
+          <div className="cont my-5 flex flex-col gap-1">
             {fullInspection &&
               Object.entries(
                 fullInspection.questions.reduce((acc, question) => {
@@ -254,7 +260,11 @@ const GenerateStep1 = () => {
           </div>
         )}
       </div>
-      <div className="text-center mt-9">
+      {fullInspection?.questions.every((q) => q.statusInspectionConfig) && (
+        <ImageUploader onFilesChange={setInspectionFiles} />
+      )}
+
+      <div className="text-center mt-5">
         <button
           className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px]"
           disabled={

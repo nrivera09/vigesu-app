@@ -59,3 +59,17 @@ export interface WorkOrder {
   workOrderDetails: WorkOrderDetail[];
   workOrderPhotos: WorkOrderPhoto[];
 }
+
+export interface LiftgateInspection {
+  templateInspectionId: number;
+  name: string;
+  filePath: string;
+  templateInspectionQuestions: LiftgateInspectionQuestion[];
+}
+
+export interface LiftgateInspectionQuestion {
+  templateInspectionQuestionId: number;
+  templateInspectionId: number;
+  question: string;
+  typeQuestion: number;
+}

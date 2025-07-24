@@ -6,11 +6,12 @@ import { toast } from "sonner";
 import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
 import Loading from "@/shared/components/shared/Loading";
 import { FaRegEdit } from "react-icons/fa";
-import { FiTrash2 } from "react-icons/fi";
+import { FiPrinter, FiTrash2 } from "react-icons/fi";
 import { getInspections } from "./api/inspectionApi";
 import { IInspectionItem } from "./models/inspection.types";
 import { formatDate, toISOStringWithTimeSmart } from "@/shared/utils/utils";
 import { GiAutoRepair } from "react-icons/gi";
+import { axiosInstance } from "@/shared/utils/axiosInstance";
 
 const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
   const router = useRouter();
@@ -46,8 +47,24 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
-  const deleteTypeInspection = async (typeInspectionId: number) => {
-    return "";
+  const deleteTypeInspection = async (inspectionId: number) => {
+    try {
+      const payload = {
+        inspectionId,
+        status: 1,
+      };
+
+      await axiosInstance.put(
+        `/Inspection/UpdateInspectionState/${inspectionId}`,
+        payload
+      );
+
+      toast.success("Inspección eliminada correctamente");
+      fetchData();
+    } catch (error) {
+      toast.error("❌ Error al eliminar la inspección");
+      console.error(error);
+    }
   };
 
   useEffect(() => {
@@ -63,12 +80,12 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
       <table className="table table-fixed w-full">
         <thead>
           <tr>
-            <th className="w-[20%]">Inspection #</th>
+            <th className="w-[10%]">Inspection #</th>
             <th className="w-[15%]">Cliente</th>
             <th className="w-[15%]">Empleado</th>
             <th className="w-[15%]">Fecha</th>
             <th className="w-[10%]">Estado</th>
-            <th className="w-[10%]"></th>
+            <th className="w-[20%]"></th>
           </tr>
         </thead>
         <tbody>
@@ -104,13 +121,14 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
                 <td className="flex justify-end gap-2">
                   <ActionButton
                     icon={
-                      <GiAutoRepair className="w-[20px] h-[20px] opacity-70" />
+                      <FiPrinter className="w-[20px] h-[20px] opacity-70" />
                     }
-                    label="Work order"
+                    label="Print"
                     onClick={() =>
-                      router.push(`${pathname}/workorder/${item.inspectionId}`)
+                      router.push(
+                        `${pathname}/generate-pdf/${item.inspectionId}`
+                      )
                     }
-                    className="!hidden"
                   />
                   {item.status !== 1 && (
                     <ActionButton
