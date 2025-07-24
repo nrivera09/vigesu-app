@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import AnswerSign from "./typeQuest/AnswerSign";
 import AnswerText from "./typeQuest/AnswerText";
 import AnswerOptions from "./typeQuest/AnswerOptions";
+import { IoCloseOutline } from "react-icons/io5";
 
 interface ItemWithQuantity {
   id: string;
@@ -227,6 +228,7 @@ const GenerateStep3 = () => {
     answerId: string,
     items: ItemWithQuantity[]
   ): IFullAnswer[] => {
+    console.log("modal: ", tree, answerId, items);
     return tree.map((a) => {
       if (String(a.typeInspectionDetailAnswerId) === answerId) {
         return { ...a, selectedItems: items };
@@ -576,29 +578,35 @@ const GenerateStep3 = () => {
   useEffect(() => {
     if (!fullQuestion || !fullInspection) return;
 
-    // Buscar la pregunta actual
     const q = fullInspection.questions.find(
       (q) => q.typeInspectionDetailId === fullQuestion.typeInspectionDetailId
     );
 
-    // ✅ Siempre hidrata originalAnswers si no existe
+    // Siempre hidrata originalAnswers
     if (q && !q.originalAnswers && fullQuestion.answers) {
       q.originalAnswers = structuredClone(fullQuestion.answers);
     }
 
-    // ✅ Asegúrate de que esté en memoria también
     if (q?.originalAnswers) {
       fullQuestion.originalAnswers = q.originalAnswers;
     }
 
-    // ✅ Hidratar estado visible si ya respondido
-    if (q?.statusInspectionConfig) {
+    const alreadyAnswered = q?.statusInspectionConfig;
+
+    if (alreadyAnswered && (isSingle || isMultiple)) {
+      // ✅ Permite volver a editar cualquier SingleChoice o MultipleChoice
       setSelectedTree(q.answers ?? []);
       setTextResponse(q.finalResponse ?? "");
       setSignUrl(q.finalResponse ?? "");
       setIsSignValid(!!q.finalResponse);
+    } else if (alreadyAnswered && isText) {
+      // TextInput → mantener el texto sin editar
+      setTextResponse(q.finalResponse ?? "");
+    } else if (alreadyAnswered && isSign) {
+      setSignUrl(q.finalResponse ?? "");
+      setIsSignValid(!!q.finalResponse);
     } else {
-      // Si es una nueva pregunta, limpiar campos pero usar originalAnswers
+      // Nueva pregunta
       setSelectedTree([]);
       setTextResponse("");
       setSignUrl("");
@@ -677,9 +685,9 @@ const GenerateStep3 = () => {
         </div>
       </div>
 
-      <div className="flex items-center justify-center mt-5">
+      <div className="flex items-center justify-center mt-5 px-6">
         <button
-          className="btn font-normal bg-red-600 text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:max-w-[300px] mx-auto text-[13px]"
+          className="btn font-normal bg-red-300 text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full  md:max-w-[300px] mx-auto text-[13px] transition-all hover:bg-red-600"
           onClick={() => useInspectionFullStore.getState().setStepWizard(2)}
         >
           Cancelar
@@ -705,10 +713,18 @@ const GenerateStep3 = () => {
 
       {showRootPicker && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-xl w-[90%] max-w-md">
-            <h2 className="text-lg font-bold mb-4">
-              ¿Cuál es la respuesta final?
-            </h2>
+          <div className="bg-white p-6 rounded-xl w-[90%] max-w-md relative">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold ">
+                ¿Cuál es la respuesta final?
+              </h2>
+              <button
+                className="bg-black text-white w-[38px] h-[38px] absolute right-0 top-0 rounded-bl-3xl flex items-center justify-center transition-all cursor-pointer"
+                onClick={() => setShowRootPicker(!showRootPicker)}
+              >
+                <IoCloseOutline className="text-2xl font-bold" />
+              </button>
+            </div>
             <div className="flex flex-col gap-4">
               {(fullQuestion?.originalAnswers ?? []).map((root) => (
                 <button
