@@ -228,7 +228,6 @@ const GenerateStep3 = () => {
     answerId: string,
     items: ItemWithQuantity[]
   ): IFullAnswer[] => {
-    console.log("modal: ", tree, answerId, items);
     return tree.map((a) => {
       if (String(a.typeInspectionDetailAnswerId) === answerId) {
         return { ...a, selectedItems: items };
@@ -472,8 +471,6 @@ const GenerateStep3 = () => {
       }
       return q;
     });
-
-    console.log("updatedQuestions: ", updatedQuestions);
 
     store.setFullInspection({
       ...current,

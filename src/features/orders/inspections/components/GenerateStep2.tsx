@@ -33,8 +33,6 @@ const GenerateStep2 = () => {
       )
       .filter((item) => item.statusInspectionConfig === false).length ?? 0;
 
-  console.log("enableFinalButton : ", enableFinalButton);
-
   const handleFinalSubmit = async () => {
     if (!fullInspection) return;
 
@@ -64,7 +62,7 @@ const GenerateStep2 = () => {
       inspectionPhotos: [], // puedes completar luego si usas fotos
     };
 
-    console.log("📤 Enviando payload a API:", payload);
+    //console.log("📤 Enviando payload a API:", payload);
 
     try {
       const response = await axiosInstance.post("/Inspection", payload);

@@ -157,9 +157,8 @@ const GenerateStep1 = () => {
       inspectionPhotos: [],
     };
 
-    console.log("📤 Enviando payload a API:", payload);
-    useInspectionFullStore.getState().resetFullInspection();
-    /*try {
+    //console.log("📤 Enviando payload a API:", payload);
+    try {
       const response = await axiosInstance.post("/Inspection", payload);
 
       toast.success("Inspección enviada correctamente");
@@ -170,7 +169,7 @@ const GenerateStep1 = () => {
     } catch (error) {
       toast.error("❌ Error al enviar inspección");
       console.error(error);
-    }*/
+    }
   };
 
   return (
