@@ -5,4 +5,5 @@ export interface IInspectionItem {
   employeeName: string;
   dateOfInspection: string;
   status?: number | null;
+  statusInspection?: number | null;
 }

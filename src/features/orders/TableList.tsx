@@ -259,8 +259,8 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
                     </div>
                   )}
                 </td>
-                <td className="">
-                  {item.statusWorkOrder !== 2 && (
+                <td className=" text-center">
+                  {item.statusWorkOrder !== 2 ? (
                     <div className="flex items-center justify-center">
                       {syncStatus[item.workOrderId] === "loading" ? (
                         <IoMdSync className="loading text-gray-500 text-3xl" />
@@ -273,6 +273,10 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
                           onChange={() => handleSyncWorkOrder(item.workOrderId)}
                         />
                       )}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center">
+                      <IoMdCheckmark className="text-green-500 text-xl text-center" />
                     </div>
                   )}
                 </td>

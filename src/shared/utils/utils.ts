@@ -138,3 +138,11 @@ export const isColorLight = (hexColor: string): boolean => {
 
   return luminance > 186; // Mayor a 186 se considera claro
 };
+
+export const getInitials = (fullName: string): string => {
+  const words = fullName.trim().split(/\s+/); // separa por espacios múltiples
+  return words
+    .slice(0, 2)
+    .map((word) => word[0].toUpperCase())
+    .join("");
+};

@@ -329,11 +329,14 @@ const GenerateStep0 = () => {
         <div className="cont my-5 flex flex-col gap-1">
           {inspectionData &&
             Object.entries(
-              inspectionData.questions.reduce((acc, question) => {
-                if (!acc[question.groupName]) acc[question.groupName] = [];
-                acc[question.groupName].push(question);
-                return acc;
-              }, {} as Record<string, IFullQuestion[]>)
+              inspectionData.questions.reduce(
+                (acc, question) => {
+                  if (!acc[question.groupName]) acc[question.groupName] = [];
+                  acc[question.groupName].push(question);
+                  return acc;
+                },
+                {} as Record<string, IFullQuestion[]>
+              )
             ).map(([groupName, questions]) => {
               const groupId = questions[0]?.groupId;
               return (
@@ -376,7 +379,9 @@ const GenerateStep0 = () => {
       </div>
       {inspectionData && (
         <div className="containerX mt-12 max-w-full mb-5">
-          {stepWizard === 1 && <GenerateStep1 />}
+          {objFilterForm.client !== "" && stepWizard === 1 && (
+            <GenerateStep1 ClientName={objFilterForm.client} />
+          )}
           {stepWizard === 2 && <GenerateStep2 />}
           {stepWizard === 3 && <GenerateStep3 />}
           {stepWizard === 4 && <GenerateStep4 />}

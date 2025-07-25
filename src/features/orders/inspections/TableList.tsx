@@ -5,13 +5,19 @@ import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
 import Loading from "@/shared/components/shared/Loading";
-import { FaRegEdit } from "react-icons/fa";
+import { FaRegEdit, FaRegEye } from "react-icons/fa";
 import { FiPrinter, FiTrash2 } from "react-icons/fi";
 import { getInspections } from "./api/inspectionApi";
 import { IInspectionItem } from "./models/inspection.types";
 import { formatDate, toISOStringWithTimeSmart } from "@/shared/utils/utils";
 import { GiAutoRepair } from "react-icons/gi";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
+import {
+  TypeInspectionOrders,
+  TypeInspectionOrdersLabel,
+} from "../models/workOrder.types";
+import clsx from "clsx";
+import { IoMdCheckmark, IoMdSync } from "react-icons/io";
 
 const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
   const router = useRouter();
@@ -22,6 +28,10 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [loading, setLoading] = useState(false);
+
+  const [syncStatus, setSyncStatus] = useState<{
+    [key: number]: "idle" | "loading" | "success";
+  }>({});
 
   const totalPages = Math.ceil(totalCount / rowsPerPage);
 
@@ -43,6 +53,100 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
     }
   };
 
+  const getBadgeClass = (
+    status: TypeInspectionOrders | null | undefined
+  ): string => {
+    switch (status) {
+      case TypeInspectionOrders.Create:
+      case TypeInspectionOrders.SyncQuickbook:
+        return "badge badge-dash  badge-success";
+      case TypeInspectionOrders.PreAccepted:
+      case TypeInspectionOrders.Accepted:
+        return "badge badge-dash badge-warning";
+      case TypeInspectionOrders.Disabled:
+        return "badge badge-dash badge-error";
+      default:
+        return "badge badge-dash badge-neutral";
+    }
+  };
+
+  const sendPdfToQuickBooks = async (
+    quickBookEstimatedId: number,
+    inspectionId: number
+  ) => {
+    try {
+      const response = await fetch(`/api/pdf/${inspectionId}?type=liftgate`);
+
+      if (!response.ok) {
+        throw new Error("Error al generar el PDF desde el servidor");
+      }
+
+      const pdfBlob = await response.blob();
+      const file = new File([pdfBlob], `Estimate-${quickBookEstimatedId}.pdf`, {
+        type: "application/pdf",
+      });
+
+      const formData = new FormData();
+      formData.append("QuickBookEstimatedId", String(quickBookEstimatedId));
+      formData.append("FilePdf", file);
+      formData.append("RealmId", "9341454759827689");
+
+      await axiosInstance.post(
+        "/QuickBooks/estimates/attachmentPDF",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      toast.success("PDF enviado correctamente a QuickBooks");
+    } catch (err) {
+      console.error("Error al enviar el PDF:", err);
+      toast.error("Error al enviar el PDF a QuickBooks");
+    }
+  };
+
+  const handleSyncWorkOrder = async (
+    inspectionId: number,
+    syncOnlyEstimate = false
+  ) => {
+    setSyncStatus((prev) => ({ ...prev, [inspectionId]: "loading" }));
+    try {
+      const response = await axiosInstance.put(
+        "/QuickBooks/CreateEstimateFromInspection",
+        {
+          inspectionId,
+          realmId: "9341454759827689",
+        }
+      );
+
+      const quickBookEstimatedId = response.data;
+
+      if (!syncOnlyEstimate) {
+        await sendPdfToQuickBooks(quickBookEstimatedId, inspectionId);
+      }
+
+      setSyncStatus((prev) => ({ ...prev, [inspectionId]: "success" }));
+
+      setTimeout(async () => {
+        setSyncStatus((prev) => {
+          const updated = { ...prev };
+          delete updated[inspectionId];
+          return updated;
+        });
+
+        await fetchData();
+
+        toast.success("¡Sincronización exitosa!");
+      }, 1000);
+    } catch (error) {
+      toast.error("Error al sincronizar.");
+      setSyncStatus((prev) => ({ ...prev, [inspectionId]: "idle" }));
+    }
+  };
+
   const changePage = (page: number) => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
@@ -51,7 +155,7 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
     try {
       const payload = {
         inspectionId,
-        status: 1,
+        status: TypeInspectionOrders.Disabled,
       };
 
       await axiosInstance.put(
@@ -74,16 +178,17 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
   useEffect(() => {
     setCurrentPage(1);
   }, [objFilter]);
-
+  console.log("item: ", allData);
   return (
     <div className="overflow-x-auto space-y-4">
       <table className="table table-fixed w-full">
         <thead>
           <tr>
-            <th className="w-[10%]">Inspection #</th>
+            <th className="w-[5%]">#</th>
             <th className="w-[15%]">Cliente</th>
             <th className="w-[15%]">Empleado</th>
             <th className="w-[15%]">Fecha</th>
+            <th className="w-[20%] text-center">Sync Quickbook</th>
             <th className="w-[10%]">Estado</th>
             <th className="w-[20%]"></th>
           </tr>
@@ -107,23 +212,49 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
                 <td className="truncate">
                   {formatDate(item.dateOfInspection)}
                 </td>
+                <td className="text-center">
+                  {item.statusInspection !== 2 ? (
+                    <div className="flex items-center justify-center">
+                      {syncStatus[item.inspectionId] === "loading" ? (
+                        <IoMdSync className="loading text-gray-500 text-3xl" />
+                      ) : syncStatus[item.inspectionId] === "success" ? (
+                        <IoMdCheckmark className="text-green-500 text-xl" />
+                      ) : (
+                        <input
+                          type="checkbox"
+                          className="checkbox"
+                          onChange={() =>
+                            handleSyncWorkOrder(item.inspectionId)
+                          }
+                        />
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center">
+                      <IoMdCheckmark className="text-green-500 text-xl text-center" />
+                    </div>
+                  )}
+                </td>
                 <td>
-                  {item.status === 0 && (
-                    <div className="badge badge-success">Activo</div>
-                  )}
-                  {item.status === 1 && (
-                    <div className="badge badge-error">Inactivo</div>
-                  )}
-                  {item.status == null && (
-                    <div className="badge badge-neutral">Sin estado</div>
-                  )}
+                  <div
+                    className={clsx(
+                      getBadgeClass(
+                        item.statusInspection as TypeInspectionOrders
+                      ),
+                      `truncate`
+                    )}
+                  >
+                    {item.statusInspection != null
+                      ? (TypeInspectionOrdersLabel[
+                          item.statusInspection as TypeInspectionOrders
+                        ] ?? "Desconocido")
+                      : "Sin estado"}
+                  </div>
                 </td>
                 <td className="flex justify-end gap-2">
                   <ActionButton
-                    icon={
-                      <FiPrinter className="w-[20px] h-[20px] opacity-70" />
-                    }
-                    label="Print"
+                    icon={<FaRegEye className="w-[20px] h-[20px] opacity-70" />}
+                    label="Watch"
                     onClick={() =>
                       router.push(
                         `${pathname}/generate-pdf/${item.inspectionId}`

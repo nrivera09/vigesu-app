@@ -18,14 +18,18 @@ import { FC, useEffect, useState } from "react";
 import { useSidebarStore } from "../../stores/useSidebarStore";
 import { IoCloseOutline } from "react-icons/io5";
 import { generalReactClass } from "@/shared/types/TGeneral";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { HiOutlineServer } from "react-icons/hi2";
 import { getTotalWorkOrders } from "@/features/orders/api/workOrdersApi";
 import { useAuthUser } from "@/shared/stores/useAuthUser";
 import { getInspections } from "@/features/orders/inspections/api/inspectionApi";
 import Loading from "./Loading";
+import { getInitials } from "@/shared/utils/utils";
+import { useAuthStore } from "@/shared/stores/useAuthStore";
 
 const MenuAside: FC<generalReactClass> = ({ className }) => {
+  const router = useRouter();
+  const logout = useAuthStore((state) => state.logout);
   const { userName, employeeName, rol } = useAuthUser();
   const isSidebarOpen = useSidebarStore((state) => state.isSidebarOpen);
   const closeSidebar = useSidebarStore((state) => state.closeSidebar);
@@ -98,6 +102,11 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
       )
       .sort((a, b) => b.href.length - a.href.length)[0]?.href ?? undefined;
 
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024 && isSidebarOpen) {
@@ -142,9 +151,11 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
           style={{ borderBottom: "1px solid #ffffff17" }}
         >
           <div className="flex flex-row items-center gap-2">
-            <div className="avatar avatar-online">
-              <div className="w-10 rounded-full">
-                <img src="https://img.daisyui.com/images/profile/demo/gordon@192.webp" />
+            <div className="avatar avatar-online avatar-placeholder">
+              <div className="bg-neutral text-neutral-content w-10 rounded-full">
+                <span className="text-xl">
+                  {employeeName && getInitials(employeeName)}
+                </span>
               </div>
             </div>
             <div className="flex flex-col justify-center gap-[.5px]">
@@ -270,10 +281,15 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
           style={{ borderTop: "1px solid #ffffff17" }}
         >
           <div className="flex items-center justify-center">
-            <button className="btn btn-square btn-neutral bg-transparent shadow-none border-none">
-              <SlLogin className="text-lg" />
-            </button>
-            <span className="text-white">Sign Out</span>
+            <div
+              className="flex flex-row items-center justify-center cursor-pointer"
+              onClick={handleLogout}
+            >
+              <button className="btn btn-square btn-neutral bg-transparent shadow-none border-none">
+                <SlLogin className="text-2xl" />
+              </button>
+              <span className="text-white">Sign Out</span>
+            </div>
           </div>
           <div>
             <span className="text-sm text-gray-400">Version 0.0.1</span>

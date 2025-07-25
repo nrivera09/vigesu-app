@@ -28,3 +28,29 @@ export const getInspections = async ({
     totalPages: data.totalPages ?? 1,
   };
 };
+
+export interface TemplateInspection {
+  templateInspectionId: number;
+  name: string;
+  filePath: string;
+}
+
+export interface TemplateInspectionResponse {
+  items: TemplateInspection[];
+  pageNumber: number;
+  totalPages: number;
+  totalCount: number;
+}
+
+export const getTemplateInspections = async (
+  page: number,
+  name: string
+): Promise<TemplateInspectionResponse> => {
+  const res = await axiosInstance.get("/TemplateInspection", {
+    params: {
+      PageNumber: page,
+      Name: name,
+    },
+  });
+  return res.data;
+};

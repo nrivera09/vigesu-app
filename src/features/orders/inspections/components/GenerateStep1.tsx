@@ -28,8 +28,17 @@ import clsx from "clsx";
 import { BsQuestionCircle } from "react-icons/bs";
 import { toast } from "sonner";
 import ImageUploader from "../../create-order/ImageUploader";
+import { useAuthUser } from "@/shared/stores/useAuthUser";
+import EmailConfirmationModal from "./EmailConfirmationModal";
 
-const GenerateStep1 = () => {
+interface GenerateStep1Props {
+  ClientName: string;
+}
+
+const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
+  const [showModal, setShowModal] = useState(false);
+
+  const { userName, employeeName, rol, employeeId } = useAuthUser();
   const [inspectionFiles, setInspectionFiles] = useState<File[]>([]);
 
   const router = useRouter();
@@ -108,9 +117,9 @@ const GenerateStep1 = () => {
     const payload = {
       typeInspectionId: fullInspection.typeInspectionId,
       customerId: fullInspection.customerId,
-      employeeId: "empleado-123",
-      customerName: "Cliente Prueba",
-      employeeName: "Empleado QA",
+      employeeId: employeeId?.toString(),
+      customerName: ClientName.toString(),
+      employeeName: employeeName?.toString(),
       dateOfInspection: new Date().toISOString(),
       inspectionDetails: fullInspection.questions.map((q) => {
         // 🔎 Obtenemos todas las respuestas recursivas
@@ -188,11 +197,14 @@ const GenerateStep1 = () => {
           <div className="cont my-5 flex flex-col gap-1">
             {fullInspection &&
               Object.entries(
-                fullInspection.questions.reduce((acc, question) => {
-                  if (!acc[question.groupName]) acc[question.groupName] = [];
-                  acc[question.groupName].push(question);
-                  return acc;
-                }, {} as Record<string, IFullQuestion[]>)
+                fullInspection.questions.reduce(
+                  (acc, question) => {
+                    if (!acc[question.groupName]) acc[question.groupName] = [];
+                    acc[question.groupName].push(question);
+                    return acc;
+                  },
+                  {} as Record<string, IFullQuestion[]>
+                )
               ).map(([groupName, questions]) => {
                 const groupId = questions[0]?.groupId;
                 return (
@@ -267,14 +279,20 @@ const GenerateStep1 = () => {
       <div className="text-center mt-5">
         <button
           className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px]"
-          disabled={
-            !fullInspection?.questions.every((q) => q.statusInspectionConfig)
-          }
-          onClick={() => handleFinalSubmit()}
+          disabled={fullInspection?.questions.every(
+            (q) => q.statusInspectionConfig
+          )}
+          onClick={() => setShowModal(true)}
         >
           Complete and save inspection
         </button>
       </div>
+      <EmailConfirmationModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        onConfirm={handleFinalSubmit}
+        userName={employeeName || "Usuario"}
+      />
     </>
   );
 };

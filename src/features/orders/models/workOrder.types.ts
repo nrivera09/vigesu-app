@@ -41,3 +41,19 @@ export const TypeQuestionLabel: Record<TypeQuestion, string> = {
   [TypeQuestion.TextInput]: "Text Input",
   [TypeQuestion.Sign]: "by Sign",
 };
+
+export enum TypeInspectionOrders {
+  Create = 0, // Selección única como estamos trabajando
+  PreAccepted = 1, // Selección múltiple pero de la misma respuesta raiz, pero solo de la misma raiz, osea raiz uno y puede seleccionar sub 1 y sub2 y asi sucesivamente, PERO de la misma respuesta raiz
+  Accepted = 2, // Texto libre, aqui no selecciona NADA solo ingresa su respuesta libremente
+  Disabled = 3,
+  SyncQuickbook = 4,
+}
+
+export const TypeInspectionOrdersLabel: Record<TypeInspectionOrders, string> = {
+  [TypeInspectionOrders.Create]: "Create",
+  [TypeInspectionOrders.PreAccepted]: "Pre accepted",
+  [TypeInspectionOrders.Accepted]: "Accepted",
+  [TypeInspectionOrders.Disabled]: "Disabled",
+  [TypeInspectionOrders.SyncQuickbook]: "Sync Quickbook",
+};
