@@ -279,9 +279,9 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
       <div className="text-center mt-5">
         <button
           className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px]"
-          disabled={fullInspection?.questions.every(
-            (q) => q.statusInspectionConfig
-          )}
+          disabled={
+            !fullInspection?.questions.every((q) => q.statusInspectionConfig)
+          }
           onClick={() => setShowModal(true)}
         >
           Complete and save inspection
