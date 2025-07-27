@@ -11,13 +11,16 @@ export async function GET(req: NextRequest) {
 
   // 🧠 Construir la URL según el tipo
   let pdfUrl = "";
+  let fileNamePDF = "";
 
   switch (type) {
     case "liftgate":
       pdfUrl = `${baseUrl}/${locale}/dashboard/orders/inspections/generate-pdf/${id}?preview=true`;
+      fileNamePDF = `Inspection-${id}.pdf`;
       break;
     default:
       pdfUrl = `${baseUrl}/${locale}/dashboard/orders/work-orders/generate-pdf/${id}?preview=true`;
+      fileNamePDF = `WorkOrder-${id}.pdf`;
       break;
   }
 
@@ -32,7 +35,7 @@ export async function GET(req: NextRequest) {
   return new Response(pdfBuffer, {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="WorkOrder-${id}.pdf"`,
+      "Content-Disposition": `attachment; filename="${fileNamePDF}.pdf"`,
     },
   });
 }
