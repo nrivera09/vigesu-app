@@ -46,7 +46,7 @@ const GeneratePdfPage = () => {
   return (
     <>
       <div className="header-page flex flex-row items-center justify-between min-h-[70px] bg-base-200 px-6 gap-2">
-        <BackButton title={data.name} />
+        <BackButton title={data.name} link={`../`} />
         <div className="flex flex-row gap-2">
           <ActionButton
             className={`${
@@ -81,7 +81,7 @@ const GeneratePdfPage = () => {
       <div className="body-app print:overflow-visible overflow-y-auto">
         <div
           ref={contentRef}
-          className="container min-h-screen max-w-full mb-5 print"
+          className="container min-h-screen max-w-full mb-5 print "
           id="pdf-content"
         >
           <LiftgateInspectionCheckList data={data} isEditable={isEditable} />

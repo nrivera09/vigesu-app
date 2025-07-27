@@ -61,7 +61,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
               className="relative border rounded-md overflow-hidden w-[100px] h-[100px] flex-shrink-0"
             >
               <img
-                src={`${DOMAIN}/uploads/workorders/${name}`}
+                src={`${DOMAIN}uploads/workorders/${name}`}
                 alt={`existing-${index}`}
                 className="w-full h-full object-cover"
               />

@@ -6,9 +6,14 @@ import { FC, useEffect, useState } from "react";
 interface BackButtonProps {
   title?: string;
   disableArrow?: boolean;
+  link?: string;
 }
 
-const BackButton: FC<BackButtonProps> = ({ title, disableArrow = false }) => {
+const BackButton: FC<BackButtonProps> = ({
+  title,
+  disableArrow = false,
+  link,
+}) => {
   const router = useRouter();
   const pathname = usePathname();
   const pageTitle = usePageTitle();
@@ -27,8 +32,12 @@ const BackButton: FC<BackButtonProps> = ({ title, disableArrow = false }) => {
   }, [pathname]);
 
   const handleBack = () => {
-    if (parentPath) {
-      router.push(parentPath);
+    if (link) {
+      router.push(link);
+    } else {
+      if (parentPath) {
+        router.push(parentPath);
+      }
     }
   };
 

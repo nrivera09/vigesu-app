@@ -6,4 +6,5 @@ export interface IInspectionItem {
   dateOfInspection: string;
   status?: number | null;
   statusInspection?: number | null;
+  templateInspectionId?: number;
 }

@@ -60,7 +60,7 @@ export const mapOrderFormToApiPayload = (
     observation: form.observation,
     workOrderDetails:
       form.work_items?.map((item) => ({
-        itemId: item.idParts,
+        itemId: String(item.idParts),
         quantity: Number(item.quantity),
         observation: item.description,
       })) ?? [],
@@ -88,7 +88,8 @@ export const mapOrderEditFormToApiPayload = (
     workOrderId: Number(workOrderId), // Aquí lo agregamos al payload
     customerId: String(form.customer_order),
     employeeId: String(form.mechanic_name),
-    command: "string",
+
+    command: "UPDATE", // ✅ Valor correcto requerido por backend
     customerName: selectedCustomer?.name ?? "",
     employeeName: selectedMechanic?.name ?? "",
     locationOfRepair: form.location_of_repair,
@@ -116,7 +117,7 @@ export const mapOrderEditFormToApiPayload = (
     observation: form.observation,
     workOrderDetails:
       form.work_items?.map((item) => ({
-        itemId: item.idParts,
+        itemId: String(item.idParts), // ✅ Convertido a string para el backend
         quantity: Number(item.quantity),
         observation: item.description,
       })) ?? [],

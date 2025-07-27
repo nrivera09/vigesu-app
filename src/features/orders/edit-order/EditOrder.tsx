@@ -297,7 +297,7 @@ const EditOrder = () => {
           async (item) => ({
             description: item.observation ?? "",
             quantity: String(item.quantity ?? ""),
-            itemId: item.itemId ?? 0,
+            itemId: Number(item.itemId ?? 0), // ✅ aseguramos tipo number
             parts: await fetchItemName(item.itemId ?? 0),
           })
         ) ?? []
@@ -306,6 +306,7 @@ const EditOrder = () => {
       const customerName = await getCustomerName(data.customerId);
       const mechanicName = await getMechanicName(data.employeeId);
 
+      // 🔁 1. Reset con todos los campos excepto work_items
       reset({
         customer_order: String(data.customerId),
         mechanic_name: String(data.employeeId),
@@ -332,8 +333,10 @@ const EditOrder = () => {
           cir: data.cir ?? "",
           co: data.cor ?? "",
         },
-        work_items: workItems,
       });
+
+      // 🧩 2. Luego sincroniza el array con `replace`
+      replace(workItems);
 
       // Luego seteamos los "visuales"
       setSelectedCustomer({ id: data.customerId, name: customerName });
@@ -362,7 +365,7 @@ const EditOrder = () => {
     register,
     control,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { errors, isValid, isSubmitting },
     setValue,
     reset,
   } = useForm<OrderForm>({
@@ -410,19 +413,33 @@ const EditOrder = () => {
 
         files.forEach((file) => {
           const renamed = renameFileWithUniqueName(file);
+
+          // Log para ver si realmente se renombra
+          console.log("Uploading renamed file:", renamed.name);
+
           formData.append("Files", renamed);
         });
 
         try {
-          await axiosInstance.post(
+          const res = await axiosInstance.post(
             "/WorkOrder/UploadWorkOrderPhotos",
             formData,
             {
-              headers: { "Content-Type": "multipart/form-data" },
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
             }
           );
+          console.log("Upload result:", res.data);
+
+          if (res.data !== 1) {
+            toast.error("⚠️ No se subió ningún archivo nuevo");
+          } else {
+            toast.success("✅ Archivos subidos correctamente");
+          }
         } catch (error) {
-          toast.error(`${error}`);
+          toast.error("❌ Error al subir archivos");
+          console.error(error);
         }
       }
 
@@ -506,7 +523,12 @@ const EditOrder = () => {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form
+      onSubmit={handleSubmit(onSubmit, (errors) => {
+        console.warn("❌ FORM INVALID:", errors);
+        toast.error("Por favor completa todos los campos obligatorios.");
+      })}
+    >
       <div className=" border-[#00000014] border-1 p-2 mb-6 rounded-md flex flex-col gap-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
           <div className="flex flex-row gap-2 items-center justify-center ">
@@ -542,7 +564,6 @@ const EditOrder = () => {
                       setValue("customer_order", e.target.value);
                     }}
                     ref={(el) => {
-                      register("customer_order").ref(el);
                       inputRef.current = el;
                     }}
                     autoComplete="off"

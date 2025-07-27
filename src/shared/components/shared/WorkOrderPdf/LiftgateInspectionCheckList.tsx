@@ -41,32 +41,32 @@ const LiftgateInspectionCheckList: React.FC<Props> = ({ data, isEditable }) => {
       </h1>
       <div className="flex flex-col mt-5 p-5">
         <div className="flex flex-row justify-between items-center">
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2  avoid-break">
             <InputLine
               isEditable={isEditable}
-              label={values[0].question}
+              label={values[0]?.question}
               value="10/05/2025"
-              id={values[0].templateInspectionQuestionId}
+              id={values[0]?.templateInspectionQuestionId}
             />
             <InputLine
               isEditable={isEditable}
-              label={values[1].question}
+              label={values[1]?.question}
               value="10/05/2025"
-              id={values[1].templateInspectionQuestionId}
+              id={values[1]?.templateInspectionQuestionId}
             />
             <InputLine
               isEditable={isEditable}
-              label={values[3].question}
+              label={values[3]?.question}
               value="10/05/2025"
-              id={values[3].templateInspectionQuestionId}
+              id={values[3]?.templateInspectionQuestionId}
             />
           </div>
           <div>
             <InputLine
               isEditable={isEditable}
-              label={values[2].question}
+              label={values[2]?.question}
               value="10/05/2025"
-              id={values[2].templateInspectionQuestionId}
+              id={values[2]?.templateInspectionQuestionId}
             />
           </div>
         </div>
@@ -75,25 +75,25 @@ const LiftgateInspectionCheckList: React.FC<Props> = ({ data, isEditable }) => {
             <div className="w-1/3">
               <InputLine
                 isEditable={isEditable}
-                label={values[4].question}
+                label={values[4]?.question}
                 value="10/05/2025"
-                id={values[4].templateInspectionQuestionId}
+                id={values[4]?.templateInspectionQuestionId}
               />
             </div>
             <div className="w-1/3 flex justify-center">
               <InputLine
                 isEditable={isEditable}
-                label={values[5].question}
+                label={values[5]?.question}
                 value="10/05/2025"
-                id={values[5].templateInspectionQuestionId}
+                id={values[5]?.templateInspectionQuestionId}
               />
             </div>
             <div className="w-1/3 flex justify-end">
               <InputLine
                 isEditable={isEditable}
-                label={values[6].question}
+                label={values[6]?.question}
                 value="10/05/2025"
-                id={values[6].templateInspectionQuestionId}
+                id={values[6]?.templateInspectionQuestionId}
               />
             </div>
           </div>
@@ -101,37 +101,37 @@ const LiftgateInspectionCheckList: React.FC<Props> = ({ data, isEditable }) => {
             <div className="w-1/3">
               <InputLine
                 isEditable={isEditable}
-                label={values[7].question}
+                label={values[7]?.question}
                 value="10/05/2025"
-                id={values[7].templateInspectionQuestionId}
+                id={values[7]?.templateInspectionQuestionId}
               />
             </div>
             <div className="w-1/3 flex justify-center">
               <InputLine
                 isEditable={isEditable}
-                label={values[8].question}
+                label={values[8]?.question}
                 value="10/05/2025"
-                id={values[8].templateInspectionQuestionId}
+                id={values[8]?.templateInspectionQuestionId}
               />
             </div>
             <div className="w-1/3 flex justify-end">
               <InputLine
                 isEditable={isEditable}
-                label={values[9].question}
+                label={values[9]?.question}
                 value="10/05/2025"
-                id={values[9].templateInspectionQuestionId}
+                id={values[9]?.templateInspectionQuestionId}
               />
             </div>
           </div>
         </div>
       </div>
       <Separator label="90 Day Inspection" isEditable={isEditable} />
-      <div className="p-5 print:block print:gap-0 flex flex-col gap-2">
+      <div className="p-5 print:block print:gap-0 flex flex-col gap-2  avoid-break">
         {inspections.map((item, index) => {
           return (
             <InputLineInspections
-              label={item.question.toLowerCase()}
-              id={item.templateInspectionQuestionId}
+              label={item?.question.toLowerCase()}
+              id={item?.templateInspectionQuestionId}
               key={index}
               value="N/A"
               className="!capitalize"
@@ -142,7 +142,7 @@ const LiftgateInspectionCheckList: React.FC<Props> = ({ data, isEditable }) => {
       </div>
       <Separator label="Annual Inspection" />
       <div
-        className="p-5 print:block print:gap-0 flex flex-col gap-2"
+        className="p-5 print:block print:gap-0 flex flex-col gap-2  avoid-break"
         contentEditable={isEditable}
         suppressContentEditableWarning
       >

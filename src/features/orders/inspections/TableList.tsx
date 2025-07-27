@@ -257,7 +257,7 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
                     label="Watch"
                     onClick={() =>
                       router.push(
-                        `${pathname}/generate-pdf/${item.inspectionId}`
+                        `${pathname}/generate-pdf/${item?.templateInspectionId}`
                       )
                     }
                   />
