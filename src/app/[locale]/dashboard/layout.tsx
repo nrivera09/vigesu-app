@@ -11,6 +11,8 @@ import { FaRegBell } from "react-icons/fa";
 import { IoMenu } from "react-icons/io5";
 import { useEffect } from "react";
 import { useSessionValidator } from "@/shared/hooks/useSessionValidator";
+import Loading from "@/shared/components/shared/Loading";
+import { useLoadingStore } from "@/shared/stores/useLoadinStore";
 
 export default function DashboardLayout({
   children,
@@ -19,6 +21,7 @@ export default function DashboardLayout({
 }) {
   useSessionValidator();
 
+  const { isLoading, loadingLabel } = useLoadingStore();
   const router = useRouter();
   const token = useAuthStore((state) => state.token);
 
@@ -44,7 +47,7 @@ export default function DashboardLayout({
     lg:relative lg:translate-x-0 lg:left-0 lg:transform-none`}
       />
 
-      <main className=" flex-1 rounded-2xl p-2 h-full overflow-hidden">
+      <main className=" flex-1 rounded-2xl p-2 h-full overflow-hidden relative">
         <div className="bg-white rounded-xl  h-full shadow-xl overflow-hidden">
           <div
             className="app-header flex flex-row items-center justify-between px-6 min-h-[53px] gap-4"
@@ -82,6 +85,12 @@ export default function DashboardLayout({
             </div>
           </div>
         </div>
+        {isLoading && (
+          <Loading
+            className="bg-black/30 absolute left-0 top-0 w-full h-full !text-white"
+            label={loadingLabel}
+          />
+        )}
       </main>
     </div>
   );

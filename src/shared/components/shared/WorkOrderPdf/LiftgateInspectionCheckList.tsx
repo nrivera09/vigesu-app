@@ -71,7 +71,7 @@ const LiftgateInspectionCheckList: React.FC<Props> = ({ data, isEditable }) => {
           </div>
         </div>
         <div className="flex flex-col mt-2 gap-2">
-          <div className="flex flex-row">
+          <div className="flex flex-row gap-4">
             <div className="w-1/3">
               <InputLine
                 isEditable={isEditable}
@@ -97,7 +97,7 @@ const LiftgateInspectionCheckList: React.FC<Props> = ({ data, isEditable }) => {
               />
             </div>
           </div>
-          <div className="flex flex-row">
+          <div className="flex flex-row gap-4">
             <div className="w-1/3">
               <InputLine
                 isEditable={isEditable}

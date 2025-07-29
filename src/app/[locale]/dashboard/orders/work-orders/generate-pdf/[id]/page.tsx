@@ -20,6 +20,7 @@ import { sanitizeElementForPDF } from "@/shared/utils/utils";
 import html2pdf from "html2pdf.js";
 import { CiEdit } from "react-icons/ci";
 import { IoCloseOutline } from "react-icons/io5";
+import { generatePDF } from "@/shared/utils/generatePDF";
 
 const GeneratePdfPage = () => {
   const [isEditable, setIsEditable] = useState<boolean>(false);
@@ -118,7 +119,9 @@ const GeneratePdfPage = () => {
             className="!bg-red-500 text-white"
             icon={<AiOutlineFilePdf className="w-[20px] h-[20px] opacity-70" />}
             label={`Download PDF `}
-            onClick={() => window.open(`/api/pdf/${id}`, "_blank")}
+            onClick={() =>
+              generatePDF("pdf-content", `WorkOrder - ${data.workOrderId}.pdf`)
+            }
           />
         </div>
       </div>

@@ -3,23 +3,19 @@
 
 /* app/global.css */
 @media print {
-  body * {
-    visibility: hidden;
+  * {
+    color: black !important;
+    background-color: white !important;
   }
-  #pdf-content,
-  #pdf-content * {
-    visibility: visible;
-  }
-  #pdf-content {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-  }
+}
+
+[data-html2canvas-color] {
+  color: black !important;
 }
 
 :root {
   font-family: var(--font-jost-sans), sans-serif;
+  --primary-brand-color: hsl(24, 100%, 61%);
 }
 body,
 html {
