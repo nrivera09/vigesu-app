@@ -60,6 +60,7 @@ const TableList = ({ objFilter, setRefreshFlag }: TableListProps) => {
             <tr
               key={item.templateInspectionId}
               className="cursor-pointer odd:bg-base-200"
+              data-id={item.templateInspectionId}
             >
               <td className="truncate">{item.name}</td>
               <td className="flex items-center justify-end gap-2">

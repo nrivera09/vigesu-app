@@ -26,7 +26,7 @@ const WorkOrderPdf = forwardRef<HTMLDivElement, Props>(
           </p>
         </div>
         <h1
-          className="font-bold text-6xl py-4"
+          className="font-bold text-4xl md:text-6xl py-4"
           contentEditable={isEditable}
           suppressContentEditableWarning
         >
@@ -35,7 +35,7 @@ const WorkOrderPdf = forwardRef<HTMLDivElement, Props>(
 
         <div className="flex flex-col gap-4 mb-10">
           <div className="grid grid-cols-3 border border-black">
-            <div className="flex flex-row p-2 items-center justify-start gap-2">
+            <div className="flex flex-col md:flex-row p-2 items-center justify-start gap-1 md:gap-2">
               <label
                 htmlFor=""
                 className="min-w-auto font-medium"
@@ -52,7 +52,7 @@ const WorkOrderPdf = forwardRef<HTMLDivElement, Props>(
                 {data.customerName}
               </span>
             </div>
-            <div className="flex flex-row p-2 items-center justify-start border-r-1 border-l-1 gap-2">
+            <div className="flex flex-col md:flex-row p-2 items-center justify-start border-r-1 border-l-1 gap-2">
               <label
                 htmlFor=""
                 className="min-w-auto font-medium"
@@ -69,7 +69,7 @@ const WorkOrderPdf = forwardRef<HTMLDivElement, Props>(
                 {data.locationOfRepair}
               </span>
             </div>
-            <div className="flex flex-row p-2 items-center justify-start gap-2">
+            <div className="flex flex-col md:flex-row p-2 items-center justify-start gap-1 md:gap-2">
               <label
                 htmlFor=""
                 className="min-w-auto font-medium"
@@ -88,7 +88,7 @@ const WorkOrderPdf = forwardRef<HTMLDivElement, Props>(
             </div>
           </div>
           <div className="grid grid-cols-3 border border-black">
-            <div className="flex flex-row p-2 items-center justify-start gap-2">
+            <div className="flex flex-col md:flex-row p-2 items-center justify-start gap-1 md:gap-2">
               <label
                 htmlFor=""
                 className="min-w-auto font-medium"
@@ -99,7 +99,7 @@ const WorkOrderPdf = forwardRef<HTMLDivElement, Props>(
               </label>
               <span className="flex flex-1">{data.equipament}</span>
             </div>
-            <div className="flex flex-row p-2 items-center justify-start border-r-1 border-l-1 gap-2">
+            <div className="flex flex-col md:flex-row p-2 items-center justify-start border-r-1 border-l-1 gap-2">
               <label
                 htmlFor=""
                 className="min-w-auto font-medium"
@@ -116,7 +116,7 @@ const WorkOrderPdf = forwardRef<HTMLDivElement, Props>(
                 {formatDate(data.dateOfRepair)}
               </span>
             </div>
-            <div className="flex flex-row p-2 items-center justify-start gap-2">
+            <div className="flex flex-col md:flex-row p-2 items-center justify-start gap-1 md:gap-2">
               <label
                 htmlFor=""
                 className="min-w-auto font-medium"
@@ -135,7 +135,7 @@ const WorkOrderPdf = forwardRef<HTMLDivElement, Props>(
             </div>
           </div>
           <div className="grid grid-cols-2 border border-black">
-            <div className="flex flex-row p-2 items-center justify-start gap-2">
+            <div className="flex flex-col md:flex-row p-2 items-center justify-start gap-1 md:gap-2">
               <label
                 htmlFor=""
                 className="min-w-auto font-medium"
@@ -152,7 +152,7 @@ const WorkOrderPdf = forwardRef<HTMLDivElement, Props>(
                 {data.licencePlate}
               </span>
             </div>
-            <div className="flex flex-row p-2 items-center justify-start gap-2 border-l-1 ">
+            <div className="flex flex-col md:flex-row p-2 items-center justify-start gap-1 md:gap-2 border-l-1 ">
               <label
                 htmlFor=""
                 className="min-w-auto font-medium"
@@ -171,7 +171,7 @@ const WorkOrderPdf = forwardRef<HTMLDivElement, Props>(
             </div>
           </div>
           <div className="grid grid-cols-2 border border-black">
-            <div className="flex flex-row p-2 items-center justify-start gap-2">
+            <div className="flex flex-col md:flex-row p-2 items-center justify-start gap-1 md:gap-2">
               <label
                 htmlFor=""
                 className="min-w-auto font-medium"
@@ -188,7 +188,7 @@ const WorkOrderPdf = forwardRef<HTMLDivElement, Props>(
                 {data.vin}
               </span>
             </div>
-            <div className="flex flex-row p-2 items-center justify-start gap-2 border-l-1 ">
+            <div className="flex flex-col md:flex-row p-2 items-center justify-start gap-1 md:gap-2 border-l-1 ">
               <label
                 htmlFor=""
                 className="min-w-auto font-medium"

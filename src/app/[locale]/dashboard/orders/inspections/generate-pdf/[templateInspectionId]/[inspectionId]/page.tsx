@@ -8,7 +8,7 @@ import Loading from "@/shared/components/shared/Loading";
 import LiftgateInspectionCheckList, {
   IInspection,
   IInspectionDetail,
-} from "@/shared/components/shared/WorkOrderPdf/LiftgateInspectionCheckList";
+} from "@/shared/components/shared/InspectionsPdf/LiftgateInspectionCheckList";
 import BackButton from "@/shared/components/shared/BackButton";
 import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
 import { FiEdit, FiPrinter } from "react-icons/fi";
@@ -16,6 +16,7 @@ import { AiOutlineFilePdf } from "react-icons/ai";
 import { IoCloseOutline } from "react-icons/io5";
 import { useReactToPrint } from "react-to-print";
 import { generatePDF } from "@/shared/utils/generatePDF";
+import RenderComponentByNumber from "@/shared/components/shared/InspectionsPdf/RenderComponentByNumber";
 
 const GeneratePdfPage = () => {
   const [isEditable, setIsEditable] = useState<boolean>(false);
@@ -49,7 +50,6 @@ const GeneratePdfPage = () => {
         const resInspection = await axiosInstance.get(
           `/Inspection/GetInspectionById?InspectionId=${inspectionId}`
         );
-
         setTemplateData(resTemplate.data);
         setInspectionData(resInspection.data);
       } catch (error) {
@@ -104,11 +104,13 @@ const GeneratePdfPage = () => {
           className="container min-h-screen max-w-full mb-5"
           id="pdf-content"
         >
-          <LiftgateInspectionCheckList
-            data={templateData}
-            inspectionDetails={inspectionData?.inspectionDetails ?? []}
-            isEditable={isEditable}
-          />
+          <div>
+            {RenderComponentByNumber(templateData.templateInspectionId, {
+              data: templateData,
+              inspectionDetails: inspectionData?.inspectionDetails ?? [],
+              isEditable: isEditable,
+            })}
+          </div>
         </div>
       </div>
     </>

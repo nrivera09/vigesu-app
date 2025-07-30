@@ -148,15 +148,15 @@ const LiftgateInspectionCheckList: React.FC<Props> = ({
   return (
     <div className="text-black max-w-full font-sans bg-white mx-auto pt-[20px] border-2 mt-5 print-no-flex print-no-gap">
       <h1
-        className="font-bold text-3xl  text-center"
+        className="font-bold text-4xl  text-center"
         contentEditable={isEditable}
         suppressContentEditableWarning
       >
         Liftgate Inspection Checklist
       </h1>
       <div className="flex flex-col mt-5 p-5">
-        <div className="flex flex-row justify-between items-start">
-          <div className="flex flex-col gap-2  avoid-break">
+        <div className="flex flex-row justify-between items-start gap-2">
+          <div className="flex flex-col gap-2  ">
             <InputLine
               isEditable={isEditable}
               label={values[0]?.question}
@@ -186,7 +186,7 @@ const LiftgateInspectionCheckList: React.FC<Props> = ({
           </div>
         </div>
         <div className="flex flex-col mt-2 gap-2">
-          <div className="flex flex-row gap-4 items-start">
+          <div className="flex flex-col md:flex-row gap-4 items-start">
             <div className="w-1/3">
               <InputLine
                 isEditable={isEditable}
@@ -195,7 +195,7 @@ const LiftgateInspectionCheckList: React.FC<Props> = ({
                 id={values[4]?.templateInspectionQuestionId}
               />
             </div>
-            <div className="w-1/3 flex justify-center">
+            <div className="w-full md:w-1/3 flex justify-start md:justify-center">
               <InputLine
                 isEditable={isEditable}
                 label={values[5]?.question}
@@ -203,7 +203,7 @@ const LiftgateInspectionCheckList: React.FC<Props> = ({
                 id={values[5]?.templateInspectionQuestionId}
               />
             </div>
-            <div className="w-1/3 flex justify-end">
+            <div className="w-full md:w-1/3 flex justify-start md:justify-center">
               <InputLine
                 isEditable={isEditable}
                 label={values[6]?.question}
@@ -212,8 +212,8 @@ const LiftgateInspectionCheckList: React.FC<Props> = ({
               />
             </div>
           </div>
-          <div className="flex flex-row gap-4 items-start">
-            <div className="w-1/3">
+          <div className="flex flex-col md:flex-row gap-4 items-start">
+            <div className="w-full md:w-1/3">
               <InputLine
                 isEditable={isEditable}
                 label={values[7]?.question}
@@ -240,8 +240,13 @@ const LiftgateInspectionCheckList: React.FC<Props> = ({
           </div>
         </div>
       </div>
+      <div className="bg-black/5 text-black font-bold p-3 text-center border-t-2 border-b-0 justify-between items-center flex flex-row">
+        <span>P = Passed Inspection</span>
+        <span>R/P = Repaired and Passed</span>
+        <span>N/A = Not Applicable</span>
+      </div>
       <Separator label="90 Day Inspection" isEditable={isEditable} />
-      <div className="p-5 print:block print:gap-0 flex flex-col gap-2  avoid-break">
+      <div className="p-5   flex flex-col gap-2  ">
         {inspections.map((item, index) => {
           return (
             <InputLineInspections
@@ -260,7 +265,7 @@ const LiftgateInspectionCheckList: React.FC<Props> = ({
       </div>
       <Separator label="Annual Inspection" />
       <div
-        className="p-5 print:block print:gap-0 flex flex-col gap-2  avoid-break"
+        className="p-5   flex flex-col gap-2  "
         contentEditable={isEditable}
         suppressContentEditableWarning
       >
@@ -272,10 +277,10 @@ const LiftgateInspectionCheckList: React.FC<Props> = ({
         label="List all completed repairs made on this inspection work order "
         isEditable={isEditable}
       />
-      <div className=" flex flex-col gap-1 print:gap-0 print:block">
+      <div className=" flex flex-col gap-1  ">
         <LineComplete isEditable={isEditable} />
       </div>
-      <div className=" flex flex-col gap-1 print:gap-0 border-t p-2 print:block">
+      <div className=" flex flex-col gap-1  border-t p-2 ">
         Commets (if applicable)
       </div>
     </div>
@@ -291,7 +296,7 @@ const LineComplete: React.FC<NumberedListProps> = ({
   const filledItems = [...items, ...Array(5)].slice(0, 5);
 
   return (
-    <ol className="flex flex-col print:block print:gap-0">
+    <ol className="flex flex-col  ">
       {filledItems.map((item, index) => (
         <li
           key={index}
@@ -319,7 +324,7 @@ const InputLine: React.FC<InputLineProps> = ({
   return (
     <div
       className={clsx(
-        `flex flex-row  items-center justify-start gap-2 uppercase`,
+        `flex flex-row  items-start justify-start gap-2 uppercase`,
         className
       )}
     >
@@ -328,14 +333,14 @@ const InputLine: React.FC<InputLineProps> = ({
         contentEditable={isEditable}
         suppressContentEditableWarning
       >
-        {label}:
+        {label && label + `: `}
       </label>
       <span
-        className="flex flex-1 underline"
+        className="flex flex-1 underline "
         contentEditable={isEditable}
         suppressContentEditableWarning
       >
-        {value}
+        {value && value}
       </span>
     </div>
   );
@@ -379,7 +384,7 @@ const Separator: React.FC<SeparatorProps> = ({ label, isEditable }) => {
       contentEditable={isEditable}
       suppressContentEditableWarning
       className={clsx(
-        `bg-black/20 text-black font-bold p-3 text-center border-t-2 border-b-2 print:block print:gap-0`
+        `bg-black/20 text-black font-bold p-3 text-center border-t-2 border-b-2  `
       )}
     >
       {label}
