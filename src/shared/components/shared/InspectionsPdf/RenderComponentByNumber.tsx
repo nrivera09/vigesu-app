@@ -4,6 +4,7 @@ import LiftgateInspectionCheckList, {
 } from "@/shared/components/shared/InspectionsPdf/LiftgateInspectionCheckList";
 import { LiftgateInspection } from "@/shared/types/order/ITypes";
 import ChassisAnnualInspectionReport from "./ChassisAnnualInspectionReport";
+import ChassisAnnualInspectionReportDayPM from "./ChassisAnnualInspectionReportDayPM";
 
 interface RenderProps {
   data: LiftgateInspection;
@@ -24,9 +25,15 @@ const RenderComponentByNumber = (
           isEditable={isEditable}
         />
       ),
-      2: ({ data }) => <div>Otro componente usando {data.name}</div>,
-      3: ({ data, inspectionDetails, isEditable }) => (
+      2: ({ data, inspectionDetails, isEditable }) => (
         <ChassisAnnualInspectionReport
+          data={data}
+          inspectionDetails={inspectionDetails}
+          isEditable={isEditable}
+        />
+      ),
+      3: ({ data, inspectionDetails, isEditable }) => (
+        <ChassisAnnualInspectionReportDayPM
           data={data}
           inspectionDetails={inspectionDetails}
           isEditable={isEditable}

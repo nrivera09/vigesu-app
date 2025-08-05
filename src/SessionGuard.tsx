@@ -66,8 +66,8 @@ export default function SessionGuard({
     <>
       {children}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[9999]">
-          <div className="bg-white p-8 rounded-md shadow-lg text-center max-w-sm w-full">
+        <div className="fixed inset-0 bg-black/30 bg-opacity-80 flex items-center justify-center z-[9999]">
+          <div className="bg-white p-8 rounded-xl shadow-lg text-center max-w-sm w-full">
             <h2 className="text-xl font-bold mb-4">Sesión finalizada</h2>
             <p className="mb-6 text-gray-600">
               Por inactividad o pérdida de sesión, debes iniciar nuevamente.

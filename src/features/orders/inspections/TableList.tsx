@@ -205,6 +205,7 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
               <tr
                 key={item.inspectionId}
                 className="cursor-pointer odd:bg-base-200"
+                data-url={`${pathname}/generate-pdf/${item?.templateInspectionId}/${item?.inspectionId}`}
               >
                 <td className="truncate">{item.inspectionNumber}</td>
                 <td className="truncate">{item.customerName}</td>
