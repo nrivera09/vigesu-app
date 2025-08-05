@@ -159,9 +159,9 @@ const ModalUsingItem = ({
           <table className="table table-fixed w-full">
             <thead>
               <tr>
-                <th className="w-[40%] text-center">Item</th>
-                <th className="w-[40%] text-center">Cantidad</th>
-                <th className="w-[20%] text-center"></th>
+                <th className="w-[40%] text-center truncate">Item</th>
+                <th className="w-[40%] text-center truncate">Cantidad</th>
+                <th className="w-[20%] text-center truncate"></th>
               </tr>
             </thead>
             <tbody>

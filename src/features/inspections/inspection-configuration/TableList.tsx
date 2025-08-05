@@ -93,10 +93,10 @@ const TableList = ({ objFilter }: TableListProps) => {
       <table className="table table-fixed w-full">
         <thead>
           <tr>
-            <th className="w-[25%]">Name</th>
-            <th className="w-[30%]">Description</th>
-            <th className="w-[15%]">Status</th>
-            <th className="w-[20%]"></th>
+            <th className="w-[25%] truncate">Name</th>
+            <th className="w-[30%] truncate">Description</th>
+            <th className="w-[15%] truncate">Status</th>
+            <th className="w-[20%] truncate"></th>
           </tr>
         </thead>
         <tbody>

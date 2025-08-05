@@ -184,13 +184,13 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
       <table className="table table-fixed w-full">
         <thead>
           <tr>
-            <th className="w-[5%]">#</th>
-            <th className="w-[15%]">Cliente</th>
-            <th className="w-[15%]">Empleado</th>
-            <th className="w-[15%]">Fecha</th>
-            <th className="w-[20%] text-center">Sync Quickbook</th>
-            <th className="w-[10%]">Estado</th>
-            <th className="w-[20%]"></th>
+            <th className="w-[5%] truncate">#</th>
+            <th className="w-[15%] truncate">Cliente</th>
+            <th className="w-[15%] truncate">Empleado</th>
+            <th className="w-[15%] truncate">Fecha</th>
+            <th className="w-[20%] text-center truncate">Sync Quickbook</th>
+            <th className="w-[10%] truncate">Estado</th>
+            <th className="w-[20%] truncate"></th>
           </tr>
         </thead>
         <tbody>

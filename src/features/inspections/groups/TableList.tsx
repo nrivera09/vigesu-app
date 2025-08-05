@@ -80,9 +80,9 @@ const TableList = ({
         <table className="table table-fixed w-full">
           <thead>
             <tr>
-              <th className="w-[50%]">Group</th>
-              <th className="w-[30%] text-center">Status</th>
-              <th className="w-[20%]"></th>
+              <th className="w-[50%] truncate">Group</th>
+              <th className="w-[30%] truncate text-center">Status</th>
+              <th className="w-[20%] truncate"></th>
             </tr>
           </thead>
           <tbody>
@@ -95,8 +95,8 @@ const TableList = ({
                       item.status === 0
                         ? "badge-success"
                         : item.status === 1
-                        ? "badge-warning"
-                        : "badge-neutral"
+                          ? "badge-warning"
+                          : "badge-neutral"
                     }`}
                   >
                     {getInspectionStatusGroupsLabel(item.status)}

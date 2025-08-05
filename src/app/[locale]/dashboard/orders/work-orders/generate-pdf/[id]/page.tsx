@@ -128,7 +128,7 @@ const GeneratePdfPage = () => {
       <div className="body-app overflow-y-auto ">
         <div
           ref={contentRef}
-          className="container max-w-full mb-5"
+          className="container max-w-full my-5"
           id="pdf-content"
         >
           <WorkOrderPdf

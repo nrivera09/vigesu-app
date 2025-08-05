@@ -82,9 +82,9 @@ const UserTable: FC<Props> = ({ objFilter, refreshFlag }) => {
       <table className="table table-fixed w-full">
         <thead>
           <tr>
-            <th>Username</th>
-            <th>Employee</th>
-            <th>Role</th>
+            <th className="truncate">Username</th>
+            <th className="truncate">Employee</th>
+            <th className="truncate">Role</th>
             <th></th>
           </tr>
         </thead>

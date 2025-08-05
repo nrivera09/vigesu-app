@@ -5,6 +5,7 @@ import LiftgateInspectionCheckList, {
 import { LiftgateInspection } from "@/shared/types/order/ITypes";
 import ChassisAnnualInspectionReport from "./ChassisAnnualInspectionReport";
 import ChassisAnnualInspectionReportDayPM from "./ChassisAnnualInspectionReportDayPM";
+import PremierFHWA from "./PremierFHWA";
 
 interface RenderProps {
   data: LiftgateInspection;
@@ -20,6 +21,13 @@ const RenderComponentByNumber = (
     {
       7: ({ data, inspectionDetails, isEditable }) => (
         <LiftgateInspectionCheckList
+          data={data}
+          inspectionDetails={inspectionDetails}
+          isEditable={isEditable}
+        />
+      ),
+      5: ({ data, inspectionDetails, isEditable }) => (
+        <PremierFHWA
           data={data}
           inspectionDetails={inspectionDetails}
           isEditable={isEditable}

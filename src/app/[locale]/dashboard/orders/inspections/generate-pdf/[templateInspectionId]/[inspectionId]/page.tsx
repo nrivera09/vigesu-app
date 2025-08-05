@@ -17,6 +17,7 @@ import { IoCloseOutline } from "react-icons/io5";
 import { useReactToPrint } from "react-to-print";
 import { generatePDF } from "@/shared/utils/generatePDF";
 import RenderComponentByNumber from "@/shared/components/shared/InspectionsPdf/RenderComponentByNumber";
+import { toast } from "sonner";
 
 const GeneratePdfPage = () => {
   const [isEditable, setIsEditable] = useState<boolean>(false);
@@ -41,24 +42,31 @@ const GeneratePdfPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 1️⃣ Obtener Template
-        const resTemplate = await axiosInstance.get(
-          `/TemplateInspection/GetTemplateInspectionById?TemplateInspectionId=${templateInspectionId}`
-        );
+        const [resTemplate, resInspection] = await Promise.allSettled([
+          axiosInstance.get(
+            `/TemplateInspection/GetTemplateInspectionById?TemplateInspectionId=${templateInspectionId}`
+          ),
+          axiosInstance.get(
+            `/Inspection/GetInspectionById?InspectionId=${inspectionId}`
+          ),
+        ]);
 
-        // 2️⃣ Obtener Inspection
-        const resInspection = await axiosInstance.get(
-          `/Inspection/GetInspectionById?InspectionId=${inspectionId}`
-        );
-        setTemplateData(resTemplate.data);
-        setInspectionData(resInspection.data);
+        if (resTemplate.status === "fulfilled") {
+          setTemplateData(resTemplate.value.data);
+        } else {
+          toast.error("Error fetching template data");
+        }
+
+        if (resInspection.status === "fulfilled") {
+          setInspectionData(resInspection.value.data);
+        }
       } catch (error) {
-        console.error("Error fetching data", error);
+        toast.error("Error fetching template data");
       }
     };
 
     fetchData();
-  }, [templateInspectionId, inspectionId, isPreview]);
+  }, [templateInspectionId, inspectionId]);
 
   if (!templateData) return <Loading />;
 
@@ -101,7 +109,7 @@ const GeneratePdfPage = () => {
       <div className="body-app overflow-y-auto">
         <div
           ref={pdfRef}
-          className="container min-h-screen max-w-full mb-5"
+          className="container min-h-screen max-w-full my-5"
           id="pdf-content"
         >
           <div>

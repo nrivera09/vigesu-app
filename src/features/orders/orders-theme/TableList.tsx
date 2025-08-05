@@ -51,8 +51,8 @@ const TableList = ({ objFilter, setRefreshFlag }: TableListProps) => {
       <table className="table table-fixed w-full">
         <thead>
           <tr>
-            <th className="w-[70%]">Technical report form</th>
-            <th className="w-[30%]"></th>
+            <th className="w-[70%] truncate">Technical report form</th>
+            <th className="w-[30%] truncate"></th>
           </tr>
         </thead>
         <tbody>

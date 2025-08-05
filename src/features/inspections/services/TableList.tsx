@@ -42,10 +42,10 @@ const TableList = ({ objFilter }: TableListProps) => {
       <table className="table table-fixed w-full">
         <thead>
           <tr>
-            <th className="w-[10%]">Sel</th>
-            <th className="w-[45%]">Service</th>
-            <th className="w-[15%]">Status</th>
-            <th className="w-[30%]"></th>
+            <th className="w-[10%] truncate">Sel</th>
+            <th className="w-[45%] truncate">Service</th>
+            <th className="w-[15%] truncate">Status</th>
+            <th className="w-[30%] truncate"></th>
           </tr>
         </thead>
         <tbody>
@@ -65,10 +65,10 @@ const TableList = ({ objFilter }: TableListProps) => {
                     item.status === "success"
                       ? "badge-success"
                       : item.status === "warning"
-                      ? "badge-warning"
-                      : item.status === "error"
-                      ? "badge-error "
-                      : "badge-neutral"
+                        ? "badge-warning"
+                        : item.status === "error"
+                          ? "badge-error "
+                          : "badge-neutral"
                   }`}
                 >
                   {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
