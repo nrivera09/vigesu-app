@@ -19,6 +19,7 @@ export interface IInspectionDetail {
   typeInspectionDetailAnswerId: number;
   finalResponse: string;
   inspectionDetailAnswers: IInspectionDetailAnswer[];
+  templateInspectionQuestionId?: number;
 }
 
 export interface IInspectionPhoto {

@@ -1,4 +1,6 @@
+import { TypeQuestion } from "@/features/orders/models/workOrder.types";
 import { PropsPDF } from "@/shared/types/inspection/ITypes";
+import { getAnswersFromDetails } from "@/shared/utils/getAnswerValue";
 import clsx from "clsx";
 import React, { FC } from "react";
 
@@ -7,29 +9,119 @@ const MckinneyFederalInspection: React.FC<PropsPDF> = ({
   inspectionDetails,
   isEditable,
 }) => {
+  console.log("data: ", data);
+  console.log("inspectionDetails: ", inspectionDetails);
+
+  const getAnswerValue = (templateQuestionId: number) => {
+    const match = inspectionDetails
+      ? inspectionDetails.find(
+          (item) =>
+            Number(item.templateInspectionQuestionId) ===
+            Number(templateQuestionId)
+        )
+      : null;
+
+    if (!match) {
+      console.warn(`❌ Sin match para QuestionId: ${templateQuestionId}`);
+      return "";
+    }
+
+    const typeQuestion = data?.templateInspectionQuestions.find(
+      (item) => item.templateInspectionQuestionId === Number(templateQuestionId)
+    )?.typeQuestion;
+
+    if (!typeQuestion) {
+      console.warn(`❌ Sin match para typeQuestion: ${templateQuestionId}`);
+      return "";
+    }
+
+    let value = "";
+
+    switch (typeQuestion) {
+      case TypeQuestion.TextInput:
+        // ✅ Caso texto libre
+        value = match.finalResponse?.trim() ?? "";
+        break;
+
+      case TypeQuestion.MultipleChoice:
+        // ✅ Caso múltiple: aseguramos que inspeccionDetailAnswers tenga data
+        if (
+          Array.isArray(match.inspectionDetailAnswers) &&
+          match.inspectionDetailAnswers.length > 0
+        ) {
+          value = match.inspectionDetailAnswers
+            .map((ans) => ans.response?.trim())
+            .filter(Boolean)
+            .join(", ");
+        }
+        break;
+
+      case TypeQuestion.SingleChoice:
+        // ✅ Caso selección única: usar primera respuesta válida
+        if (
+          Array.isArray(match.inspectionDetailAnswers) &&
+          match.inspectionDetailAnswers.length > 0
+        ) {
+          value = match.inspectionDetailAnswers[0]?.response?.trim() ?? "";
+        }
+        break;
+
+      case TypeQuestion.Sign:
+        value = match.finalResponse?.trim() ?? "";
+        break;
+
+      default:
+        value = match.finalResponse?.trim() ?? "";
+    }
+
+    console.log(
+      `🔎 [MATCH] QID:${templateQuestionId} | Type:${typeQuestion} | FinalResponse:"${match.finalResponse}" | Answers:[${match.inspectionDetailAnswers?.map((a) => a.response)}] | Value:"${value}"`
+    );
+
+    return value || "";
+  };
+
   return (
     <>
       <div className="overflow-x-auto">
         <table className="w-full  border-collapse">
           <thead>
             <tr className="border">
-              <th className="p-2 text-center">
+              <th className="p-2 text-center gap-2">
                 <span className="truncate">Unit #</span>
+                <span className="font-normal truncate ml-2">
+                  {getAnswerValue(1)}
+                </span>
               </th>
-              <th className="p-2 text-center">
+              <th className="p-2 text-center gap-2">
                 <span className="truncate">VIN #</span>
+                <span className="font-normal truncate ml-2">
+                  {getAnswerValue(2)}
+                </span>
               </th>
-              <th className="p-2 text-center">
+              <th className="p-2 text-center gap-2">
                 <span className="t">Make</span>
+                <span className="font-normal truncate ml-2">
+                  {getAnswerValue(3)}
+                </span>
               </th>
-              <th className="p-2 text-center">
+              <th className="p-2 text-center gap-2">
                 <span className="truncate">Year</span>
+                <span className="font-normal truncate ml-2">
+                  {getAnswerValue(4)}
+                </span>
               </th>
-              <th className="p-2 text-center">
+              <th className="p-2 text-center gap-2">
                 <span className="truncate">Lic Plates:</span>
+                <span className="font-normal truncate ml-2">
+                  {getAnswerValue(5)}
+                </span>
               </th>
-              <th className="p-2 text-center">
+              <th className="p-2 text-center gap-2">
                 <span className="truncate">State:</span>
+                <span className="font-normal truncate ml-2">
+                  {getAnswerValue(6)}
+                </span>
               </th>
             </tr>
           </thead>
@@ -96,7 +188,7 @@ crossmembers above slider rail**`}
               check2={false}
               label2={`Proper lubricant level in each wheel (oil/grease)`}
               repaired2={false}
-            />{" "}
+            />
             <LineTable
               check1
               label1={`Pressurize air system, activate ABS System**`}
@@ -452,7 +544,7 @@ interface BoxDataSmallProps {
 const BoxDataSmall: FC<BoxDataSmallProps> = ({ label1, label2 }) => {
   return (
     <div className="rounded-lg border w-full px-2 py-1 gap-5 flex items-center justify-center h-[50px]">
-      <div className="flex flex-row w-full items-center gap-1 px-8 justify-between">
+      <div className="flex flex-row w-full items-center gap-1 px-25 md:px-8 justify-between">
         <span className="font-bold text-sm">{label1}</span>
         <span className="font-bold text-sm">{label2}</span>
       </div>
