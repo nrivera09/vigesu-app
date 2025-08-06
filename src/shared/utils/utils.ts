@@ -146,3 +146,13 @@ export const getInitials = (fullName: string): string => {
     .map((word) => word[0].toUpperCase())
     .join("");
 };
+
+export const getTodayParts = () => {
+  const today = new Date();
+
+  return {
+    day: String(today.getDate()).padStart(2, "0"), // 01-31
+    month: String(today.getMonth() + 1).padStart(2, "0"), // 01-12
+    year: String(today.getFullYear()), // YYYY
+  };
+};

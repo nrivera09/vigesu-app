@@ -6,6 +6,7 @@ import { LiftgateInspection } from "@/shared/types/order/ITypes";
 import ChassisAnnualInspectionReport from "./ChassisAnnualInspectionReport";
 import ChassisAnnualInspectionReportDayPM from "./ChassisAnnualInspectionReportDayPM";
 import PremierFHWA from "./PremierFHWA";
+import MckinneyFederalInspection from "./MckinneyFederalInspection";
 
 interface RenderProps {
   data: LiftgateInspection;
@@ -19,6 +20,13 @@ const RenderComponentByNumber = (
 ): React.ReactNode => {
   const componentMap: Record<number, (props: RenderProps) => React.ReactNode> =
     {
+      1: ({ data, inspectionDetails, isEditable }) => (
+        <MckinneyFederalInspection
+          data={data}
+          inspectionDetails={inspectionDetails}
+          isEditable={isEditable}
+        />
+      ),
       7: ({ data, inspectionDetails, isEditable }) => (
         <LiftgateInspectionCheckList
           data={data}
