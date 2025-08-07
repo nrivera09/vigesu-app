@@ -412,12 +412,7 @@ const EditOrder = () => {
         formData.append("WorkOrderId", String(id));
 
         files.forEach((file) => {
-          const renamed = renameFileWithUniqueName(file);
-
-          // Log para ver si realmente se renombra
-          console.log("Uploading renamed file:", renamed.name);
-
-          formData.append("Files", renamed);
+          formData.append("Files", file);
         });
 
         try {

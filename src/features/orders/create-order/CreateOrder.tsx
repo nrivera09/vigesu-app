@@ -294,19 +294,17 @@ const CreateOrder = () => {
       if (files.length > 0) {
         const formData = new FormData();
 
-        // Importante: WorkOrderId debe ser string si lo exige el backend
         formData.append("WorkOrderId", String(workOrderId));
 
         files.forEach((file) => {
-          const renamed = renameFileWithUniqueName(file);
-          formData.append("Files", renamed);
+          formData.append("Files", file); // ✅ ya están renombrados
         });
 
         await axiosInstance.post("/WorkOrder/UploadWorkOrderPhotos", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
 
-        console.log(" Archivos subidos correctamente");
+        console.log("📸 Archivos subidos correctamente");
       }
 
       console.log("🎯 Todo OK - proceso finalizado");

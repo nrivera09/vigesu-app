@@ -15,7 +15,15 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
 
   const onDrop = useCallback(
     (acceptedFiles: FileWithPath[]) => {
-      const updated = [...files, ...acceptedFiles];
+      const renamedFiles: File[] = acceptedFiles.map((file) => {
+        const extension = file.name.split(".").pop();
+        const timestamp = new Date().toISOString().replace(/[-:.TZ]/g, "");
+        const uniqueId = crypto.randomUUID(); // o usa uuidv4()
+        const newName = `${timestamp}-${uniqueId}.${extension}`;
+        return new File([file], newName, { type: file.type });
+      });
+
+      const updated = [...files, ...renamedFiles];
       setFiles(updated);
       onFilesChange?.(updated);
     },
