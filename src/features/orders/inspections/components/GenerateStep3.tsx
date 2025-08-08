@@ -276,9 +276,22 @@ const GenerateStep3 = () => {
           <div className="flex flex-row items-center justify-start my-2">
             <div
               className="flex flex-row items-center gap-0 cursor-pointer group"
-              onClick={() =>
-                setSelectedTree((prev) => toggleAnswer(prev, answer, parentId))
-              }
+              onClick={() => {
+                const updated = toggleAnswer(selectedTree, answer, parentId);
+                setSelectedTree(updated);
+
+                // ✅ Solo aplica si estamos seleccionando raíz
+                const isRoot = !parentId;
+
+                if (
+                  isRoot &&
+                  (isSingle || isMultiple) &&
+                  updated.length === 1 && // solo hay 1 respuesta raíz
+                  isLastQuestionInGroup // última pregunta del grupo
+                ) {
+                  completeCurrentQuestion(updated[0].response); // llama directamente
+                }
+              }}
             >
               <div
                 data-color={answer.color}
@@ -486,7 +499,6 @@ const GenerateStep3 = () => {
     const store = useInspectionFullStore.getState();
     const current = store.fullInspection;
     const fullQuestion = store.fullQuestion;
-
     if (!current || !fullQuestion) return;
 
     let resolvedFinalResponse = responseValue ?? "";
@@ -632,6 +644,10 @@ const GenerateStep3 = () => {
             onComplete={(valid, url) => {
               setIsSignValid(valid);
               setSignUrl(url);
+
+              if (valid && isLastQuestionInGroup) {
+                completeCurrentQuestion(url); // avanzar automáticamente
+              }
             }}
           />
         )}
@@ -663,7 +679,11 @@ const GenerateStep3 = () => {
               disabled={selectedTree.length === 0}
               className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px]"
               onClick={() => {
-                setShowRootPicker(true);
+                if (selectedTree.length === 1) {
+                  completeCurrentQuestion(selectedTree[0].response);
+                } else {
+                  setShowRootPicker(true); // solo si hay más de una raíz
+                }
               }}
             >
               {isLastQuestionInGroup ? "Save" : "Continue"}
