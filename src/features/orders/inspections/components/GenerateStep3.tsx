@@ -646,7 +646,7 @@ const GenerateStep3 = () => {
               setSignUrl(url);
 
               if (valid && isLastQuestionInGroup) {
-                completeCurrentQuestion(url); // avanzar automáticamente
+                //completeCurrentQuestion(url);
               }
             }}
           />
@@ -679,11 +679,7 @@ const GenerateStep3 = () => {
               disabled={selectedTree.length === 0}
               className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px]"
               onClick={() => {
-                if (selectedTree.length === 1) {
-                  completeCurrentQuestion(selectedTree[0].response);
-                } else {
-                  setShowRootPicker(true); // solo si hay más de una raíz
-                }
+                setShowRootPicker(true);
               }}
             >
               {isLastQuestionInGroup ? "Save" : "Continue"}
@@ -757,7 +753,11 @@ const GenerateStep3 = () => {
                     setShowRootPicker(false);
                     completeCurrentQuestionWithRoot(root.response);
                   }}
-                  className="btn w-full min-h-[39px] p-2 rounded-md"
+                  className={`btn w-full min-h-[39px] p-2 rounded-md text-lg hover:opacity-85`}
+                  style={{
+                    backgroundColor: root.color,
+                    color: isColorLight(root.color) ? "#000" : "#fff",
+                  }}
                 >
                   {root.response}
                 </button>
