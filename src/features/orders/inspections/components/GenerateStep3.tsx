@@ -716,12 +716,18 @@ const GenerateStep3 = () => {
           onClose={() => setShowItemModal(false)}
           onSave={(items: ItemWithQuantity[]) => {
             if (!modalAnswer) return;
-            const updated = updateSelectedItems(
-              selectedTree,
-              String(modalAnswer.typeInspectionDetailAnswerId),
-              items
-            );
-            setSelectedTree(updated);
+
+            // 💡 Aseguramos usar siempre la última versión del árbol
+            setSelectedTree((prevTree) => {
+              const updated = updateSelectedItems(
+                prevTree,
+                String(modalAnswer.typeInspectionDetailAnswerId),
+                items
+              );
+              console.log("✅ Árbol actualizado con items:", updated);
+              return updated;
+            });
+
             setShowItemModal(false);
           }}
           initialItems={initialItems}

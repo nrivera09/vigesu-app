@@ -31,7 +31,7 @@ interface WorkOrderDetail {
 }
 
 const workItemSchema = z.object({
-  description: z.string().min(1, "Required"),
+  description: z.string().optional(),
   parts: z.string().min(1, "Required"),
   quantity: z.string().min(1, "Required"),
   itemId: z.number().optional(),

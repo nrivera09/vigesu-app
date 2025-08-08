@@ -20,7 +20,7 @@ import { renameFileWithUniqueName } from "@/shared/utils/utils";
 import Loading from "@/shared/components/shared/Loading";
 
 const workItemSchema = z.object({
-  description: z.string().min(1, "Required"),
+  description: z.string().optional(),
   parts: z.string().min(1, "Required"),
   idParts: z.number().min(1, "Required"),
   quantity: z.string().min(1, "Required"),
