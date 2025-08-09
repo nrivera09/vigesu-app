@@ -7,6 +7,7 @@ import ChassisAnnualInspectionReport from "./ChassisAnnualInspectionReport";
 import ChassisAnnualInspectionReportDayPM from "./ChassisAnnualInspectionReportDayPM";
 import PremierFHWA from "./PremierFHWA";
 import MckinneyFederalInspection from "./MckinneyFederalInspection";
+import InspectionTTN from "./InspectionTTN";
 
 interface RenderProps {
   data: LiftgateInspection;
@@ -50,6 +51,13 @@ const RenderComponentByNumber = (
       ),
       3: ({ data, inspectionDetails, isEditable }) => (
         <ChassisAnnualInspectionReportDayPM
+          data={data}
+          inspectionDetails={inspectionDetails}
+          isEditable={isEditable}
+        />
+      ),
+      4: ({ data, inspectionDetails, isEditable }) => (
+        <InspectionTTN
           data={data}
           inspectionDetails={inspectionDetails}
           isEditable={isEditable}
