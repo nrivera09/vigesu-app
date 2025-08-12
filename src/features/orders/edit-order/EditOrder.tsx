@@ -287,7 +287,7 @@ const EditOrder = () => {
       const fetchItemName = async (itemId: number): Promise<string> => {
         if (!itemId) return "";
         const response = await axiosInstance.get(
-          `https://ronnyruiz-001-site1.qtempurl.com/api/QuickBooks/Items/GetItemId?ItemId=${itemId}&RealmId=9341454759827689`
+          `/QuickBooks/Items/GetItemId?ItemId=${itemId}&RealmId=9341454759827689`
         );
         return response.data?.name ?? "";
       };
