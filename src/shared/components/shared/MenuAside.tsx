@@ -27,8 +27,11 @@ import Loading from "./Loading";
 import { getInitials } from "@/shared/utils/utils";
 import { useAuthStore } from "@/shared/stores/useAuthStore";
 import { TbDeviceTabletCheck } from "react-icons/tb";
+import { useTranslations } from "next-intl";
 
 const MenuAside: FC<generalReactClass> = ({ className }) => {
+  const t = useTranslations("aside");
+  const tLogout = useTranslations("logout");
   const router = useRouter();
   const logout = useAuthStore((state) => state.logout);
   const { userName, employeeName, rol } = useAuthUser();
@@ -44,19 +47,19 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
     rol === 1
       ? [
           {
-            label: "Work orders",
+            label: t("module1.menu1"),
             href: "/dashboard/orders/work-orders",
             icon: <SlBookOpen />,
           },
           {
-            label: "Inspections",
+            label: t("module1.menu2"),
             href: "/dashboard/orders/inspections",
             icon: <SlNote />,
           },
         ]
       : [
           {
-            label: "Inspections",
+            label: t("module1.menu2"),
             href: "#",
             icon: <SlNote />,
           },
@@ -64,17 +67,17 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
 
   const inspectionsLinks = [
     {
-      label: "Inspection configuration",
+      label: t("module2.menu1"),
       href: "/dashboard/inspections/inspection-configuration",
       icon: <SlSettings />,
     },
     {
-      label: "Groups",
+      label: t("module2.menu2"),
       href: "/dashboard/inspections/groups",
       icon: <SlLayers />,
     },
     {
-      label: "Users",
+      label: t("module2.menu3"),
       href: "/dashboard/inspections/users",
       icon: <SlUser />,
     },
@@ -82,12 +85,12 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
 
   const configurationLinks = [
     {
-      label: "Configurations",
+      label: t("module3.menu1"),
       href: "#",
       icon: <SlSettings />,
     },
     {
-      label: "IC theme",
+      label: t("module3.menu2"),
       href: "/dashboard/configurations/ic-theme",
       icon: <SlDirections />,
     },
@@ -253,7 +256,7 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
               <button className="btn btn-square btn-neutral bg-transparent shadow-none border-none">
                 <SlLogin className="text-2xl" />
               </button>
-              <span className="text-white">Sign Out</span>
+              <span className="text-white">{tLogout("logout")}</span>
             </div>
           </div>
           <div>

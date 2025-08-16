@@ -2,5 +2,26 @@
   "home": {
     "form-title": "Bienvenido",
     "form-info": "Porfavor ingrese sus credenciales"
+  },
+  "aside": {
+    "module1": {
+      "title": "DOCUMENTOSS",
+      "menu1": "Ordenes de trabajo",
+      "menu2": "Inspecciones"
+    },
+    "module2": {
+      "title": "CATÁLOGOS",
+      "menu1": "Configuración de inspecciones",
+      "menu2": "Grupos",
+      "menu3": "Usuarios"
+    },
+    "module3": {
+      "title": "Configuración",
+      "menu1": "Configuraciones",
+      "menu2": "IC theme"
+    }
+  },
+  "logout": {
+    "logout": "Cerrar sesión"
   }
 }

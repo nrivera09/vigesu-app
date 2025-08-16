@@ -5,6 +5,7 @@ import Link from "next/link";
 import clsx from "clsx";
 import { SidebarSectionProps } from "@/shared/types/TGeneral";
 import { useSidebarStore } from "@/shared/stores/useSidebarStore";
+import { useTranslations } from "next-intl";
 
 interface SidebarSectionWithActive extends SidebarSectionProps {
   activeHref: string | undefined;

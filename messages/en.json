@@ -2,5 +2,26 @@
   "home": {
     "title": " Welcome",
     "description": "We're glad to have you here. From this space, you can manage the entire platform with speed, security, and precision.\nExplore the system sections, access key metrics, and stay fully in control of your operations.\n\nIf you need assistance, our team is always ready to help.\n\nWishing you a productive and successful day!"
+  },
+  "aside": {
+    "module1": {
+      "title": "DOCUMENTS",
+      "menu1": "Work orders",
+      "menu2": "Inspections"
+    },
+    "module2": {
+      "title": "CATALOGS",
+      "menu1": "Inspection configuration",
+      "menu2": "Groups",
+      "menu3": "Users"
+    },
+    "module3": {
+      "title": "Configuration",
+      "menu1": "Configurations",
+      "menu2": "IC theme"
+    }
+  },
+  "logout": {
+    "logout": "Sign out"
   }
 }

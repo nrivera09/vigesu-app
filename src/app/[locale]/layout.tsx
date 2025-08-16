@@ -32,19 +32,17 @@ export default async function RootLayout({
     notFound();
   }
   return (
-    <SessionGuard>
-      <html lang={locale} suppressHydrationWarning>
-        <body className={`${jostSans.className}  antialiased`}>
-          <NextIntlClientProvider>
-            {/*
+    <html lang={locale} suppressHydrationWarning>
+      <body className={`${jostSans.className}  antialiased`}>
+        <NextIntlClientProvider>
+          {/*
           <ThemeSwitcher />
           <LanguageSwitcher />
           */}
-            {children}
-            <Toaster richColors position="bottom-right" />
-          </NextIntlClientProvider>
-        </body>
-      </html>
-    </SessionGuard>
+          {children}
+          <Toaster richColors position="bottom-right" />
+        </NextIntlClientProvider>
+      </body>
+    </html>
   );
 }
