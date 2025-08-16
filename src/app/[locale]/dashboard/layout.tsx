@@ -13,6 +13,7 @@ import { useEffect } from "react";
 import { useSessionValidator } from "@/shared/hooks/useSessionValidator";
 import Loading from "@/shared/components/shared/Loading";
 import { useLoadingStore } from "@/shared/stores/useLoadinStore";
+import clsx from "clsx";
 
 export default function DashboardLayout({
   children,
@@ -25,9 +26,25 @@ export default function DashboardLayout({
   const router = useRouter();
   const token = useAuthStore((state) => state.token);
 
-  const toggleSidebar = useSidebarStore((state) => state.toggleSidebar);
-  const isSidebarOpen = useSidebarStore((state) => state.isSidebarOpen);
+  const isSidebarOpen = useSidebarStore((s) => s.isSidebarOpen);
+  const toggleSidebar = useSidebarStore((s) => s.toggleSidebar);
+  const openSidebar = useSidebarStore((s) => s.openSidebar);
+  const closeSidebar = useSidebarStore((s) => s.closeSidebar);
   const pathname = usePathname();
+  console.log("isSidebarOpen: ", isSidebarOpen);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const apply = (matches: boolean) => {
+      if (matches)
+        openSidebar(); // Desktop: abierto por defecto
+      else closeSidebar(); // Mobile: cerrado por defecto
+    };
+    apply(mq.matches);
+    const listener = (e: MediaQueryListEvent) => apply(e.matches);
+    mq.addEventListener("change", listener);
+    return () => mq.removeEventListener("change", listener);
+  }, [openSidebar, closeSidebar]);
 
   /*useEffect(() => {
     if (!token) {
@@ -42,9 +59,15 @@ export default function DashboardLayout({
       )} app h-dvh w-full flex flex-row bg-[#191917] `}
     >
       <MenuAside
-        className={`transition-transform duration-300 ease-in-out transform absolute top-0 h-full w-[250px] bg-[#191917] z-50
+        className={`
+    bg-[#191917] overflow-hidden
+    fixed inset-y-0 left-0 w-[70%] transform transition-transform duration-300 ease-in-out
     ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
-    lg:relative lg:translate-x-0 lg:left-0 lg:transform-none`}
+    lg:static lg:inset-auto lg:transform-none
+    lg:transition-[width] lg:duration-300 lg:ease-in-out
+    ${isSidebarOpen ? "lg:w-[350px]" : "lg:w-0"}
+    z-50
+  `}
       />
 
       <main className=" flex-1 rounded-2xl p-2 h-full overflow-hidden relative">
@@ -72,7 +95,11 @@ export default function DashboardLayout({
                 </span>
               </button>
               <button
-                className="btn bg-black rounded-lg w-[38px] h-[38px] flex lg:hidden"
+                data-toggle={isSidebarOpen}
+                className={clsx(
+                  `btn bg-black rounded-lg w-[38px] h-[38px] flex `,
+                  !isSidebarOpen ? `` : `lg:hidden`
+                )}
                 onClick={toggleSidebar}
               >
                 <IoMenu className="min-w-[20px] min-h-[20px] text-white" />

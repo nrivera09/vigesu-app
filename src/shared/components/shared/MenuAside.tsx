@@ -26,6 +26,7 @@ import { getInspections } from "@/features/orders/inspections/api/inspectionApi"
 import Loading from "./Loading";
 import { getInitials } from "@/shared/utils/utils";
 import { useAuthStore } from "@/shared/stores/useAuthStore";
+import { TbDeviceTabletCheck } from "react-icons/tb";
 
 const MenuAside: FC<generalReactClass> = ({ className }) => {
   const router = useRouter();
@@ -108,21 +109,6 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
   };
 
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 1024 && isSidebarOpen) {
-        closeSidebar();
-      }
-    };
-
-    window.addEventListener("resize", handleResize);
-    handleResize();
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [isSidebarOpen, closeSidebar]);
-
-  useEffect(() => {
     const fetchTotal = async () => {
       const count = await getTotalWorkOrders();
       setTotalOrders(count ?? 0);
@@ -139,11 +125,7 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
   }, []);
 
   return (
-    <aside
-      className={`bg-[#191917] ${
-        !isSidebarOpen ? `min-w-[300px]` : `w-full`
-      } flex flex-row  ${className}`}
-    >
+    <aside className={`flex flex-row h-full ${className}`}>
       <div className="flex-1 h-full flex flex-col">
         {/* HEADER */}
         <div
@@ -164,35 +146,18 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
             </div>
           </div>
           <div className="flex flex-row gap-3">
-            <div className="dropdown dropdown-end">
-              <button
-                tabIndex={0}
-                role="button"
-                className="btn btn-square btn-neutral bg-[#ffffff1f] shadow-none border-none"
-              >
-                <SlOptions className="text-lg" />
-              </button>
-              <ul
-                tabIndex={0}
-                className="dropdown-content menu bg-zinc-800 rounded-box z-1 w-52 shadow-sm"
-                style={{ border: "1px solid #ffffff17" }}
-              >
-                <li>
-                  <Link
-                    href="#"
-                    className="text-white min-h-[40px] flex items-center justify-start hover:text-white hover:pl-5 transition-all"
-                  >
-                    Opcion 1
-                  </Link>
-                </li>
-              </ul>
-            </div>
             <button
               role="button"
-              onClick={closeSidebar}
-              className="btn btn-square btn-neutral bg-[#ffffff1f] shadow-none border-none flex lg:hidden"
+              onClick={() => {
+                closeSidebar();
+              }}
+              className="btn btn-square btn-neutral bg-[#ffffff1f] shadow-none border-none flex "
             >
-              <IoCloseOutline className="text-2xl" />
+              {!isSidebarOpen ? (
+                <IoCloseOutline className="text-2xl" />
+              ) : (
+                <TbDeviceTabletCheck className="text-2xl" />
+              )}
             </button>
           </div>
         </div>
