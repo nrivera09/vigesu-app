@@ -1,6 +1,6 @@
 import { PropsPDF } from "@/shared/types/inspection/ITypes";
 import clsx from "clsx";
-import React, { FC } from "react";
+import React, { FC, useEffect, useState } from "react";
 
 const InspectionTTN: React.FC<PropsPDF> = ({
   data,
@@ -928,11 +928,17 @@ interface MarkTireChartProps {
 }
 
 const MarkTireChart: FC<MarkTireChartProps> = ({ number, active }) => {
+  const [enable, setEnable] = useState<boolean>(false);
+  useEffect(() => {
+    setEnable(active);
+  }, []);
+
   return (
     <div
+      onClick={() => setEnable(!enable)}
       className={clsx(
         `transition-all cursor-pointer rounded-full w-[24px] h-[24px]  min-h-auto flex items-center text-lg font-mono justify-center `,
-        active ? `bg-black text-white` : `text-black border `
+        enable ? `bg-black text-white` : `text-black border `
       )}
     >
       {number}
