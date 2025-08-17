@@ -1,4 +1,9 @@
 [build]
-  command = "npm run build"
+  # Elimina .next antes de compilar para evitar caché residual
+  command = "rm -rf .next && npm run build"
   publish = ".next"
-  environment = { NODE_VERSION = "18" }
+
+  [build.environment]
+    NODE_VERSION = "18"
+    NETLIFY_USE_YARN_CACHE = "false"
+    NETLIFY_USE_NPM_CACHE = "false"
