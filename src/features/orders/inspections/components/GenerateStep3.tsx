@@ -433,66 +433,67 @@ const GenerateStep3 = () => {
     store.setStepWizard(2); // ← vuelve al paso 2
   };
 
-  const completeCurrentQuestionWithRoot2 = (rootId: string) => {
-    const store = useInspectionFullStore.getState();
-    const current = store.fullInspection;
-    const fullQuestion = store.fullQuestion;
-
-    if (!current || !fullQuestion) return;
-
-    const selectedRoot = (fullQuestion?.originalAnswers ?? []).find(
-      (a) => String(a.typeInspectionDetailAnswerId) === rootId
-    );
-
-    const updatedQuestions = current.questions.map((q) => {
-      if (q.typeInspectionDetailId === fullQuestion.typeInspectionDetailId) {
-        return {
-          ...q,
-          finalResponse: selectedRoot?.response ?? "",
-          statusInspectionConfig: true,
-          answers: selectedTree.length > 0 ? selectedTree : q.answers,
-        };
-      }
-      return q;
-    });
-
-    store.setFullInspection({
-      ...current,
-      questions: updatedQuestions,
-    });
-
-    toast.success("Pregunta respondida.");
-    store.setStepWizard(2);
-    setShowRootPicker(false);
-  };
-
   const completeCurrentQuestionWithRoot = (rootLabel: string) => {
     const store = useInspectionFullStore.getState();
     const current = store.fullInspection;
     const fullQuestion = store.fullQuestion;
-
     if (!current || !fullQuestion) return;
 
+    // Actualiza SOLO la pregunta actual con el rootLabel elegido en el modal
     const updatedQuestions = current.questions.map((q) => {
       if (q.typeInspectionDetailId === fullQuestion.typeInspectionDetailId) {
         return {
           ...q,
-          finalResponse: rootLabel, // ✅ guarda el label como "X", "OK", etc.
-          statusInspectionConfig: true,
+          finalResponse: rootLabel, // ← valor elegido en el modal
+          statusInspectionConfig: true, // ← marcada como respondida
           answers: selectedTree.length > 0 ? selectedTree : q.answers,
         };
       }
       return q;
     });
 
-    store.setFullInspection({
+    // Conjunto de preguntas del MISMO grupo (para decidir siguiente)
+    const currentGroupQuestions = updatedQuestions.filter(
+      (q) =>
+        q.groupId === fullQuestion.groupId &&
+        q.groupName === fullQuestion.groupName
+    );
+
+    const groupCompleted = currentGroupQuestions.every(
+      (q) => q.statusInspectionConfig
+    );
+
+    // Persistimos TODO el estado de la inspección
+    const updatedInspection = {
       ...current,
       questions: updatedQuestions,
-    });
+      statusInspectionConfig: updatedQuestions.every(
+        (q) => q.statusInspectionConfig
+      ),
+    };
+    store.setFullInspection(updatedInspection);
 
-    toast.success("Pregunta respondida.");
-    store.setStepWizard(2);
+    // Cierra el modal SIEMPRE
     setShowRootPicker(false);
+
+    // Si el grupo NO terminó, navega a la siguiente sin responder del mismo grupo
+    if (!groupCompleted) {
+      const nextUnanswered = currentGroupQuestions.find(
+        (q) => !q.statusInspectionConfig
+      );
+      if (nextUnanswered) {
+        store.setFullQuestion(nextUnanswered);
+        store.setGroupId(nextUnanswered.groupId);
+        store.setGroupName(nextUnanswered.groupName);
+        store.setTitleQuestion(nextUnanswered.question);
+        store.setStepWizard(3); // 👉 pasa directo a la siguiente pregunta
+        return;
+      }
+    }
+
+    // Si ya no quedan preguntas en este grupo, regresa al listado
+    toast.success("Grupo finalizado correctamente.");
+    store.setStepWizard(2);
   };
 
   const completeCurrentQuestion = (responseValue: string | null = null) => {
@@ -502,7 +503,6 @@ const GenerateStep3 = () => {
     if (!current || !fullQuestion) return;
 
     let resolvedFinalResponse = responseValue ?? "";
-
     // 🟢 Si es SingleChoice, obtener el texto de la raíz seleccionada
     if (isSingle && selectedTree.length === 1) {
       resolvedFinalResponse = selectedTree[0].response;
