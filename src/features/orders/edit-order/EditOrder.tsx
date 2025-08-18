@@ -1,5 +1,5 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { COMPANY_INFO } from "@/config/constants";
 import React, { FC, useRef, useState } from "react";
 import { FiTrash2 } from "react-icons/fi";
@@ -86,6 +86,9 @@ export type OrderForm = z.infer<typeof orderSchema>;
 const EditOrder = () => {
   const { id } = useParams<{ id: string }>();
   const [isLoading, setIsLoading] = useState(true);
+
+  const pathname = usePathname();
+  const parentPath = pathname.replace(/\/[^/]+$/, "");
 
   const router = useRouter();
   const [disableButton, setDisableButton] = useState<number | null>(null);
@@ -468,6 +471,8 @@ const EditOrder = () => {
       setFiles([]);
 
       toast.success("Orden actualizada correctamente");
+
+      //router.push(parentPath);
     } catch (error) {
       toast.error(`${error}`);
     }

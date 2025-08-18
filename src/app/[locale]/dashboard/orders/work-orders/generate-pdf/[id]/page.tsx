@@ -93,7 +93,7 @@ const GeneratePdfPage = () => {
   return (
     <>
       <div className="header-page flex flex-row items-center justify-between min-h-[70px] bg-base-200 px-6 gap-2">
-        <BackButton title={`Ready to print #${id}`} />
+        <BackButton title={`Ready to print #${id}`} link={`../../`} />
         <div className="flex flex-row gap-2">
           <ActionButton
             className={`${

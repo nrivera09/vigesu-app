@@ -1,16 +1,58 @@
 // components/WorkOrderPdf.tsx
-import React, { forwardRef, useState } from "react";
+import React, { forwardRef, useEffect, useState } from "react";
 import { WorkOrder } from "@/shared/types/order/ITypes";
 import { formatDate } from "@/shared/utils/utils";
+import { axiosInstance } from "@/shared/utils/axiosInstance";
+import { toast } from "sonner";
 
 interface Props {
   data: WorkOrder;
   isEditable?: boolean;
 }
 
+interface ItemOption {
+  id: string;
+  name: string;
+  unitPrice: number;
+}
+
 const WorkOrderPdf = forwardRef<HTMLDivElement, Props>(
   ({ data, isEditable }, ref) => {
-    console.log("isEditable: ", isEditable);
+    const [getItem, setGetItem] = useState<ItemOption[]>([]);
+
+    const getItemName = async () => {
+      try {
+        const res = await axiosInstance.get<ItemOption[]>(
+          `/QuickBooks/Items/GetItemName?RealmId=9341454759827689`
+        );
+
+        const items = res.data ?? [];
+
+        // defensivo: validar que existan los datos de workOrderDetails
+        const woItemId = data?.workOrderDetails?.[0]?.itemId;
+        if (woItemId == null) {
+          console.warn("workOrderDetails[0].itemId no existe");
+          return items;
+        }
+
+        // si id es string y itemId es number, normaliza:
+        const match = items.find((it) => String(it.id) === String(woItemId));
+        // o si quieres varios:
+        // const matches = items.filter(it => String(it.id) === String(woItemId));
+
+        console.log("match:", match);
+        setGetItem(items);
+      } catch (error) {
+        console.error("Error fetching template data:", error);
+        toast.error("Error fetching template data");
+        return [];
+      }
+    };
+
+    useEffect(() => {
+      getItemName();
+    }, []);
+
     return (
       <div
         ref={ref}
@@ -254,7 +296,7 @@ const WorkOrderPdf = forwardRef<HTMLDivElement, Props>(
               {data.workOrderDetails.map((item, index) => (
                 <tr key={index} className="text-center   border-b-black">
                   <td
-                    className=""
+                    className="border-r"
                     contentEditable={isEditable}
                     suppressContentEditableWarning
                   >
@@ -265,7 +307,7 @@ const WorkOrderPdf = forwardRef<HTMLDivElement, Props>(
                     contentEditable={isEditable}
                     suppressContentEditableWarning
                   >
-                    {(item.observation ?? "") + " x" + (item.quantity ?? "")}
+                    {item.observation ?? ""}
                   </td>
                   <td
                     className="border-r"
@@ -279,13 +321,14 @@ const WorkOrderPdf = forwardRef<HTMLDivElement, Props>(
                     contentEditable={isEditable}
                     suppressContentEditableWarning
                   >
-                    {""}
+                    {getItem.find((it) => String(it.id) === String(item.itemId))
+                      ?.name ?? ""}
                   </td>
                   <td
                     contentEditable={isEditable}
                     suppressContentEditableWarning
                   >
-                    {""}
+                    {item.quantity ?? ""}
                   </td>
                 </tr>
               ))}
@@ -463,6 +506,90 @@ const WorkOrderPdf = forwardRef<HTMLDivElement, Props>(
                         suppressContentEditableWarning
                       >
                         {data.lor}
+                      </span>
+                    </div>
+                  </div>
+                </td>
+                <td
+                  className="border-r"
+                  contentEditable={isEditable}
+                  suppressContentEditableWarning
+                ></td>
+                <td
+                  className="border-r"
+                  contentEditable={isEditable}
+                  suppressContentEditableWarning
+                ></td>
+                <td
+                  contentEditable={isEditable}
+                  suppressContentEditableWarning
+                ></td>
+              </tr>
+              <tr className="text-center border-b-black ">
+                <td colSpan={2} className="border-r">
+                  <div className="grid grid-cols-4">
+                    <div className="flex flex-row gap-2">
+                      <span
+                        className="min-w-auto font-semibold"
+                        contentEditable={isEditable}
+                        suppressContentEditableWarning
+                      >
+                        CIF
+                      </span>
+                      <span
+                        className="flex-1 text-left"
+                        contentEditable={isEditable}
+                        suppressContentEditableWarning
+                      >
+                        {data.cif}
+                      </span>
+                    </div>
+                    <div className="flex flex-row gap-2">
+                      <span
+                        className="min-w-auto font-semibold"
+                        contentEditable={isEditable}
+                        suppressContentEditableWarning
+                      >
+                        COF
+                      </span>
+                      <span
+                        className="flex-1 text-left"
+                        contentEditable={isEditable}
+                        suppressContentEditableWarning
+                      >
+                        {data.cof}
+                      </span>
+                    </div>
+                    <div className="flex flex-row gap-2">
+                      <span
+                        className="min-w-auto font-semibold"
+                        contentEditable={isEditable}
+                        suppressContentEditableWarning
+                      >
+                        CIR
+                      </span>
+                      <span
+                        className="flex-1 text-left"
+                        contentEditable={isEditable}
+                        suppressContentEditableWarning
+                      >
+                        {data.cir}
+                      </span>
+                    </div>
+                    <div className="flex flex-row gap-2">
+                      <span
+                        className="min-w-auto font-semibold"
+                        contentEditable={isEditable}
+                        suppressContentEditableWarning
+                      >
+                        COR
+                      </span>
+                      <span
+                        className="flex-1 text-left"
+                        contentEditable={isEditable}
+                        suppressContentEditableWarning
+                      >
+                        {data.cor}
                       </span>
                     </div>
                   </div>

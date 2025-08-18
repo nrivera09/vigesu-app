@@ -41,7 +41,6 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
         "/QuickBooks/CreateEstimateFromWorkOrder",
         {
           workOrderId,
-          realmId: "9341454759827689",
         }
       );
 
