@@ -77,7 +77,7 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
   ) => {
     try {
       // tu API route genera PDF de WorkOrder por defecto (sin ?type=)
-      const response = await fetch(`/api/pdf/${workOrderId}`);
+      const response = await fetch(`/api/pdf/${workOrderId}?type=liftgate`);
       if (!response.ok)
         throw new Error("No se pudo generar el PDF de WorkOrder");
 
@@ -111,8 +111,7 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
     try {
       // tu API route para inspección usa ?type=liftgate
       const response = await fetch(`/api/pdf/${inspectionId}?type=liftgate`);
-      if (!response.ok)
-        throw new Error("No se pudo generar el PDF de Inspección");
+      if (!response.ok) toast.error("No se pudo generar el PDF de Inspección");
 
       const pdfBlob = await response.blob();
       const file = new File([pdfBlob], `Inspection-${inspectionId}.pdf`, {
@@ -130,7 +129,7 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
         { headers: { "Content-Type": "multipart/form-data" } }
       );
     } catch (err) {
-      console.error("Error adjuntando PDF de Inspección:", err);
+      toast.error("Error adjuntando PDF de Inspección");
       throw err;
     }
   };
@@ -144,8 +143,6 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
 
     try {
       // 1) Crear WorkOrder desde la inspección
-      //    Tu payload de ejemplo pide inspectionId y quickBookEstimateId (string).
-      //    Aún NO lo tenemos, así que mando "" (vacío).
       const { data: workOrderId } = await axiosInstance.post<number>(
         `/Inspection/CreateWorkOrdeFromInspection/${inspectionId}`,
         {
@@ -154,38 +151,58 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
         }
       );
 
-      if (!workOrderId || typeof workOrderId !== "number") {
+      if (typeof workOrderId !== "number") {
         throw new Error("No se obtuvo un workOrderId válido.");
       }
 
-      // 2) Crear Estimate en QuickBooks desde el WorkOrder (devuelve number)
-      const { data: quickBookEstimateId } = await axiosInstance.put<number>(
-        "/QuickBooks/CreateEstimateFromWorkOrder",
-        { workOrderId }
-      );
-      debugger;
-      if (quickBookEstimateId === undefined || quickBookEstimateId === null) {
-        throw new Error("No se obtuvo un quickBookEstimateId válido.");
+      // 2) Crear Estimate en QuickBooks DESDE el WorkOrder (devuelve number)
+      const { data: qbEstimateIdFromWorkOrder } =
+        await axiosInstance.put<number>(
+          "/QuickBooks/CreateEstimateFromWorkOrder",
+          { workOrderId }
+        );
+
+      if (
+        qbEstimateIdFromWorkOrder === undefined ||
+        qbEstimateIdFromWorkOrder === null
+      ) {
+        throw new Error(
+          "No se obtuvo un quickBookEstimateId (WorkOrder) válido."
+        );
       }
 
-      // Normaliza a string cuando haga falta (FormData, logs, etc.)
-      const quickBookEstimateIdStr = String(quickBookEstimateId);
+      const qbEstimateIdFromWorkOrderStr = String(qbEstimateIdFromWorkOrder);
 
       // 3) Adjuntar PDF del WorkOrder (si no es 'solo estimate')
       if (!syncOnlyEstimate) {
-        await sendWorkOrderPdfToQuickBooks(quickBookEstimateIdStr, workOrderId);
+        await sendWorkOrderPdfToQuickBooks(
+          qbEstimateIdFromWorkOrderStr,
+          workOrderId
+        );
       }
 
-      // 4) Actualizar la inspección con el Estimate de QB
-      //    Según tu instrucción, este endpoint recibe { inspectionId }
-      await axiosInstance.put("/QuickBooks/CreateEstimateFromInspection", {
-        inspectionId,
-      });
+      // 4) Actualizar la INSPECCIÓN con el estimate de QB (devuelve number)
+      const { data: qbEstimateIdFromInspection } =
+        await axiosInstance.put<number>(
+          "/QuickBooks/CreateEstimateFromInspection",
+          { inspectionId }
+        );
+
+      if (
+        qbEstimateIdFromInspection === undefined ||
+        qbEstimateIdFromInspection === null
+      ) {
+        throw new Error(
+          "No se obtuvo un quickBookEstimateId (Inspection) válido."
+        );
+      }
+
+      const qbEstimateIdFromInspectionStr = String(qbEstimateIdFromInspection);
 
       // 5) Adjuntar PDF de la Inspección (si no es 'solo estimate')
       if (!syncOnlyEstimate) {
         await sendInspectionPdfToQuickBooks(
-          quickBookEstimateIdStr,
+          qbEstimateIdFromInspectionStr,
           inspectionId
         );
       }
