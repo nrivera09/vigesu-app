@@ -81,17 +81,21 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
       }
 
       const pdfBlob = await response.blob();
-      const file = new File([pdfBlob], `Estimate-${quickBookEstimatedId}.pdf`, {
-        type: "application/pdf",
-      });
+      const file = new File(
+        [pdfBlob],
+        `WorkOrder-${quickBookEstimatedId}.pdf`,
+        {
+          type: "application/pdf",
+        }
+      );
 
       const formData = new FormData();
-      formData.append("QuickBookEstimatedId", String(quickBookEstimatedId));
+      formData.append("QuickBookEstimateId", String(quickBookEstimatedId));
       formData.append("FilePdf", file);
       formData.append("RealmId", "9341454759827689");
 
       await axiosInstance.post(
-        "/QuickBooks/estimates/attachmentPDF",
+        "/QuickBooks/estimates/attachmentPDF?RealmId=9341454759827689",
         formData,
         {
           headers: {

@@ -70,66 +70,128 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
     }
   };
 
-  const sendPdfToQuickBooks = async (
-    quickBookEstimatedId: number,
-    inspectionId: number
+  // PDF del WorkOrder → Estimate de QB
+  const sendWorkOrderPdfToQuickBooks = async (
+    quickBookEstimateId: string,
+    workOrderId: number
   ) => {
     try {
-      const response = await fetch(`/api/pdf/${inspectionId}?type=liftgate`);
-
-      if (!response.ok) {
-        throw new Error("Error al generar el PDF desde el servidor");
-      }
+      // tu API route genera PDF de WorkOrder por defecto (sin ?type=)
+      const response = await fetch(`/api/pdf/${workOrderId}`);
+      if (!response.ok)
+        throw new Error("No se pudo generar el PDF de WorkOrder");
 
       const pdfBlob = await response.blob();
-      const file = new File([pdfBlob], `Estimate-${quickBookEstimatedId}.pdf`, {
+      const file = new File([pdfBlob], `WorkOrder-${workOrderId}.pdf`, {
         type: "application/pdf",
       });
 
       const formData = new FormData();
-      formData.append("QuickBookEstimatedId", String(quickBookEstimatedId));
+      // ⚠️ nombre EXACTO de los campos según tu backend
+      formData.append("QuickBookEstimateId", quickBookEstimateId);
       formData.append("FilePdf", file);
       formData.append("RealmId", "9341454759827689");
 
       await axiosInstance.post(
-        "/QuickBooks/estimates/attachmentPDF",
+        "/QuickBooks/estimates/attachmentPDF?RealmId=9341454759827689",
         formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+        { headers: { "Content-Type": "multipart/form-data" } }
       );
-
-      toast.success("PDF enviado correctamente a QuickBooks");
     } catch (err) {
-      console.error("Error al enviar el PDF:", err);
-      toast.error("Error al enviar el PDF a QuickBooks");
+      console.error("Error adjuntando PDF de WorkOrder:", err);
+      throw err;
     }
   };
 
+  // PDF de la Inspección → Estimate de QB
+  const sendInspectionPdfToQuickBooks = async (
+    quickBookEstimateId: string,
+    inspectionId: number
+  ) => {
+    try {
+      // tu API route para inspección usa ?type=liftgate
+      const response = await fetch(`/api/pdf/${inspectionId}?type=liftgate`);
+      if (!response.ok)
+        throw new Error("No se pudo generar el PDF de Inspección");
+
+      const pdfBlob = await response.blob();
+      const file = new File([pdfBlob], `Inspection-${inspectionId}.pdf`, {
+        type: "application/pdf",
+      });
+
+      const formData = new FormData();
+      formData.append("QuickBookEstimateId", quickBookEstimateId);
+      formData.append("FilePdf", file);
+      formData.append("RealmId", "9341454759827689");
+
+      await axiosInstance.post(
+        "/QuickBooks/estimates/attachmentPDF?RealmId=9341454759827689",
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+    } catch (err) {
+      console.error("Error adjuntando PDF de Inspección:", err);
+      throw err;
+    }
+  };
+
+  // Orquesta todo el flujo desde la tabla
   const handleSyncWorkOrder = async (
     inspectionId: number,
     syncOnlyEstimate = false
   ) => {
     setSyncStatus((prev) => ({ ...prev, [inspectionId]: "loading" }));
+
     try {
-      const response = await axiosInstance.put(
-        "/QuickBooks/CreateEstimateFromInspection",
+      // 1) Crear WorkOrder desde la inspección
+      //    Tu payload de ejemplo pide inspectionId y quickBookEstimateId (string).
+      //    Aún NO lo tenemos, así que mando "" (vacío).
+      const { data: workOrderId } = await axiosInstance.post<number>(
+        `/Inspection/CreateWorkOrdeFromInspection/${inspectionId}`,
         {
           inspectionId,
-          realmId: "9341454759827689",
+          quickBookEstimateId: "", // aún no disponible
         }
       );
 
-      const quickBookEstimatedId = response.data;
-
-      if (!syncOnlyEstimate) {
-        await sendPdfToQuickBooks(quickBookEstimatedId, inspectionId);
+      if (!workOrderId || typeof workOrderId !== "number") {
+        throw new Error("No se obtuvo un workOrderId válido.");
       }
 
-      setSyncStatus((prev) => ({ ...prev, [inspectionId]: "success" }));
+      // 2) Crear Estimate en QuickBooks desde el WorkOrder (devuelve number)
+      const { data: quickBookEstimateId } = await axiosInstance.put<number>(
+        "/QuickBooks/CreateEstimateFromWorkOrder",
+        { workOrderId }
+      );
+      debugger;
+      if (quickBookEstimateId === undefined || quickBookEstimateId === null) {
+        throw new Error("No se obtuvo un quickBookEstimateId válido.");
+      }
 
+      // Normaliza a string cuando haga falta (FormData, logs, etc.)
+      const quickBookEstimateIdStr = String(quickBookEstimateId);
+
+      // 3) Adjuntar PDF del WorkOrder (si no es 'solo estimate')
+      if (!syncOnlyEstimate) {
+        await sendWorkOrderPdfToQuickBooks(quickBookEstimateIdStr, workOrderId);
+      }
+
+      // 4) Actualizar la inspección con el Estimate de QB
+      //    Según tu instrucción, este endpoint recibe { inspectionId }
+      await axiosInstance.put("/QuickBooks/CreateEstimateFromInspection", {
+        inspectionId,
+      });
+
+      // 5) Adjuntar PDF de la Inspección (si no es 'solo estimate')
+      if (!syncOnlyEstimate) {
+        await sendInspectionPdfToQuickBooks(
+          quickBookEstimateIdStr,
+          inspectionId
+        );
+      }
+
+      // UI feedback
+      setSyncStatus((prev) => ({ ...prev, [inspectionId]: "success" }));
       setTimeout(async () => {
         setSyncStatus((prev) => {
           const updated = { ...prev };
@@ -138,10 +200,10 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
         });
 
         await fetchData();
-
         toast.success("¡Sincronización exitosa!");
       }, 1000);
     } catch (error) {
+      console.error("Error en la sincronización:", error);
       toast.error("Error al sincronizar.");
       setSyncStatus((prev) => ({ ...prev, [inspectionId]: "idle" }));
     }
@@ -201,79 +263,83 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
               </td>
             </tr>
           ) : (
-            allData.map((item) => (
-              <tr
-                key={item.inspectionId}
-                className="cursor-pointer odd:bg-base-200"
-                data-url={`${pathname}/generate-pdf/${item?.templateInspectionId}/${item?.inspectionId}`}
-              >
-                <td className="truncate">{item.inspectionNumber}</td>
-                <td className="truncate">{item.customerName}</td>
-                <td className="truncate">{item.employeeName}</td>
-                <td className="truncate">
-                  {formatDate(item.dateOfInspection)}
-                </td>
-                <td className="text-center">
-                  {item.statusInspection !== 2 ? (
-                    <div className="flex items-center justify-center">
-                      {syncStatus[item.inspectionId] === "loading" ? (
-                        <IoMdSync className="loading text-gray-500 text-3xl" />
-                      ) : syncStatus[item.inspectionId] === "success" ? (
-                        <IoMdCheckmark className="text-green-500 text-xl" />
-                      ) : (
-                        <input
-                          type="checkbox"
-                          className="checkbox"
-                          onChange={() =>
-                            handleSyncWorkOrder(item.inspectionId)
-                          }
-                        />
-                      )}
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center">
-                      <IoMdCheckmark className="text-green-500 text-xl text-center" />
-                    </div>
-                  )}
-                </td>
-                <td>
-                  <div
-                    className={clsx(
-                      getBadgeClass(
-                        item.statusInspection as TypeInspectionOrders
-                      ),
-                      `truncate`
+            allData.map((item) => {
+              const status = Number(
+                item.statusInspection
+              ) as TypeInspectionOrders;
+
+              return (
+                <tr
+                  key={item.inspectionId}
+                  className="cursor-pointer odd:bg-base-200"
+                  data-url={`${pathname}/generate-pdf/${item?.templateInspectionId}/${item?.inspectionId}`}
+                >
+                  <td className="truncate">{item.inspectionNumber}</td>
+                  <td className="truncate">{item.customerName}</td>
+                  <td className="truncate">{item.employeeName}</td>
+                  <td className="truncate">
+                    {formatDate(item.dateOfInspection)}
+                  </td>
+
+                  {/* Sync Quickbook */}
+                  <td className="text-center">
+                    {status !== TypeInspectionOrders.SyncQuickbook ? (
+                      <div className="flex items-center justify-center">
+                        {syncStatus[item.inspectionId] === "loading" ? (
+                          <IoMdSync className="loading text-gray-500 text-3xl" />
+                        ) : syncStatus[item.inspectionId] === "success" ? (
+                          <IoMdCheckmark className="text-green-500 text-xl" />
+                        ) : (
+                          <input
+                            type="checkbox"
+                            className="checkbox"
+                            onChange={() =>
+                              handleSyncWorkOrder(item.inspectionId)
+                            }
+                          />
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center">
+                        <IoMdCheckmark className="text-green-500 text-xl text-center" />
+                      </div>
                     )}
-                  >
-                    {item.statusInspection != null
-                      ? (TypeInspectionOrdersLabel[
-                          item.statusInspection as TypeInspectionOrders
-                        ] ?? "Desconocido")
-                      : "Sin estado"}
-                  </div>
-                </td>
-                <td className="flex justify-end gap-2">
-                  <ActionButton
-                    icon={<FaRegEye className="w-[20px] h-[20px] opacity-70" />}
-                    label="Watch"
-                    onClick={() =>
-                      router.push(
-                        `${pathname}/generate-pdf/${item?.templateInspectionId}/${item?.inspectionId}`
-                      )
-                    }
-                  />
-                  {item.status !== 1 && (
+                  </td>
+
+                  {/* Estado (badge) */}
+                  <td>
+                    <div className={clsx(getBadgeClass(status), "truncate")}>
+                      {TypeInspectionOrdersLabel[status] ?? "Sin estado"}
+                    </div>
+                  </td>
+
+                  {/* Acciones */}
+                  <td className="flex justify-end gap-2">
                     <ActionButton
                       icon={
-                        <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
+                        <FaRegEye className="w-[20px] h-[20px] opacity-70" />
                       }
-                      label="Delete"
-                      onClick={() => deleteTypeInspection(item.inspectionId)}
+                      label="Watch"
+                      onClick={() =>
+                        router.push(
+                          `${pathname}/generate-pdf/${item?.templateInspectionId}/${item?.inspectionId}`
+                        )
+                      }
                     />
-                  )}
-                </td>
-              </tr>
-            ))
+
+                    {status !== TypeInspectionOrders.Disabled && (
+                      <ActionButton
+                        icon={
+                          <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
+                        }
+                        label="Delete"
+                        onClick={() => deleteTypeInspection(item.inspectionId)}
+                      />
+                    )}
+                  </td>
+                </tr>
+              );
+            })
           )}
         </tbody>
       </table>
