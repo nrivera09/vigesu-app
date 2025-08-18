@@ -70,144 +70,107 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
     }
   };
 
-  // PDF del WorkOrder → Estimate de QB
   const sendWorkOrderPdfToQuickBooks = async (
     quickBookEstimateId: string,
     workOrderId: number
   ) => {
-    try {
-      // tu API route genera PDF de WorkOrder por defecto (sin ?type=)
-      const response = await fetch(`/api/pdf/${workOrderId}?type=liftgate`);
-      if (!response.ok)
-        throw new Error("No se pudo generar el PDF de WorkOrder");
+    const resp = await fetch(`/api/pdf/${workOrderId}?type=workorder`);
+    if (!resp.ok) throw new Error("No se pudo generar el PDF del WorkOrder");
 
-      const pdfBlob = await response.blob();
-      const file = new File([pdfBlob], `WorkOrder-${workOrderId}.pdf`, {
-        type: "application/pdf",
-      });
+    const pdfBlob = await resp.blob();
+    const file = new File([pdfBlob], `WorkOrder-${workOrderId}.pdf`, {
+      type: "application/pdf",
+    });
 
-      const formData = new FormData();
-      // ⚠️ nombre EXACTO de los campos según tu backend
-      formData.append("QuickBookEstimateId", quickBookEstimateId);
-      formData.append("FilePdf", file);
-      formData.append("RealmId", "9341454759827689");
+    const formData = new FormData();
+    formData.append("QuickBookEstimateId", quickBookEstimateId);
+    formData.append("FilePdf", file);
+    formData.append("RealmId", "9341454759827689");
 
-      await axiosInstance.post(
-        "/QuickBooks/estimates/attachmentPDF?RealmId=9341454759827689",
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
-    } catch (err) {
-      console.error("Error adjuntando PDF de WorkOrder:", err);
-      throw err;
-    }
+    await axiosInstance.post(
+      "/QuickBooks/estimates/attachmentPDF?RealmId=9341454759827689",
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
   };
 
-  // PDF de la Inspección → Estimate de QB
   const sendInspectionPdfToQuickBooks = async (
     quickBookEstimateId: string,
     inspectionId: number
   ) => {
-    try {
-      // tu API route para inspección usa ?type=liftgate
-      const response = await fetch(`/api/pdf/${inspectionId}?type=liftgate`);
-      if (!response.ok) toast.error("No se pudo generar el PDF de Inspección");
+    const resp = await fetch(`/api/pdf/${inspectionId}?type=liftgate`);
+    if (!resp.ok) throw new Error("No se pudo generar el PDF de la Inspección");
 
-      const pdfBlob = await response.blob();
-      const file = new File([pdfBlob], `Inspection-${inspectionId}.pdf`, {
-        type: "application/pdf",
-      });
+    const pdfBlob = await resp.blob();
+    const file = new File([pdfBlob], `Inspection-${inspectionId}.pdf`, {
+      type: "application/pdf",
+    });
 
-      const formData = new FormData();
-      formData.append("QuickBookEstimateId", quickBookEstimateId);
-      formData.append("FilePdf", file);
-      formData.append("RealmId", "9341454759827689");
+    const formData = new FormData();
+    formData.append("QuickBookEstimateId", quickBookEstimateId);
+    formData.append("FilePdf", file);
+    formData.append("RealmId", "9341454759827689");
 
-      await axiosInstance.post(
-        "/QuickBooks/estimates/attachmentPDF?RealmId=9341454759827689",
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
-    } catch (err) {
-      toast.error("Error adjuntando PDF de Inspección");
-      throw err;
-    }
+    await axiosInstance.post(
+      "/QuickBooks/estimates/attachmentPDF?RealmId=9341454759827689",
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
   };
 
-  // Orquesta todo el flujo desde la tabla
+  // Flujo principal actualizado
   const handleSyncWorkOrder = async (
     inspectionId: number,
     syncOnlyEstimate = false
   ) => {
     setSyncStatus((prev) => ({ ...prev, [inspectionId]: "loading" }));
-
     try {
-      // 1) Crear WorkOrder desde la inspección
+      // 1) Crear WorkOrder desde la inspección (SIN quickbooks id)
       const { data: workOrderId } = await axiosInstance.post<number>(
         `/Inspection/CreateWorkOrdeFromInspection/${inspectionId}`,
-        {
-          inspectionId,
-          quickBookEstimateId: "", // aún no disponible
-        }
+        { inspectionId }
       );
-
-      if (typeof workOrderId !== "number") {
+      if (typeof workOrderId !== "number")
         throw new Error("No se obtuvo un workOrderId válido.");
-      }
 
-      // 2) Crear Estimate en QuickBooks DESDE el WorkOrder (devuelve number)
-      const { data: qbEstimateIdFromWorkOrder } =
-        await axiosInstance.put<number>(
-          "/QuickBooks/CreateEstimateFromWorkOrder",
-          { workOrderId }
-        );
-
-      if (
-        qbEstimateIdFromWorkOrder === undefined ||
-        qbEstimateIdFromWorkOrder === null
-      ) {
+      // 2) Crear Estimate en QuickBooks desde el WorkOrder (DEVUELVE STRING)
+      const { data: quickBookEstimateId } = await axiosInstance.put<string>(
+        "/QuickBooks/CreateEstimateFromWorkOrder",
+        { workOrderId }
+      );
+      if (!quickBookEstimateId)
         throw new Error(
-          "No se obtuvo un quickBookEstimateId (WorkOrder) válido."
+          "No se obtuvo un quickBookEstimateId válido (WorkOrder)."
         );
-      }
-
-      const qbEstimateIdFromWorkOrderStr = String(qbEstimateIdFromWorkOrder);
 
       // 3) Adjuntar PDF del WorkOrder (si no es 'solo estimate')
       if (!syncOnlyEstimate) {
-        await sendWorkOrderPdfToQuickBooks(
-          qbEstimateIdFromWorkOrderStr,
-          workOrderId
-        );
+        await sendWorkOrderPdfToQuickBooks(quickBookEstimateId, workOrderId);
       }
 
-      // 4) Actualizar la INSPECCIÓN con el estimate de QB (devuelve number)
-      const { data: qbEstimateIdFromInspection } =
-        await axiosInstance.put<number>(
-          "/QuickBooks/CreateEstimateFromInspection",
-          { inspectionId }
-        );
+      // 4) Actualizar la inspección con el QuickBooks Estimate Id (NUEVO PARÁMETRO)
+      console.log("Payload CreateEstimateFromInspection =>", {
+        inspectionId: Number(inspectionId),
+        quickBookEstimateId: String(quickBookEstimateId),
+      });
 
-      if (
-        qbEstimateIdFromInspection === undefined ||
-        qbEstimateIdFromInspection === null
-      ) {
-        throw new Error(
-          "No se obtuvo un quickBookEstimateId (Inspection) válido."
-        );
-      }
-
-      const qbEstimateIdFromInspectionStr = String(qbEstimateIdFromInspection);
+      await axiosInstance.put(
+        "/QuickBooks/CreateEstimateFromInspection",
+        {
+          command: {
+            inspectionId: Number(inspectionId), // opcional/compatibilidad
+            quickBookEstimateId: String(quickBookEstimateId),
+          },
+        },
+        { headers: { "Content-Type": "application/json" } }
+      );
 
       // 5) Adjuntar PDF de la Inspección (si no es 'solo estimate')
       if (!syncOnlyEstimate) {
-        await sendInspectionPdfToQuickBooks(
-          qbEstimateIdFromInspectionStr,
-          inspectionId
-        );
+        await sendInspectionPdfToQuickBooks(quickBookEstimateId, inspectionId);
       }
 
-      // UI feedback
+      // Éxito visual
       setSyncStatus((prev) => ({ ...prev, [inspectionId]: "success" }));
       setTimeout(async () => {
         setSyncStatus((prev) => {
@@ -215,12 +178,11 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
           delete updated[inspectionId];
           return updated;
         });
-
         await fetchData();
         toast.success("¡Sincronización exitosa!");
-      }, 1000);
+      }, 800);
     } catch (error) {
-      console.error("Error en la sincronización:", error);
+      console.error("Error al sincronizar:", error);
       toast.error("Error al sincronizar.");
       setSyncStatus((prev) => ({ ...prev, [inspectionId]: "idle" }));
     }
