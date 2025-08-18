@@ -1,5 +1,5 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { COMPANY_INFO } from "@/config/constants";
 import React, { useRef, useState } from "react";
 import { FiTrash2 } from "react-icons/fi";
@@ -73,6 +73,8 @@ interface ItemOption {
 export type OrderForm = z.infer<typeof orderSchema>;
 
 const CreateOrder = () => {
+  const pathname = usePathname();
+  const parentPath = pathname.replace(/\/[^/]+$/, "");
   const router = useRouter();
   const [selectedCustomer, setSelectedCustomer] =
     useState<CustomerOption | null>(null);
@@ -309,7 +311,7 @@ const CreateOrder = () => {
 
       console.log("🎯 Todo OK - proceso finalizado");
       toast.success("Work Order creado correctamente!");
-      router.push("../");
+      router.push(parentPath);
     } catch (error) {
       //console.error("❌ Error al procesar el formulario", error);
 
@@ -356,6 +358,9 @@ const CreateOrder = () => {
           All the grey spaces are editable, meaning you can write on them and
           add the required data.
         </span>
+        <button type="button" onClick={() => router.push(`${pathname}`)}>
+          Click me
+        </button>
       </div>
 
       <div className=" border-[#00000014] border-1 p-2 mb-6 rounded-md flex flex-col gap-4">

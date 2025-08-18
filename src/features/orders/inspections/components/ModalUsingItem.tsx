@@ -7,6 +7,7 @@ import { IoMdClose } from "react-icons/io";
 import { v4 as uuidv4 } from "uuid";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
 import debounce from "lodash/debounce";
+import Loading from "@/shared/components/shared/Loading";
 
 interface ItemOption {
   id: string;
@@ -27,6 +28,7 @@ const ModalUsingItem = ({
   onSave,
   initialItems,
 }: ModalUsingItemProps) => {
+  const [isSearching, setIsSearching] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<ItemOption[]>([]);
   const [selectedItems, setSelectedItems] = useState<ItemOption[]>([]);
@@ -37,20 +39,31 @@ const ModalUsingItem = ({
   //  Debounced search function usando useRef como en tu ejemplo
   const debouncedFetch = useRef(
     debounce(async (term: string) => {
-      if (term.length < 3) return;
+      const q = term.trim();
+
+      // Si no cumple el mínimo: limpia y apaga el loader
+      if (q.length < 3) {
+        setResults([]);
+        setIsSearching(false);
+        return;
+      }
 
       try {
+        setIsSearching(true);
+
         const res = await axiosInstance.get<ItemOption[]>(
           "/QuickBooks/Items/GetItemName"
         );
 
-        const filtered = res.data.filter((item) =>
-          item.name.toLowerCase().includes(term.toLowerCase())
+        const filtered = (res.data ?? []).filter((item) =>
+          item.name.toLowerCase().includes(q.toLowerCase())
         );
 
         setResults(filtered);
       } catch (err) {
         console.error("Error fetching items:", err);
+      } finally {
+        setIsSearching(false);
       }
     }, 500)
   ).current;
@@ -80,13 +93,7 @@ const ModalUsingItem = ({
     setSelectedItems(itemsWithUid);
   }, [initialItems]);
 
-  useEffect(() => {
-    if (query.length >= 3) {
-      debouncedFetch(query);
-    } else {
-      setResults([]);
-    }
-  }, [query, debouncedFetch]);
+  useEffect(() => () => debouncedFetch.cancel(), [debouncedFetch]);
 
   return (
     <dialog open className="modal">
@@ -99,22 +106,43 @@ const ModalUsingItem = ({
             </legend>
             <div className="relative">
               <input
-                type="search"
+                type="text"
                 ref={inputRef}
                 value={query}
                 onChange={(e) => {
-                  setQuery(e.target.value);
+                  const value = e.target.value;
+                  setQuery(value);
                   setSelectedItem(null);
+
+                  const q = value.trim();
+
+                  if (q.length === 0) {
+                    // limpiar si vacío
+                    setResults([]);
+                    setIsSearching(false);
+                    return;
+                  }
+
+                  // mostrar spinner mientras debounce corre
+                  setIsSearching(true);
+                  debouncedFetch(q); // <- tu debouncedFetch corregido llama setIsSearching(false) en finally
                 }}
                 className="input input-lg text-lg w-full"
+                autoComplete="off"
               />
+
+              {/* Dropdown de resultados */}
               {results.length > 0 && (
-                <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto absolute  mt-1">
+                <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto absolute mt-1">
                   {results.map((item) => (
                     <li
                       key={item.id}
                       className="cursor-pointer text-sm block w-full text-left px-4 py-2 hover:bg-gray-100"
                       onClick={() => {
+                        // 👉 evita que se ejecute la búsqueda que ya estaba encolada
+                        debouncedFetch.cancel();
+                        setIsSearching(false);
+
                         setSelectedItem(item);
                         setQuery(item.name);
                         setResults([]);
@@ -126,6 +154,13 @@ const ModalUsingItem = ({
                   ))}
                 </ul>
               )}
+
+              {/* Loader: solo mientras está buscando */}
+              {isSearching && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
+                  <Loading enableLabel={false} size="loading-sm " />
+                </div>
+              )}
             </div>
           </div>
 
@@ -135,7 +170,7 @@ const ModalUsingItem = ({
             </legend>
             <input
               type="number"
-              className="input input-lg text-lg w-full"
+              className="input input-lg text-lg w-full text-center"
               value={quantity}
               onChange={(e) => setQuantity(Number(e.target.value))}
               min={1}
