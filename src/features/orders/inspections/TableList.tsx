@@ -157,10 +157,8 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
       await axiosInstance.put(
         "/QuickBooks/CreateEstimateFromInspection",
         {
-          command: {
-            inspectionId: Number(inspectionId), // opcional/compatibilidad
-            quickBookEstimateId: String(quickBookEstimateId),
-          },
+          inspectionId, // number
+          quickBookEstimateId: String(quickBookEstimateId), // string
         },
         { headers: { "Content-Type": "application/json" } }
       );
