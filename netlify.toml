@@ -7,11 +7,3 @@
     NODE_VERSION = "18"
     NETLIFY_USE_YARN_CACHE = "false"
     NETLIFY_USE_NPM_CACHE = "false"
-
-[functions]
-  # Usa esbuild para bundlear correctamente las serverless functions
-  node_bundler = "esbuild"
-
-  # Mantén puppeteer-core y chromium como dependencias externas
-  # (Netlify no puede bundlear binarios grandes, así que se cargan como está)
-  external_node_modules = ["@sparticuz/chromium", "puppeteer-core"]
