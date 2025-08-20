@@ -217,7 +217,6 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
   useEffect(() => {
     setCurrentPage(1);
   }, [objFilter]);
-  console.log("item: ", allData);
   return (
     <div className="overflow-x-auto space-y-4">
       <table className="table table-fixed w-full">

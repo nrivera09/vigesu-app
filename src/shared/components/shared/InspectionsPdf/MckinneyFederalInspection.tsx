@@ -1,8 +1,39 @@
 import { TypeQuestion } from "@/features/orders/models/workOrder.types";
 import { PropsPDF } from "@/shared/types/inspection/ITypes";
 import { getAnswersFromDetails } from "@/shared/utils/getAnswerValue";
+import { it } from "@faker-js/faker";
 import clsx from "clsx";
 import React, { FC } from "react";
+
+type InspectionDetailAnswerItem = {
+  inspectionDetailAnswerItemId: number;
+  itemId: string;
+  itemName: string;
+  quantity: number;
+  price: number;
+};
+
+type InspectionDetailAnswer = {
+  inspectionDetailAnswerId: number;
+  typeInspectionDetailAnswerId: number;
+  response: string;
+  items: InspectionDetailAnswerItem[];
+};
+
+type InspectionDetail = {
+  inspectionDetailId: number;
+  typeInspectionDetailId: number;
+  templateInspectionQuestionId: number;
+  typeInspectionDetailAnswerId: number;
+  finalResponse: string;
+  inspectionDetailAnswers: InspectionDetailAnswer[];
+};
+
+type MinimalAnswer = { response?: string };
+type MinimalInspectionDetail = {
+  finalResponse?: string;
+  inspectionDetailAnswers?: MinimalAnswer[];
+};
 
 const MckinneyFederalInspection: React.FC<PropsPDF> = ({
   data,
@@ -81,43 +112,86 @@ const MckinneyFederalInspection: React.FC<PropsPDF> = ({
     return value || "";
   };
 
+  const render = <
+    T extends {
+      templateInspectionQuestionId?: number | string;
+      finalResponse?: string;
+      inspectionDetailAnswers?: { response?: string }[];
+    },
+  >(
+    details: T[] | undefined,
+    templateQuestionId: number
+  ): { left: string | null; right: string | null } => {
+    if (!Array.isArray(details)) return { left: null, right: null };
+
+    const detail = details.find(
+      (d) =>
+        Number(d.templateInspectionQuestionId) === Number(templateQuestionId)
+    );
+    if (!detail) return { left: null, right: null };
+
+    const final = detail.finalResponse?.trim().toUpperCase() ?? "";
+    const answers = detail.inspectionDetailAnswers ?? [];
+    const hasR = answers.some((a) => a.response?.trim().toUpperCase() === "R");
+
+    // Caso 1: Final = R
+    if (final === "R") return { left: null, right: "R" };
+
+    // Caso 2: Final OK/X/NA sin R
+    if (["OK", "CHECK", "X", "NA"].includes(final) && !hasR) {
+      return { left: final === "OK" ? "✔" : final, right: null };
+    }
+
+    // Caso 3: Final distinto de R y hay R
+    if (final && hasR) return { left: final, right: "R" };
+
+    // Caso 4: No hay final válido
+    if (answers.length > 0) {
+      if (hasR)
+        return { left: final || answers[0].response || null, right: "R" };
+      return { left: final || answers[0].response || null, right: null };
+    }
+
+    return { left: null, right: null };
+  };
+
   return (
     <>
       <div className="overflow-x-auto">
         <table className="w-full  border-collapse">
           <thead>
             <tr className="border">
-              <th className="p-2 text-center gap-2">
+              <th className="p-2 text-center gap-2 w-[16.66%]">
                 <span className="truncate">Unit #</span>
                 <span className="font-normal truncate ml-2">
                   {getAnswerValue(1)}
                 </span>
               </th>
-              <th className="p-2 text-center gap-2">
+              <th className="p-2 text-center gap-2 w-[16.66%]">
                 <span className="truncate">VIN #</span>
                 <span className="font-normal truncate ml-2">
                   {getAnswerValue(2)}
                 </span>
               </th>
-              <th className="p-2 text-center gap-2">
+              <th className="p-2 text-center gap-2 w-[16.66%]">
                 <span className="t">Make</span>
                 <span className="font-normal truncate ml-2">
                   {getAnswerValue(3)}
                 </span>
               </th>
-              <th className="p-2 text-center gap-2">
+              <th className="p-2 text-center gap-2 w-[16.66%]">
                 <span className="truncate">Year</span>
                 <span className="font-normal truncate ml-2">
                   {getAnswerValue(4)}
                 </span>
               </th>
-              <th className="p-2 text-center gap-2">
+              <th className="p-2 text-center gap-2 w-[16.66%]">
                 <span className="truncate">Lic Plates:</span>
                 <span className="font-normal truncate ml-2">
                   {getAnswerValue(5)}
                 </span>
               </th>
-              <th className="p-2 text-center gap-2">
+              <th className="p-2 text-center gap-2 w-[16.66%]">
                 <span className="truncate">State:</span>
                 <span className="font-normal truncate ml-2">
                   {getAnswerValue(6)}
@@ -139,147 +213,160 @@ const MckinneyFederalInspection: React.FC<PropsPDF> = ({
           </tbody>
           <tbody>
             <LineTable
-              check1
+              check1={render(inspectionDetails, 7).left ?? ""}
               label1={
                 "Verify unit #, registration, VIN plate, license plate current and legible. Current Federal sticker applied"
               }
-              repaired1={false}
-              check2={false}
+              repaired1={render(inspectionDetails, 7).right ?? ""}
+              check2={render(inspectionDetails, 8).left ?? ""}
               label2={`Subframe - Inspect clamps, rail, slider pin assembly, pads, release and re-engage pins, stop bars,
 crossmembers above slider rail**`}
-              repaired2={false}
+              repaired2={render(inspectionDetails, 8).right ?? ""}
             />
+
             <LineTable
-              check1
+              check1={render(inspectionDetails, 9).left ?? ""}
               label1={`inspect 7-way receptacle, housing, electrical harness**`}
-              repaired1
-              check2={false}
+              repaired1={render(inspectionDetails, 9).right ?? ""}
+              check2={render(inspectionDetails, 10).left ?? ""}
               label2={`Suspension - hangers, leaf springs, equalizers, torque arms**`}
-              repaired2={false}
+              repaired2={render(inspectionDetails, 10).right ?? ""}
             />
+
             <LineTable
-              check1
+              check1={render(inspectionDetails, 11).left ?? ""}
               label1={`inspect lighting system, splice conditions**`}
-              repaired1
-              check2={false}
+              repaired1={render(inspectionDetails, 11).right ?? ""}
+              check2={render(inspectionDetails, 12).left ?? ""}
               label2={`Inspect air lines, hoses, tanks, valves and brake chambers**`}
-              repaired2={false}
+              repaired2={render(inspectionDetails, 12).right ?? ""}
             />
+
             <LineTable
-              check1
+              check1={render(inspectionDetails, 13).left ?? ""}
               label1={`inspect glad hands, air lines, protector**`}
-              repaired1
-              check2={false}
+              repaired1={render(inspectionDetails, 13).right ?? ""}
+              check2={render(inspectionDetails, 14).left ?? ""}
               label2={`Brakes - drums, discs, brake lining, wheel seals**`}
-              repaired2={false}
+              repaired2={render(inspectionDetails, 14).right ?? ""}
             />
+
             <LineTable
-              check1
+              check1={render(inspectionDetails, 15).left ?? ""}
               label1={`Verify Skybitz connectivity, Inspect for damage (if applicable)`}
-              repaired1
-              check2={false}
+              repaired1={render(inspectionDetails, 15).right ?? ""}
+              check2={render(inspectionDetails, 16).left ?? ""}
               label2={`Lubricate slack adjusters, s-cams / Verify brake adjustment**`}
-              repaired2={false}
+              repaired2={render(inspectionDetails, 16).right ?? ""}
             />
+
             <LineTable
-              check1
+              check1={render(inspectionDetails, 17).left ?? ""}
               label1={`Inspect Purkey's charging receptacles (if applicable)`}
-              repaired1
-              check2={false}
+              repaired1={render(inspectionDetails, 17).right ?? ""}
+              check2={render(inspectionDetails, 18).left ?? ""}
               label2={`Proper lubricant level in each wheel (oil/grease)`}
-              repaired2={false}
+              repaired2={render(inspectionDetails, 18).right ?? ""}
             />
+
             <LineTable
-              check1
+              check1={render(inspectionDetails, 19).left ?? ""}
               label1={`Pressurize air system, activate ABS System**`}
-              repaired1
-              check2={false}
+              repaired1={render(inspectionDetails, 19).right ?? ""}
+              check2={render(inspectionDetails, 20).left ?? ""}
               label2={`Inspect wheels - lugnuts torqued to 450-500 ft-lbs`}
-              repaired2={false}
+              repaired2={render(inspectionDetails, 20).right ?? ""}
             />
+
             <LineTable
-              check1
+              check1={render(inspectionDetails, 21).left ?? ""}
               label1={`Inspect Front Body condition and coupling device**`}
-              repaired1
-              check2={false}
+              repaired1={render(inspectionDetails, 21).right ?? ""}
+              check2={render(inspectionDetails, 22).left ?? ""}
               label2={`Tires - Verify tire matching & application, tire inflation system set within 95 - 105 psi`}
-              repaired2={false}
+              repaired2={render(inspectionDetails, 22).right ?? ""}
             />
+
             <LineTable
-              check1
+              check1={render(inspectionDetails, 23).left ?? ""}
               label1={`Mckinney decal package intact and legible`}
-              repaired1
-              check2={false}
+              repaired1={render(inspectionDetails, 23).right ?? ""}
+              check2={render(inspectionDetails, 24).left ?? ""}
               label2={`Wheel End - Hub-caps, lugnuts, valve stems accessible, hubodometer (if applicable)`}
-              repaired2={false}
+              repaired2={render(inspectionDetails, 24).right ?? ""}
             />
+
             <LineTable
-              check1
+              check1={render(inspectionDetails, 25).left ?? ""}
               label1={`Corner locking devices (if applicable)`}
-              repaired1
-              check2={false}
+              repaired1={render(inspectionDetails, 25).right ?? ""}
+              check2={render(inspectionDetails, 26).left ?? ""}
               label2={`Metal flow through valve stem caps installed`}
-              repaired2={false}
+              repaired2={render(inspectionDetails, 26).right ?? ""}
             />
+
             <LineTable
-              check1
+              check1={render(inspectionDetails, 27).left ?? ""}
               label1={`Inspect landing legs, k-brace, cross-shaft, wing plates, crossmembers - cycle and lubricate**`}
-              repaired1
-              check2={false}
+              repaired1={render(inspectionDetails, 27).right ?? ""}
+              check2={render(inspectionDetails, 28).left ?? ""}
               label2={`Inspect pump box, batteries and load test (if applicable)`}
-              repaired2={false}
+              repaired2={render(inspectionDetails, 28).right ?? ""}
             />
+
             <LineTable
-              check1
+              check1={render(inspectionDetails, 29).left ?? ""}
               label1={`Inspect undercarriage - crossmembers in Bay Area not to exceed 1/2" deflection`}
-              repaired1
-              check2={false}
+              repaired1={render(inspectionDetails, 29).right ?? ""}
+              check2={render(inspectionDetails, 30).left ?? ""}
               label2={`Conspicuity tape - side panels, rear doors, ICC bumper, headboards**`}
-              repaired2={false}
+              repaired2={render(inspectionDetails, 30).right ?? ""}
             />
+
             <LineTable
-              check1
+              check1={render(inspectionDetails, 31).left ?? ""}
               label1={`Inspect exterior side body conditions - rails, panels, posts, lift pads, pan hole covers**`}
-              repaired1
-              check2={false}
-              label2={`Swing Doors - Inspect panels, lock rod assemblies, hinges & hinge butts, pins, seals, corner tabs,
-anti-theft plate, holdbacks. Verify proper operation.`}
-              repaired2={false}
+              repaired1={render(inspectionDetails, 31).right ?? ""}
+              check2={render(inspectionDetails, 32).left ?? ""}
+              label2={`Aerodynamic Devices - side skirts, top kits, undertray (if applicable)`}
+              repaired2={render(inspectionDetails, 32).right ?? ""}
             />
+
             <LineTable
-              check1
-              label1={`Aerodynamic Devices - side skirts, top kits, undertray (if applicable)`}
-              repaired1
-              check2={false}
-              label2={`Roll Door - Inspect panels, hinges, rollers, seals, operator - drums, springs, cable, track,
-alignment, tension, latch, pull strap, track protector. Lubricate.`}
-              repaired2={false}
+              check1={render(inspectionDetails, 33).left ?? ""}
+              label1={`Fuel tank and fuel system (reefer) (if applicable)`}
+              repaired1={render(inspectionDetails, 33).right ?? ""}
+              check2={render(inspectionDetails, 34).left ?? ""}
+              label2={`Flatbed - Lubricate and cycle winch, Inspect headboard mounting hardware(if applicable)`}
+              repaired2={render(inspectionDetails, 34).right ?? ""}
             />
+
             <LineTable
-              check1
-              label1={`Fuel tank and fuel system (Reefer) (if applicable)`}
-              repaired1
-              check2={false}
+              check1={render(inspectionDetails, 35).left ?? ""}
+              label1={`Test air ride suspension (if applicable)`}
+              repaired1={render(inspectionDetails, 35).right ?? ""}
+              check2={render(inspectionDetails, 36).left ?? ""}
+              label2={`Swing Doors - Inspect panels, lock rod assemblies, hinges & hinges butts, pins, seals, comer tabs, anti-theft plate, holdbacks. Verify proper operation`}
+              repaired2={render(inspectionDetails, 36).right ?? ""}
+            />
+
+            <LineTable
+              check1={render(inspectionDetails, 37).left ?? ""}
+              label1={`Roll Door - inspect panels, hinges, rollers, seals, operator - drums, springs, cable, track, aliggment, tension, latch, pull strap, track protector. Lubricate`}
+              repaired1={render(inspectionDetails, 37).right ?? ""}
+              check2={render(inspectionDetails, 38).left ?? ""}
+              label2={`Interior - Roof, roof bows, post, e-tracks, threshold plate, scuffliners, flooring secured, plywood, liners`}
+              repaired2={render(inspectionDetails, 38).right ?? ""}
+            />
+
+            <LineTable
+              check1={render(inspectionDetails, 39).left ?? ""}
+              label1={`Rear Frame - Rear sill, rear corner posdts, header, ICC bumper assembly, dock bumpers** (ICC)`}
+              repaired1={render(inspectionDetails, 39).right ?? ""}
+              check2={""}
               label2={``}
-              repaired2={false}
+              repaired2={""}
               disable2column
-            />
-            <LineTable
-              check1
-              label1={`Flatbed - Lubricate and cycle winch, Inspect headboard mounting hardware (if applicable)`}
-              repaired1
-              check2={false}
-              label2={`Interior - Roof, roof bows, posts, e-tracks, threshold plate, scuffliners, flooring secured,
-plywood, liners`}
-              repaired2={false}
-            />
-            <LineTable
-              check1
-              label1={`Test air ride suspension (if applicable)**`}
-              repaired1
-              check2={false}
-              label2={`Rear Frame - Rear sill, rear corner posts, header, ICC bumper assembly, dock bumpers** (ICC)`}
-              repaired2={false}
             />
           </tbody>
         </table>
@@ -299,78 +386,136 @@ plywood, liners`}
             <BoxData
               title="RFO"
               label1="Brand:"
+              data1={getAnswerValue(40)}
               label2="32nda:"
+              data2={getAnswerValue(41)}
               label3="O/C:"
+              data3={getAnswerValue(42)}
               label4="PSI:"
+              data4={getAnswerValue(43)}
             />
             <BoxData
               title="RCO"
               label1="Brand:"
+              data1={getAnswerValue(44)}
               label2="32nda:"
+              data2={getAnswerValue(45)}
               label3="O/C:"
+              data3={getAnswerValue(46)}
               label4="PSI:"
+              data4={getAnswerValue(47)}
             />
             <BoxData
               title="RRO"
               label1="Brand:"
+              data1={getAnswerValue(48)}
               label2="32nda:"
+              data2={getAnswerValue(49)}
               label3="O/C:"
+              data3={getAnswerValue(50)}
               label4="PSI:"
+              data4={getAnswerValue(51)}
             />
+
             <BoxData
               title="RDA"
               label1="Brand:"
+              data1={getAnswerValue(52)}
               label2="32nda:"
+              data2={getAnswerValue(53)}
               label3="O/C:"
+              data3={getAnswerValue(54)}
               label4="PSI:"
+              data4={getAnswerValue(55)}
             />
+
             <BoxData
               title="RFI"
               label1="Brand:"
+              data1={getAnswerValue(56)}
               label2="32nda:"
+              data2={getAnswerValue(57)}
               label3="O/C:"
+              data3={getAnswerValue(58)}
               label4="PSI:"
+              data4={getAnswerValue(59)}
             />
+
             <BoxData
               title="RCI"
               label1="Brand:"
+              data1={getAnswerValue(60)}
               label2="32nda:"
+              data2={getAnswerValue(61)}
               label3="O/C:"
+              data3={getAnswerValue(62)}
               label4="PSI:"
+              data4={getAnswerValue(63)}
             />
+
             <BoxData
               title="RRI"
               label1="Brand:"
+              data1={getAnswerValue(64)}
               label2="32nda:"
+              data2={getAnswerValue(65)}
               label3="O/C:"
+              data3={getAnswerValue(66)}
               label4="PSI:"
+              data4={getAnswerValue(67)}
             />
-            <BoxDataSmall label1="RF" label2="/8ths" />
+
+            <BoxDataSmall label1="RDA /8ths" data1={getAnswerValue(68)} />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 flex-1 gap-2 items-center justify-center">
-            <BoxDataSmall label1="RF" label2="/8ths" />
-            <BoxDataSmall label1="RC" label2="/8ths" />
-            <BoxDataSmall label1="RR" label2="/8ths" />
-            <BoxDataSmallLine label="Tire Size:" value="" />
-            <BoxDataSmall label1="LF" label2="/8ths" />
-            <BoxDataSmall label1="LC" label2="/8ths" />
-            <BoxDataSmall label1="LR" label2="/8ths" />
-            <BoxDataSmallLine label="Mileage:" value="" />
+            <BoxDataSmall label1="RF /8ths" data1={getAnswerValue(69)} />
+            <BoxDataSmall label1="RC /8ths" data1={getAnswerValue(70)} />
+            <BoxDataSmall label1="RR /8ths" data1={getAnswerValue(71)} />
+            <BoxDataSmallLine label="Tire Size:" value={getAnswerValue(75)} />
+            <BoxDataSmall label1="LF /8ths" data1={getAnswerValue(72)} />
+            <BoxDataSmall label1="LC /8ths" data1={getAnswerValue(73)} />
+            <BoxDataSmall label1="LR /8ths" data1={getAnswerValue(74)} />
+            <BoxDataSmallLine label="Mileage:" value={getAnswerValue(76)} />
+            <BoxDataSmall label1="LFI Brand" data1={getAnswerValue(77)} />
+            <BoxDataSmall label1="LFI 32nda" data1={getAnswerValue(78)} />
+            <BoxDataSmall label1="LFI O/C" data1={getAnswerValue(79)} />
+            <BoxDataSmall label1="LFI PSI" data1={getAnswerValue(80)} />
+            <BoxDataSmall label1="LCI Brand" data1={getAnswerValue(81)} />
+            <BoxDataSmall label1="LCI 32nda" data1={getAnswerValue(82)} />
+            <BoxDataSmall label1="LCI O/C" data1={getAnswerValue(83)} />
+            <BoxDataSmall label1="LCI PSI" data1={getAnswerValue(84)} />
+            <BoxDataSmall label1="LRI Brand" data1={getAnswerValue(85)} />
+            <BoxDataSmall label1="LRI 32nda" data1={getAnswerValue(86)} />
+            <BoxDataSmall label1="LRI O/C" data1={getAnswerValue(87)} />
+            <BoxDataSmall label1="LRI PSI" data1={getAnswerValue(88)} />
+            <BoxDataSmall label1="LFO Brand" data1={getAnswerValue(89)} />
+            <BoxDataSmall label1="LFO 32nda" data1={getAnswerValue(90)} />
+            <BoxDataSmall label1="LFO O/C" data1={getAnswerValue(91)} />
+            <BoxDataSmall label1="LFO PSI" data1={getAnswerValue(92)} />
+            <BoxDataSmall label1="LCO Brand" data1={getAnswerValue(93)} />
+            <BoxDataSmall label1="LCO 32nda" data1={getAnswerValue(94)} />
+            <BoxDataSmall label1="LCO O/C" data1={getAnswerValue(95)} />
+            <BoxDataSmall label1="LCO PSI" data1={getAnswerValue(96)} />
+            <BoxDataSmall label1="LRO Brand" data1={getAnswerValue(97)} />
+            <BoxDataSmall label1="LRO 32nda" data1={getAnswerValue(98)} />
+            <BoxDataSmall label1="LRO O/C" data1={getAnswerValue(99)} />
+            <BoxDataSmall label1="LRO PSI" data1={getAnswerValue(100)} />
+            <BoxDataSmall label1="LDA Brand" data1={getAnswerValue(101)} />
+            <BoxDataSmall label1="LDA 32nda" data1={getAnswerValue(102)} />
+            <BoxDataSmall label1="LDA O/C" data1={getAnswerValue(103)} />
+            <BoxDataSmall label1="LDA PSI" data1={getAnswerValue(104)} />
+            <BoxDataSmall label1="LDA /8ths" data1={getAnswerValue(105)} />
           </div>
         </div>
-        <div className="min-w-[300px]">
+        <div className="max-w-[300px]">
           <div className="border rounded-lg">
-            <p className="font-bold px-2">Comments:</p>
-            <ul className="p-0 m-0 list-none flex flex-col gap-10">
-              <li className="w-full "></li>
-              <li className="w-full border-b border-gray-300"></li>
-              <li className="w-full border-b border-gray-300"></li>
-              <li className="w-full border-b border-gray-300"></li>
-              <li className="w-full border-b border-gray-300"></li>
-              <li className="w-full border-b border-gray-300"></li>
-              <li className="w-full border-b border-gray-300"></li>
-              <li className="w-full "></li>
-            </ul>
+            <p className="font-bold p-2">Comments:</p>
+            <span className="text-[14px] block p-5">
+              {getAnswerValue(106)} Lorem ipsum dolor sit amet consectetur,
+              adipisicing elit. Architecto, placeat eum voluptatem nobis ullam
+              ab ipsa deserunt exercitationem minima molestias quod velit illo
+              illum fuga ea suscipit explicabo laborum assumenda.
+            </span>
           </div>
         </div>
       </div>
@@ -379,7 +524,7 @@ plywood, liners`}
           <div className="w-full md:w-1/2">
             <BoxDataSmallLine
               label="Company Name:"
-              value=""
+              value={getAnswerValue(107)}
               className="!border-0"
               font={`text-normal`}
             />
@@ -397,10 +542,18 @@ plywood, liners`}
           <div className="w-full md:w-1/2 relative top-[12px]">
             <BoxDataSmallLine
               label="Inspection Conducted By:"
-              value=""
+              value={getAnswerValue(109)}
               className="!border-0"
               font={`text-normal`}
               signature={`(Inspector Signature)`}
+            />
+          </div>
+          <div className="w-full md:w-1/2">
+            <BoxDataSmallLine
+              label="Inspection date:"
+              value={getAnswerValue(110)}
+              className="!border-0 "
+              font={`text-normal`}
             />
           </div>
         </div>
@@ -412,13 +565,13 @@ plywood, liners`}
 export default MckinneyFederalInspection;
 
 interface LineTableProps {
-  check1: boolean;
+  check1: string | boolean;
   label1?: string;
-  repaired1: boolean;
+  repaired1: string | boolean;
   disable1column?: boolean | null;
-  check2: boolean;
+  check2: string | boolean;
   label2?: string;
-  repaired2: boolean;
+  repaired2: string | boolean;
   disable2column?: boolean | null;
 }
 
@@ -438,7 +591,7 @@ const LineTable: FC<LineTableProps> = ({
         {disable1column === null && (
           <div className="flex flex-row items-center justify-center gap-3">
             <span>[</span>
-            <span className="font-bold">{check1 ? `X` : ``}</span>
+            <span className="font-bold">{check1 ? check1 : ``}</span>
             <span>]</span>
           </div>
         )}
@@ -450,7 +603,7 @@ const LineTable: FC<LineTableProps> = ({
         {disable1column === null && (
           <div className="flex flex-row items-center justify-center gap-3">
             <span>[</span>
-            <span className="font-bold">{repaired1 ? `X` : ``}</span>
+            <span className="font-bold">{repaired1 ? repaired1 : ``}</span>
             <span>]</span>
             <span>
               <small>Repaired</small>
@@ -462,7 +615,7 @@ const LineTable: FC<LineTableProps> = ({
         {disable2column === null && (
           <div className="flex flex-row items-center justify-center gap-3 ">
             <span>[</span>
-            <span className="font-bold">{check2 ? `X` : ``}</span>
+            <span className="font-bold">{check2 ? check2 : ``}</span>
             <span>]</span>
           </div>
         )}
@@ -474,7 +627,7 @@ const LineTable: FC<LineTableProps> = ({
         {disable2column === null && (
           <div className="flex flex-row items-center justify-center gap-3">
             <span>[</span>
-            <span className="font-bold">{repaired2 ? `X` : ``}</span>
+            <span className="font-bold">{repaired2 ? repaired2 : ``}</span>
             <span>]</span>
             <span>
               <small>Repaired</small>
@@ -510,26 +663,42 @@ const BoxData: FC<BoxDataProps> = ({
   data4,
 }) => {
   return (
-    <div className="rounded-lg border w-full px-2 py-1 gap-5">
+    <div className="rounded-lg border w-full px-2 py-1 gap-3 flex flex-col ">
       <p className="font-bold  ">{title}</p>
       <div className="flex flex-row">
         <div className="w-1/2 flex flex-row gap-1">
           <span className="font-bold text-sm whitespace-nowrap">{label1}</span>
-          <input type="text" className="border-b w-full text-center" />
+          <input
+            type="text"
+            className="border-b w-full text-center"
+            value={data1}
+          />
         </div>
         <div className="w-1/2 flex flex-row gap-1">
           <span className="font-bold text-sm whitespace-nowrap">{label2}</span>
-          <input type="text" className="border-b w-full text-center" />
+          <input
+            type="text"
+            className="border-b w-full text-center"
+            value={data2}
+          />
         </div>
       </div>
       <div className="flex flex-row">
         <div className="w-1/2 flex flex-row gap-1">
           <span className="font-bold text-sm whitespace-nowrap">{label3}</span>
-          <input type="text" className="border-b w-full text-center" />
+          <input
+            type="text"
+            className="border-b w-full text-center"
+            value={data3}
+          />
         </div>
         <div className="w-1/2 flex flex-row gap-1">
           <span className="font-bold text-sm whitespace-nowrap">{label4}</span>
-          <input type="text" className="border-b w-full text-center" />
+          <input
+            type="text"
+            className="border-b w-full text-center"
+            value={data4}
+          />
         </div>
       </div>
     </div>
@@ -538,15 +707,26 @@ const BoxData: FC<BoxDataProps> = ({
 
 interface BoxDataSmallProps {
   label1: string;
-  label2: string;
+  data1?: string;
+  label2?: string;
+  data2?: string;
 }
 
-const BoxDataSmall: FC<BoxDataSmallProps> = ({ label1, label2 }) => {
+const BoxDataSmall: FC<BoxDataSmallProps> = ({
+  label1,
+  label2,
+  data1,
+  data2,
+}) => {
   return (
     <div className="rounded-lg border w-full px-2 py-1 gap-5 flex items-center justify-center h-[50px]">
       <div className="flex flex-row w-full items-center gap-1 px-25 md:px-8 justify-between">
-        <span className="font-bold text-sm">{label1}</span>
-        <span className="font-bold text-sm">{label2}</span>
+        <span className="font-bold text-sm whitespace-nowrap">{label1}</span>
+        <input
+          type="text"
+          defaultValue={data1}
+          className=" w-full text-center"
+        />
       </div>
     </div>
   );
@@ -564,7 +744,7 @@ const BoxDataSmallLine: FC<BoxDataSmallLineProps> = ({
   label,
   value,
   className,
-  font = `text-sm`,
+  font = `text-md`,
   signature = null,
 }) => {
   return (

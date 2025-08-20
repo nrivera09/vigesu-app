@@ -31,7 +31,6 @@ export default function DashboardLayout({
   const openSidebar = useSidebarStore((s) => s.openSidebar);
   const closeSidebar = useSidebarStore((s) => s.closeSidebar);
   const pathname = usePathname();
-  console.log("isSidebarOpen: ", isSidebarOpen);
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1024px)");
