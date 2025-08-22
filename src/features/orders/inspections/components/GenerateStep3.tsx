@@ -17,6 +17,7 @@ import AnswerSign from "./typeQuest/AnswerSign";
 import AnswerText from "./typeQuest/AnswerText";
 import AnswerOptions from "./typeQuest/AnswerOptions";
 import { IoCloseOutline } from "react-icons/io5";
+import { useTranslations } from "next-intl";
 
 interface ItemWithQuantity {
   id: string;
@@ -33,6 +34,7 @@ interface ExportedAnswer {
 }
 
 const GenerateStep3 = () => {
+  const tToasts = useTranslations("toast");
   const { fullInspection, groupName, groupId, titleQuestion, fullQuestion } =
     useInspectionFullStore();
   const [selectedTree, setSelectedTree] = useState<IFullAnswer[]>([]);
@@ -95,7 +97,7 @@ const GenerateStep3 = () => {
     const selected = isSelected(answerId, selectedTree);
 
     if (!selected) {
-      toast.error("Primero debes seleccionar la respuesta");
+      toast.error(`${tToasts("error")}: ${tToasts("login.30")}`);
       return;
     }
 
@@ -492,7 +494,7 @@ const GenerateStep3 = () => {
     }
 
     // Si ya no quedan preguntas en este grupo, regresa al listado
-    toast.success("Grupo finalizado correctamente.");
+    toast.success(`${tToasts("ok")}: ${tToasts("login.31")}`);
     store.setStepWizard(2);
   };
 
@@ -554,7 +556,7 @@ const GenerateStep3 = () => {
       }
     }
 
-    toast.success("Grupo finalizado correctamente.");
+    toast.success(`${tToasts("ok")}: ${tToasts("login.31")}`);
     store.setStepWizard(2);
   };
 

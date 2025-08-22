@@ -4,6 +4,7 @@ import { WorkOrder } from "@/shared/types/order/ITypes";
 import { formatDate } from "@/shared/utils/utils";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 interface Props {
   data: WorkOrder;
@@ -19,7 +20,7 @@ interface ItemOption {
 const WorkOrderPdf = forwardRef<HTMLDivElement, Props>(
   ({ data, isEditable }, ref) => {
     const [getItem, setGetItem] = useState<ItemOption[]>([]);
-
+    const tToasts = useTranslations("toast");
     const getItemName = async () => {
       try {
         const res = await axiosInstance.get<ItemOption[]>(
@@ -44,7 +45,7 @@ const WorkOrderPdf = forwardRef<HTMLDivElement, Props>(
         setGetItem(items);
       } catch (error) {
         console.error("Error fetching template data:", error);
-        toast.error("Error fetching template data");
+        toast.error(`${tToasts("error")}: ${tToasts("login.3")}`);
         return [];
       }
     };

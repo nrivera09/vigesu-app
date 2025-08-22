@@ -22,7 +22,7 @@ export default function LanguageSwitcher({
   };
 
   return design === "aside" ? (
-    <div className="dropdown dropdown-end">
+    <div className="dropdown dropdown-end ">
       <label
         tabIndex={0}
         className="btn btn-square btn-neutral bg-[#ffffff1f] border-none shadow-none text-white"
@@ -56,7 +56,7 @@ export default function LanguageSwitcher({
       </ul>
     </div>
   ) : (
-    <div className="dropdown dropdown-bottom bg-[#3f51b5] rounded-full   sm:flex items-center justify-center border-none gap-2 flex flex-row px-3">
+    <div className="dropdown dropdown-bottom bg-[#3f51b5] rounded-full   sm:flex items-center justify-center border-none gap-2 flex flex-row px-3 h-[39px]">
       <IoLanguageOutline className="text-2xl text-white hidden md:block" />
 
       <label

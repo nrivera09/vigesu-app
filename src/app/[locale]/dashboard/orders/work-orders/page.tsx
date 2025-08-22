@@ -18,6 +18,7 @@ import { debounce } from "lodash";
 import AlertInfo from "@/shared/components/shared/AlertInfo";
 import { toast } from "sonner";
 import Loading from "@/shared/components/shared/Loading";
+import { useTranslations } from "next-intl";
 
 interface CustomerOption {
   id: number;
@@ -29,6 +30,10 @@ interface MechanicOption {
 }
 
 const Page = () => {
+  const tWorkOrders = useTranslations("workorders");
+  const tAlerts = useTranslations("alerts");
+  const t = useTranslations("workorders");
+  const tAside = useTranslations("aside");
   const pathname = usePathname();
   const [refreshTable, setRefreshTable] = useState(false);
 
@@ -170,7 +175,7 @@ const Page = () => {
     <>
       <div className="gap-4 flex flex-col  min-h-full ">
         <div className="header-page flex flex-row items-center justify-between min-h-[70px] bg-base-200 px-6 gap-2">
-          <BackButton disableArrow />
+          <BackButton title={tWorkOrders("home.0")} disableArrow />
           <div className="flex flex-row gap-2">
             <Link
               href={`${pathname}/create`}
@@ -178,7 +183,7 @@ const Page = () => {
             >
               <FiPlus className="text-xl text-white" />
               <span className="bg-gray-800 py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px]">
-                New
+                {t("home.14")}
               </span>
             </Link>
             <button className="btn bg-black rounded-full pr-3 py-6  sm:flex items-center justify-center border-none !hidden">
@@ -197,18 +202,13 @@ const Page = () => {
         </div>
         <div className="body-app overflow-y-auto">
           <div className="container max-w-full mb-5">
-            <AlertInfo>
-              You need to type at least 3 characters in the fields so that you
-              can select a match.
-            </AlertInfo>
+            <AlertInfo>{tAlerts("1")}</AlertInfo>
             <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
-              <legend className="fieldset-legend text-lg">
-                Search options
-              </legend>
+              <legend className="fieldset-legend text-lg">{t("home.1")}</legend>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 <div className="flex flex-col">
                   <legend className="fieldset-legend text-lg font-normal">
-                    Client
+                    {t("home.2")}
                   </legend>
                   <div className="relative">
                     <input
@@ -259,7 +259,7 @@ const Page = () => {
 
                 <div className="flex flex-col">
                   <legend className="fieldset-legend text-lg font-normal">
-                    Status
+                    {t("home.3")}
                   </legend>
                   <select
                     defaultValue=""
@@ -273,7 +273,7 @@ const Page = () => {
                     }
                   >
                     <option disabled={true} value="">
-                      Pick a status
+                      {t("home.4")}
                     </option>
 
                     {Object.entries(WorkOrderStatusLabel).map(
@@ -287,7 +287,7 @@ const Page = () => {
                 </div>
                 <div className="flex flex-col">
                   <legend className="fieldset-legend text-lg font-normal">
-                    Nro. Work order
+                    {t("home.5")}
                   </legend>
                   <input
                     type="text"
@@ -304,7 +304,7 @@ const Page = () => {
                 </div>
                 <div className="flex flex-col">
                   <legend className="fieldset-legend text-lg font-normal">
-                    Worker
+                    {t("home.6")}
                   </legend>
                   <div className="relative">
                     <input
@@ -355,7 +355,7 @@ const Page = () => {
 
                 <div className="flex flex-col">
                   <legend className="fieldset-legend text-lg font-normal">
-                    Creation date
+                    {t("home.7")}
                   </legend>
                   <input
                     type="date"
@@ -396,7 +396,7 @@ const Page = () => {
                     >
                       <IoSearchOutline className="text-xl text-white" />
                       <span className=" py-1 px-4 text-white font-normal rounded-full  md:block text-[13px] ">
-                        Search
+                        {t("home.8")}
                       </span>
                     </button>
                     <button

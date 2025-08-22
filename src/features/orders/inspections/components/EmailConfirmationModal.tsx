@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "next-intl";
 import React, { useState } from "react";
 import { toast } from "sonner";
 
@@ -15,12 +16,13 @@ const EmailConfirmationModal: React.FC<Props> = ({
   onConfirm,
   userName,
 }) => {
+  const tToasts = useTranslations("toast");
   const [email, setEmail] = useState("bryan.riv09@gmail.com");
   const [loading, setLoading] = useState(false);
 
   const handleSend = async () => {
     if (!email.includes("@")) {
-      toast.warning("Ingresa un correo válido");
+      toast.warning(`${tToasts("warning")}: ${tToasts("login.25")}`);
       return;
     }
 
@@ -36,11 +38,11 @@ const EmailConfirmationModal: React.FC<Props> = ({
 
       if (!res.ok || json.error) throw new Error("Fallo al enviar correo");
 
-      toast.success("Correo enviado correctamente");
+      toast.success(`${tToasts("ok")}: ${tToasts("login.26")}`);
       onClose();
       onConfirm(); // Ejecuta handleFinalSubmit
     } catch (err) {
-      toast.error("Error al enviar el correo");
+      toast.error(`${tToasts("error")}: ${tToasts("login.27")}`);
       console.error(err);
     } finally {
       setLoading(false);

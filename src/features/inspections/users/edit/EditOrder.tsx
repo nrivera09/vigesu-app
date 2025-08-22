@@ -11,6 +11,7 @@ import Loading from "@/shared/components/shared/Loading";
 import { toast } from "sonner";
 import { DOMAIN } from "@/config/constants";
 import debounce from "lodash/debounce";
+import { useTranslations } from "next-intl";
 
 type EmployeeOption = { id: string; name: string };
 
@@ -24,7 +25,7 @@ const schema = z.object({
 const EditOrder = () => {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
-
+  const tToasts = useTranslations("toast");
   const signatureRef = useRef<SignaturePadRef>(null);
   const [signaturePreview, setSignaturePreview] = useState<string | null>(null);
   const [modifySign, setModifySign] = useState<boolean>(false);
@@ -113,7 +114,7 @@ const EditOrder = () => {
         }
       } catch (error) {
         console.error("Error al cargar usuario:", error);
-        toast.error("Error al cargar datos del usuario");
+        toast.error(`${tToasts("error")}: ${error}`);
       } finally {
         setLoading(false);
       }
@@ -126,12 +127,12 @@ const EditOrder = () => {
   const handleUpdate = async () => {
     const validation = schema.safeParse(form);
     if (!validation.success) {
-      toast.error("Todos los campos son obligatorios.");
+      toast.error(`${tToasts("error")}: ${tToasts("login.11")}`);
       return;
     }
 
     if (!employeeIdSelected || !employeeNameSelected) {
-      toast.error("Selecciona un empleado de la lista.");
+      toast.error(`${tToasts("error")}: ${tToasts("login.12")}`);
       return;
     }
 
@@ -154,11 +155,11 @@ const EditOrder = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      toast.success("Usuario actualizado con éxito");
+      toast.success(`${tToasts("ok")}: ${tToasts("login.13")}`);
       router.push("../"); // vuelve al listado de usuarios de este módulo
     } catch (error) {
       console.error("PUT user error", error);
-      toast.error("Error al actualizar usuario");
+      toast.error(`${tToasts("error")}: ${error}`);
     } finally {
       setSaving(false);
     }

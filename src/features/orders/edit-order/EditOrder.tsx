@@ -23,6 +23,7 @@ import { useEffect } from "react";
 import Loading from "@/shared/components/shared/Loading";
 import { toast } from "sonner";
 import { renameFileWithUniqueName } from "@/shared/utils/utils";
+import { useTranslations } from "next-intl";
 
 interface WorkOrderDetail {
   observation?: string;
@@ -84,6 +85,10 @@ interface ItemOption {
 export type OrderForm = z.infer<typeof orderSchema>;
 
 const EditOrder = () => {
+  const tToasts = useTranslations("toast");
+
+  const tAlerts = useTranslations("alerts");
+  const tWorkOrders = useTranslations("workorders");
   const { id } = useParams<{ id: string }>();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -136,7 +141,7 @@ const EditOrder = () => {
       const response = await axiosInstance.get(url);
       setCustomerOptions(response.data ?? []);
     } catch (error) {
-      toast.error(`${error}`);
+      toast.error(`${tToasts("error")}: ${error}`);
       //console.error("Error buscando clientes:", error);
     } finally {
       setIsLoadingMechanic(false);
@@ -176,7 +181,7 @@ const EditOrder = () => {
       const response = await axiosInstance.get(url);
       setMechanicOptions(response.data ?? []);
     } catch (error) {
-      toast.error(`${error}`);
+      toast.error(`${tToasts("error")}: ${error}`);
       //console.error("Error buscando empleados:", error);
     } finally {
       setIsLoadingMechanic(false);
@@ -216,7 +221,7 @@ const EditOrder = () => {
       const response = await axiosInstance.get(url);
       setItemOptions(response.data ?? []);
     } catch (error) {
-      toast.error(`${error}`);
+      toast.error(`${tToasts("error")}: ${error}`);
       //console.error("Error buscando items:", error);
     } finally {
       setIsLoadingServiceParts(false);
@@ -352,7 +357,7 @@ const EditOrder = () => {
       previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
       previewUrlsRef.current = [];
     } catch (err) {
-      toast.error(`${err}`);
+      toast.error(`${tToasts("error")}: ${err}`);
     } finally {
       setIsLoading(false);
     }
@@ -431,12 +436,12 @@ const EditOrder = () => {
           console.log("Upload result:", res.data);
 
           if (res.data !== 1) {
-            toast.error("⚠️ No se subió ningún archivo nuevo");
+            toast.error(`${tToasts("error")}: ${tToasts("login.18")}`);
           } else {
-            toast.success("✅ Archivos subidos correctamente");
+            toast.success(`${tToasts("ok")}: ${tToasts("login.19")}`);
           }
         } catch (error) {
-          toast.error("❌ Error al subir archivos");
+          toast.error(`${tToasts("error")}: ${error}`);
           console.error(error);
         }
       }
@@ -470,11 +475,11 @@ const EditOrder = () => {
 
       setFiles([]);
 
-      toast.success("Orden actualizada correctamente");
+      toast.success(`${tToasts("ok")}: ${tToasts("login.20")}`);
 
       //router.push(parentPath);
     } catch (error) {
-      toast.error(`${error}`);
+      toast.error(`${tToasts("error")}: ${error}`);
     }
   };
 
@@ -525,14 +530,15 @@ const EditOrder = () => {
   return (
     <form
       onSubmit={handleSubmit(onSubmit, (errors) => {
-        console.warn("❌ FORM INVALID:", errors);
-        toast.error("Por favor completa todos los campos obligatorios.");
+        toast.error(`${tToasts("error")}: ${tToasts("login.11")}`);
       })}
     >
       <div className=" border-[#00000014] border-1 p-2 mb-6 rounded-md flex flex-col gap-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
           <div className="flex flex-row gap-2 items-center justify-center ">
-            <span className={clsx(labelClass(), `!w-[30%]`)}>Customer</span>
+            <span className={clsx(labelClass(), `!w-[30%]`)}>
+              {tWorkOrders("edit.1")}
+            </span>
             {selectedCustomer ? (
               <div className="flex flex-1 items-center gap-2 ">
                 <span className="truncate w-0 flex-1 px-2">
@@ -608,7 +614,7 @@ const EditOrder = () => {
           </div>
 
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className={labelClass()}>Location of repair</span>
+            <span className={labelClass()}> {tWorkOrders("edit.2")}</span>
             <input
               {...register("location_of_repair")}
               type="text"
@@ -616,7 +622,7 @@ const EditOrder = () => {
             />
           </div>
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className={labelClass()}>Time start service</span>
+            <span className={labelClass()}> {tWorkOrders("edit.3")}</span>
             <input
               {...register("time_start_service")}
               type="time"
@@ -627,7 +633,7 @@ const EditOrder = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className={labelClass()}>Equipment#</span>
+            <span className={labelClass()}>{tWorkOrders("edit.4")}</span>
             <input
               {...register("equipment_order")}
               type="text"
@@ -635,7 +641,7 @@ const EditOrder = () => {
             />
           </div>
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className={labelClass()}>Date of Repair</span>
+            <span className={labelClass()}>{tWorkOrders("edit.5")}</span>
             <input
               {...register("datate_of_repair")}
               type="date"
@@ -644,7 +650,7 @@ const EditOrder = () => {
             />
           </div>
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className={labelClass()}>Time finish service</span>
+            <span className={labelClass()}>{tWorkOrders("edit.6")}</span>
             <input
               {...register("time_finish_service")}
               type="time"
@@ -654,7 +660,7 @@ const EditOrder = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className={labelClass()}>License plate #</span>
+            <span className={labelClass()}>{tWorkOrders("edit.7")}</span>
             <input
               {...register("license_plate")}
               type="text"
@@ -662,7 +668,7 @@ const EditOrder = () => {
             />
           </div>
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className={labelClass()}>PO#</span>
+            <span className={labelClass()}>{tWorkOrders("edit.8")}</span>
             <input
               {...register("po_number")}
               type="text"
@@ -672,7 +678,7 @@ const EditOrder = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className={labelClass()}>VIN#</span>
+            <span className={labelClass()}>{tWorkOrders("edit.9")}</span>
             <input
               {...register("vin_number")}
               type="text"
@@ -681,7 +687,7 @@ const EditOrder = () => {
           </div>
           <div className="flex flex-row gap-2 items-center justify-center">
             <span className={clsx(labelClass(), `!w-[30%]`)}>
-              Mechanic name
+              {tWorkOrders("edit.10")}
             </span>
 
             {selectedMechanic ? (
@@ -766,7 +772,7 @@ const EditOrder = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <div className="flex flex-row gap-2 items-center justify-center">
             <span className={clsx(labelClass(), `!w-[30%]`)}>
-              Service/Parts
+              {tWorkOrders("edit.11")}
             </span>
 
             {selectedItem ? (
@@ -842,7 +848,7 @@ const EditOrder = () => {
           </div>
 
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className={labelClass()}>Quantity</span>
+            <span className={labelClass()}> {tWorkOrders("edit.12")}</span>
             <input
               name="quantity"
               value={newItem.quantity}
@@ -856,7 +862,10 @@ const EditOrder = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-1 gap-2">
           <div className="flex flex-col gap-2 items-left justify-center">
-            <span className={`${labelClass()} !w-full`}>Work description</span>
+            <span className={`${labelClass()} !w-full`}>
+              {" "}
+              {tWorkOrders("edit.13")}
+            </span>
             <textarea
               name="description"
               value={newItem.description}
@@ -874,7 +883,7 @@ const EditOrder = () => {
               className="btn min-w-[30px] min-h-[39px] p-2 rounded-md mt-3"
             >
               <IoAddCircleOutline className="text-2xl" />
-              Add row
+              {tWorkOrders("edit.14")}
             </button>
           </div>
         </div>
@@ -883,13 +892,13 @@ const EditOrder = () => {
             <thead className="bg-[#191917]">
               <tr className="border-b-[#00000014]">
                 <th className=" text-center w-[40%] text-white font-medium">
-                  Work description
+                  {tWorkOrders("edit.13")}
                 </th>
                 <th className=" text-center w-[15%] text-white font-medium">
-                  Service/parts
+                  {tWorkOrders("edit.11")}
                 </th>
                 <th className=" text-center w-[15%] text-white font-medium">
-                  Quantity
+                  {tWorkOrders("edit.12")}
                 </th>
                 <th className=" text-center w-[5%] text-white font-medium"></th>
               </tr>
@@ -942,7 +951,7 @@ const EditOrder = () => {
       </div>
 
       <div>
-        <p className="font-bold mb-2">Tires Tread Deep</p>
+        <p className="font-bold mb-2"> {tWorkOrders("edit.15")}</p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 gap-y-4 border-[#00000014] border-1 p-3 mb-6 rounded-md">
           {(
             [
@@ -977,12 +986,14 @@ const EditOrder = () => {
 
       <div className="rounded-box border-[#00000014] border-1 mb-6 p-3 gap-4 flex flex-col">
         <div className="flex flex-col gap-2 items-left justify-center">
-          <span className="font-bold break-words !w-full">Observation</span>
+          <span className="font-bold break-words !w-full">
+            {tWorkOrders("edit.16")}
+          </span>
           <textarea
             {...register("observation")}
             className="!text-left p-2 flex-1 input input-lg bg-[#f6f3f4] w-full    transition-all border-1 text-lg font-normal border-gray-100"
             rows={5}
-            placeholder="Write work description..."
+            placeholder={tWorkOrders("edit.21")}
           ></textarea>
         </div>
       </div>
@@ -1018,7 +1029,7 @@ const EditOrder = () => {
             className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto"
           >
             <span className="py-1 px-2 text-white font-normal rounded-full md:block text-[13px]">
-              Save
+              {tWorkOrders("edit.19")}
             </span>
           </button>
         </div>

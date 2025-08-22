@@ -18,8 +18,10 @@ import {
 } from "../models/workOrder.types";
 import clsx from "clsx";
 import { IoMdCheckmark, IoMdSync } from "react-icons/io";
+import { useTranslations } from "next-intl";
 
 const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
+  const tToasts = useTranslations("toast");
   const router = useRouter();
   const pathname = usePathname();
 
@@ -47,7 +49,7 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
       setAllData(items);
       setTotalCount(totalCount);
     } catch (error) {
-      toast.error("Error al cargar inspecciones");
+      toast.error(`${tToasts("error")}: ${tToasts("login.21")}`);
     } finally {
       setLoading(false);
     }
@@ -177,11 +179,11 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
           return updated;
         });
         await fetchData();
-        toast.success("¡Sincronización exitosa!");
+        toast.success(`${tToasts("ok")}: ${tToasts("login.14")}`);
       }, 800);
     } catch (error) {
       console.error("Error al sincronizar:", error);
-      toast.error("Error al sincronizar.");
+      toast.error(`${tToasts("error")}: ${tToasts("login.22")}`);
       setSyncStatus((prev) => ({ ...prev, [inspectionId]: "idle" }));
     }
   };
@@ -202,10 +204,10 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
         payload
       );
 
-      toast.success("Inspección eliminada correctamente");
+      toast.success(`${tToasts("ok")}: ${tToasts("login.23")}`);
       fetchData();
     } catch (error) {
-      toast.error("❌ Error al eliminar la inspección");
+      toast.error(`${tToasts("error")}: ${tToasts("login.24")}`);
       console.error(error);
     }
   };

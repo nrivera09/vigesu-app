@@ -20,6 +20,7 @@ import {
   InspectionStatus,
   InspectionStatusLabel,
 } from "../models/typeInspection";
+import { useTranslations } from "next-intl";
 
 interface CreateOrderProps {
   changeTitle?: (newTitle: string) => void;
@@ -35,6 +36,7 @@ const baseSchema = z.object({
 });
 
 const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
+  const tToasts = useTranslations("toast");
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -187,11 +189,11 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
       const res = await axiosInstance.post("/TypeInspection", payload);
       //console.log(" Enviado correctamente:", res.data);
 
-      toast.success("Inspection order creado correctamente!");
+      toast.success(`${tToasts("ok")}: ${tToasts("login.5")}`);
       router.push("../");
     } catch (error) {
       //console.error("❌ Error al guardar:", error);
-      toast.error(`${error}`);
+      toast.error(`${tToasts("error")}: ${error}`);
     }
   };
 

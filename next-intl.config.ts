@@ -1,7 +1,8 @@
 const config = {
   locales: ["en", "es"],
-  defaultLocale: "es",
-  localePrefix: "as-needed", // o 'always'
+  defaultLocale: "en",
+  localePrefix: "as-needed", // o 'alwa
+  localeDetection: false, // 👈 opcional, mantén todo alineadoys'
 };
 
 export default config;

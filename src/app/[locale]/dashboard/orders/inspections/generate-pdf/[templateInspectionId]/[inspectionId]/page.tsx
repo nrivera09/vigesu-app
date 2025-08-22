@@ -18,8 +18,10 @@ import { useReactToPrint } from "react-to-print";
 import { generatePDF } from "@/shared/utils/generatePDF";
 import RenderComponentByNumber from "@/shared/components/shared/InspectionsPdf/RenderComponentByNumber";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 const GeneratePdfPage = () => {
+  const tToasts = useTranslations("toast");
   const [isEditable, setIsEditable] = useState<boolean>(false);
   const [templateData, setTemplateData] = useState<LiftgateInspection | null>(
     null
@@ -54,19 +56,19 @@ const GeneratePdfPage = () => {
         if (resTemplate.status === "fulfilled") {
           setTemplateData(resTemplate.value.data);
         } else {
-          toast.error("Error fetching template data");
+          toast.error(`${tToasts("error")}: ${tToasts("msj.3")}`);
         }
 
         if (resInspection.status === "fulfilled") {
           setInspectionData(resInspection.value.data);
         }
       } catch (error) {
-        toast.error("Error fetching template data");
+        toast.error(`${tToasts("error")}: ${error}`);
       }
     };
 
     fetchData();
-  }, [templateInspectionId, inspectionId]);
+  }, [templateInspectionId, inspectionId, tToasts]);
 
   if (!templateData) return <Loading />;
 

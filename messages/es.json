@@ -1,27 +1,168 @@
 {
   "home": {
     "form-title": "Bienvenido",
-    "form-info": "Porfavor ingrese sus credenciales"
+    "form-info": "Por favor, ingrese sus credenciales",
+    "remember-password": "Recuérdame",
+    "forgot-password": "¿Recuperar contraseña?",
+    "mistakes-login": "¿Problemas para iniciar sesión?",
+    "btn-login": "Iniciar sesión"
   },
   "aside": {
+    "menus": {
+      "name1": "DOCUMENTOS",
+      "name2": "CATÁLOGOS",
+      "name3": "CONFIGURACIÓN"
+    },
+    "module0": {
+      "title": "Panel",
+      "inspections": "Inspecciones",
+      "orders": "Órdenes"
+    },
     "module1": {
-      "title": "DOCUMENTOSS",
-      "menu1": "Ordenes de trabajo",
+      "title": "DOCUMENTOS",
+      "menu1": "Órdenes de trabajo",
       "menu2": "Inspecciones"
     },
     "module2": {
       "title": "CATÁLOGOS",
-      "menu1": "Configuración de inspecciones",
+      "menu1": "Configuración de inspección",
       "menu2": "Grupos",
       "menu3": "Usuarios"
     },
     "module3": {
       "title": "Configuración",
       "menu1": "Configuraciones",
-      "menu2": "IC theme"
+      "menu2": "Tema IC"
     }
   },
   "logout": {
     "logout": "Cerrar sesión"
+  },
+  "toast": {
+    "ok": "Ejecutado con éxito",
+    "error": "Ocurrió un error al procesar la información",
+    "warning": "Es necesario",
+    "msj": {
+      "1": "¡Inicio de sesión exitoso!",
+      "2": "Respuesta inválida del servidor",
+      "3": "Error al obtener datos de la plantilla",
+      "4": "Estado actualizado con éxito",
+      "5": "¡Orden de inspección creada con éxito!",
+      "6": "Orden editada con éxito",
+      "7": "Complete todos los campos requeridos.",
+      "8": "Seleccione un empleado de la lista.",
+      "9": "La firma es obligatoria.",
+      "10": "Usuario creado con éxito",
+      "11": "Todos los campos son obligatorios.",
+      "12": "Seleccione un empleado de la lista.",
+      "13": "Usuario actualizado con éxito",
+      "14": "¡Sincronización exitosa!",
+      "15": "PDF enviado correctamente a QuickBooks",
+      "16": "¡Orden de trabajo creada con éxito!",
+      "17": "Debe seleccionar un Servicio/Repuesto válido",
+      "18": "No se cargó ningún archivo nuevo",
+      "19": "Archivos cargados con éxito",
+      "20": "Orden actualizada con éxito",
+      "21": "Error al cargar inspecciones",
+      "22": "Error al sincronizar",
+      "23": "Inspección eliminada con éxito",
+      "24": "Error al eliminar la inspección",
+      "25": "Ingrese un correo electrónico válido",
+      "26": "Correo enviado con éxito",
+      "27": "Error al enviar el correo",
+      "28": "Inspección enviada con éxito",
+      "29": "Error al enviar inspección",
+      "30": "Primero debe seleccionar la respuesta",
+      "31": "Grupo completado con éxito.",
+      "32": "Error al cargar datos"
+    }
+  },
+  "workorders": {
+    "home": {
+      "0": "Órdenes de trabajo",
+      "1": "Opciones de búsqueda",
+      "2": "Cliente",
+      "3": "Estado",
+      "4": "Seleccione un estado",
+      "5": "Nro. Orden de trabajo",
+      "6": "Empleado",
+      "7": "Fecha de creación",
+      "8": "Buscar",
+      "9": "",
+      "10": "Cliente",
+      "11": "Empleado",
+      "12": "Estado",
+      "13": "Sincronizar Quickbook",
+      "14": "Nuevo"
+    },
+    "new": {
+      "0": "Nueva orden",
+      "1": "Cliente",
+      "2": "Lugar de reparación",
+      "3": "Hora de inicio del servicio",
+      "4": "Equipo #",
+      "5": "Fecha de reparación",
+      "6": "Hora de fin del servicio",
+      "7": "Placa #",
+      "8": "OC #",
+      "9": "VIN #",
+      "10": "Nombre del mecánico",
+      "11": "Servicio/Repuestos",
+      "12": "Cantidad",
+      "13": "Descripción del trabajo",
+      "14": "Agregar fila",
+      "15": "Profundidad de la banda de llantas",
+      "16": "Observación",
+      "17": "Adjuntar fotos o tomar imágenes",
+      "18": "Haga clic para subir o tomar una foto con su cámara",
+      "19": "Guardar",
+      "20": "Eliminar",
+      "21": "Escribir descripción del trabajo..."
+    },
+    "edit": {
+      "0": "Editar orden",
+      "1": "Cliente",
+      "2": "Lugar de reparación",
+      "3": "Hora de inicio del servicio",
+      "4": "Equipo #",
+      "5": "Fecha de reparación",
+      "6": "Hora de fin del servicio",
+      "7": "Placa #",
+      "8": "OC #",
+      "9": "VIN #",
+      "10": "Nombre del mecánico",
+      "11": "Servicio/Repuestos",
+      "12": "Cantidad",
+      "13": "Descripción del trabajo",
+      "14": "Agregar fila",
+      "15": "Profundidad de la banda de llantas",
+      "16": "Observación",
+      "17": "Adjuntar fotos o tomar imágenes",
+      "18": "Haga clic para subir o tomar una foto con su cámara",
+      "19": "Guardar",
+      "20": "Eliminar",
+      "21": "Escribir descripción del trabajo..."
+    },
+    "print": {
+      "0": "Listo para imprimir",
+      "1": "Habilitar edición",
+      "2": "Deshabilitar edición",
+      "3": "Imprimir orden",
+      "4": "Descargar PDF"
+    }
+  },
+  "alerts": {
+    "1": "Debe escribir al menos 3 caracteres en los campos para poder seleccionar una coincidencia.",
+    "2": "Todos los espacios grises son editables, lo que significa que puede escribir en ellos y agregar la información requerida."
+  },
+  "uploadPhoto": {
+    "drop": "Suelta los archivos aquí ...",
+    "upload": "Haga clic para subir o tomar una foto con su cámara",
+    "attach": "Adjuntar fotos o tomar imágenes"
+  },
+  "general": {
+    "btnWatch": "Ver",
+    "btnPrint": "Imprimir",
+    "btnDelete": "Eliminar"
   }
 }

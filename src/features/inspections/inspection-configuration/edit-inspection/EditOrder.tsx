@@ -24,6 +24,7 @@ import {
   InspectionStatusLabel,
 } from "../models/typeInspection";
 import { MdEdit } from "react-icons/md";
+import { useTranslations } from "next-intl";
 
 interface EditOrderProps {
   changeTitle?: (newTitle: string) => void;
@@ -56,6 +57,7 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
   const [selectedCustomer, setSelectedCustomer] =
     useState<CustomerOption | null>(null);
 
+  const tToasts = useTranslations("toast");
   const [customerOptions, setCustomerOptions] = useState<CustomerOption[]>([]);
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
   const [hasAtLeastOneQuestion, setHasAtLeastOneQuestion] = useState(false);
@@ -253,10 +255,10 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
 
     try {
       await axiosInstance.put(`/TypeInspection/${id}`, payload);
-      toast.success("Orden editada correctamente");
+      toast.success(`${tToasts("ok")}: ${tToasts("login.6")}`);
       router.push("../");
     } catch (error) {
-      toast.error("Error al guardar los cambios");
+      toast.error(`${tToasts("error")}: ${error}`);
       console.error(error);
     }
   };

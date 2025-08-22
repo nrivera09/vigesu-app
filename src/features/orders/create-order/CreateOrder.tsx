@@ -18,6 +18,7 @@ import { MdEdit } from "react-icons/md";
 import { toast } from "sonner";
 import { renameFileWithUniqueName } from "@/shared/utils/utils";
 import Loading from "@/shared/components/shared/Loading";
+import { useTranslations } from "next-intl";
 
 const workItemSchema = z.object({
   description: z.string().optional(),
@@ -73,6 +74,9 @@ interface ItemOption {
 export type OrderForm = z.infer<typeof orderSchema>;
 
 const CreateOrder = () => {
+  const tToasts = useTranslations("toast");
+  const tAlerts = useTranslations("alerts");
+  const tWorkOrders = useTranslations("workorders");
   const pathname = usePathname();
   const parentPath = pathname.replace(/\/[^/]+$/, "");
   const router = useRouter();
@@ -116,8 +120,7 @@ const CreateOrder = () => {
       const response = await axiosInstance.get(url);
       setCustomerOptions(response.data ?? []);
     } catch (error) {
-      toast.error(`${error}`);
-      //console.error("Error buscando clientes:", error);
+      toast.error(`${tToasts("error")}: ${error}`);
     } finally {
       setIsLoadingCustomer(false);
     }
@@ -156,7 +159,7 @@ const CreateOrder = () => {
       const response = await axiosInstance.get(url);
       setMechanicOptions(response.data ?? []);
     } catch (error) {
-      toast.error(`${error}`);
+      toast.error(`${tToasts("error")}: ${error}`);
       //console.error("Error buscando empleados:", error);
     } finally {
       setIsLoadingMechanic(false);
@@ -198,7 +201,7 @@ const CreateOrder = () => {
     } catch (error) {
       //console.error("Error buscando items:", error);
 
-      toast.error(`${error}`);
+      toast.error(`${tToasts("error")}: ${error}`);
     } finally {
       setIsLoadingServiceParts(false);
     }
@@ -309,19 +312,18 @@ const CreateOrder = () => {
         console.log("📸 Archivos subidos correctamente");
       }
 
-      console.log("🎯 Todo OK - proceso finalizado");
-      toast.success("Work Order creado correctamente!");
+      toast.success(`${tToasts("ok")}: ${tToasts("login.16")}`);
       router.push(parentPath);
     } catch (error) {
       //console.error("❌ Error al procesar el formulario", error);
 
-      toast.error(`${error}`);
+      toast.error(`${tToasts("error")}: ${error}`);
     }
   };
 
   const handleAddRow = () => {
     if (newItem.idParts === 0) {
-      setNewItemError("Debes seleccionar un Service/Part válido");
+      setNewItemError(tToasts("login.17"));
       return;
     }
 
@@ -354,11 +356,12 @@ const CreateOrder = () => {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div role="alert" className="alert alert-info alert-soft mb-5 text-lg">
-        <span>
-          All the grey spaces are editable, meaning you can write on them and
-          add the required data.
-        </span>
-        <button type="button" onClick={() => router.push(`${pathname}`)}>
+        <span>{tAlerts("2")}</span>
+        <button
+          type="button"
+          className="!hidden"
+          onClick={() => router.push(`${pathname}`)}
+        >
           Click me
         </button>
       </div>
@@ -366,7 +369,9 @@ const CreateOrder = () => {
       <div className=" border-[#00000014] border-1 p-2 mb-6 rounded-md flex flex-col gap-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
           <div className="flex flex-row gap-2 items-center justify-center ">
-            <span className={clsx(labelClass(), `!w-[30%]`)}>Customer</span>
+            <span className={clsx(labelClass(), `!w-[30%]`)}>
+              {tWorkOrders("new.1")}
+            </span>
             {selectedCustomer ? (
               <div className="flex flex-1 items-center gap-2 ">
                 <span className="truncate w-0 flex-1 px-2">
@@ -446,7 +451,7 @@ const CreateOrder = () => {
           </div>
 
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className={labelClass()}>Location of repair</span>
+            <span className={labelClass()}>{tWorkOrders("new.2")}</span>
             <input
               {...register("location_of_repair")}
               type="text"
@@ -454,7 +459,7 @@ const CreateOrder = () => {
             />
           </div>
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className={labelClass()}>Time start service</span>
+            <span className={labelClass()}>{tWorkOrders("new.3")}</span>
             <input
               {...register("time_start_service")}
               type="time"
@@ -465,7 +470,7 @@ const CreateOrder = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className={labelClass()}>Equipment#</span>
+            <span className={labelClass()}>{tWorkOrders("new.4")}</span>
             <input
               {...register("equipment_order")}
               type="text"
@@ -473,7 +478,7 @@ const CreateOrder = () => {
             />
           </div>
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className={labelClass()}>Date of Repair</span>
+            <span className={labelClass()}>{tWorkOrders("new.5")}</span>
             <input
               {...register("datate_of_repair")}
               type="date"
@@ -482,7 +487,7 @@ const CreateOrder = () => {
             />
           </div>
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className={labelClass()}>Time finish service</span>
+            <span className={labelClass()}>{tWorkOrders("new.6")}</span>
             <input
               {...register("time_finish_service")}
               type="time"
@@ -492,7 +497,7 @@ const CreateOrder = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className={labelClass()}>License plate #</span>
+            <span className={labelClass()}>{tWorkOrders("new.7")}</span>
             <input
               {...register("license_plate")}
               type="text"
@@ -500,7 +505,7 @@ const CreateOrder = () => {
             />
           </div>
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className={labelClass()}>PO#</span>
+            <span className={labelClass()}>{tWorkOrders("new.8")}</span>
             <input
               {...register("po_number")}
               type="text"
@@ -510,7 +515,7 @@ const CreateOrder = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className={labelClass()}>VIN#</span>
+            <span className={labelClass()}>{tWorkOrders("new.9")}</span>
             <input
               {...register("vin_number")}
               type="text"
@@ -519,7 +524,7 @@ const CreateOrder = () => {
           </div>
           <div className="flex flex-row gap-2 items-center justify-center">
             <span className={clsx(labelClass(), `!w-[30%]`)}>
-              Mechanic name
+              {tWorkOrders("new.10")}
             </span>
 
             {selectedMechanic ? (
@@ -603,7 +608,7 @@ const CreateOrder = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <div className="flex flex-row gap-2 items-center justify-center">
             <span className={clsx(labelClass(), `!w-[30%]`)}>
-              Service/Parts
+              {tWorkOrders("new.11")}
             </span>
 
             {selectedItem ? (
@@ -679,7 +684,7 @@ const CreateOrder = () => {
           </div>
 
           <div className="flex flex-row gap-2 items-center justify-center">
-            <span className={labelClass()}>Quantity</span>
+            <span className={labelClass()}>{tWorkOrders("new.12")}</span>
             <input
               name="quantity"
               value={newItem.quantity}
@@ -693,7 +698,9 @@ const CreateOrder = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-1 gap-2">
           <div className="flex flex-col gap-2 items-left justify-center">
-            <span className={`${labelClass()} !w-full`}>Work description</span>
+            <span className={`${labelClass()} !w-full`}>
+              {tWorkOrders("new.13")}
+            </span>
             <textarea
               name="description"
               value={newItem.description}
@@ -702,7 +709,7 @@ const CreateOrder = () => {
                 !!newItemError && newItem.description.trim() === ""
               )}`}
               rows={3}
-              placeholder="Write work description..."
+              placeholder={tWorkOrders("new.21")}
             ></textarea>
 
             <button
@@ -711,7 +718,7 @@ const CreateOrder = () => {
               className="btn min-w-[30px] min-h-[39px] p-2 rounded-md mt-3"
             >
               <IoAddCircleOutline className="text-2xl" />
-              Add row
+              {tWorkOrders("new.14")}
             </button>
           </div>
         </div>
@@ -720,13 +727,13 @@ const CreateOrder = () => {
             <thead className="bg-[#191917]">
               <tr className="border-b-[#00000014]">
                 <th className=" text-center w-[40%] text-white font-medium">
-                  Work description
+                  {tWorkOrders("new.13")}
                 </th>
                 <th className=" text-center w-[15%] text-white font-medium">
-                  Service/parts
+                  {tWorkOrders("new.11")}
                 </th>
                 <th className=" text-center w-[15%] text-white font-medium">
-                  Quantity
+                  {tWorkOrders("new.12")}
                 </th>
                 <th className=" text-center w-[5%] text-white font-medium"></th>
               </tr>
@@ -768,7 +775,7 @@ const CreateOrder = () => {
                       icon={
                         <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
                       }
-                      label="Delete"
+                      label={tWorkOrders("new.20")}
                       onClick={() => remove(index)}
                     />
                   </td>
@@ -780,7 +787,7 @@ const CreateOrder = () => {
       </div>
 
       <div>
-        <p className="font-bold mb-2">Tires Tread Deep</p>
+        <p className="font-bold mb-2">{tWorkOrders("new.15")}</p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 gap-y-4 border-[#00000014] border-1 p-3 mb-6 rounded-md">
           {(
             [
@@ -815,7 +822,9 @@ const CreateOrder = () => {
 
       <div className="rounded-box border-[#00000014] border-1 mb-6 p-3 gap-4 flex flex-col">
         <div className="flex flex-col gap-2 items-left justify-center">
-          <span className="font-bold break-words !w-full">Observation</span>
+          <span className="font-bold break-words !w-full">
+            {tWorkOrders("new.16")}
+          </span>
           <textarea
             {...register("observation")}
             className="!text-left p-2 flex-1 input input-lg bg-[#f6f3f4] w-full    transition-all border-1 text-lg font-normal border-gray-100"
@@ -842,7 +851,7 @@ const CreateOrder = () => {
           className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto"
         >
           <span className="py-1 px-2 text-white font-normal rounded-full md:block text-[13px]">
-            Save
+            {tWorkOrders("new.19")}
           </span>
         </button>
       </div>

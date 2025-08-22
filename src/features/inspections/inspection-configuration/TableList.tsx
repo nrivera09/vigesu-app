@@ -16,8 +16,10 @@ import {
 import Loading from "@/shared/components/shared/Loading";
 import { usePathname, useRouter } from "next/navigation";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
+import { useTranslations } from "next-intl";
 
 const TableList = ({ objFilter }: TableListProps) => {
+  const tToasts = useTranslations("toast");
   const router = useRouter();
   const pathname = usePathname();
   const [allData, setAllData] = useState<ITypeInspectionItem[]>([]);
@@ -48,7 +50,7 @@ const TableList = ({ objFilter }: TableListProps) => {
       setAllData(mappedItems);
       setTotalCount(totalCount);
     } catch (error) {
-      toast.error("Error al cargar configuraciones de inspección");
+      toast.error(`${tToasts("error")}: ${error}`);
     } finally {
       setLoading(false);
     }
@@ -70,11 +72,10 @@ const TableList = ({ objFilter }: TableListProps) => {
         }
       );
 
-      toast.success("Estado actualizado correctamente");
+      toast.success(`${tToasts("ok")}: ${tToasts("msj.4")}`);
       fetchData();
     } catch (error) {
-      console.error("Error al actualizar estado:", error);
-      toast.error("No se pudo actualizar el estado de la inspección");
+      toast.error(`${tToasts("error")}: ${error}`);
     } finally {
       setLoading(false);
     }
@@ -116,12 +117,12 @@ const TableList = ({ objFilter }: TableListProps) => {
                 <td className="truncate">{item.description}</td>
                 <td>
                   {item.status === 0 && (
-                    <div className="badge badge-dash badge-success">
+                    <div className="badge badge-dash badge-success mx-auto whitespace-nowrap">
                       {getInspectionStatusLabel(item.status)}
                     </div>
                   )}
                   {item.status === 1 && (
-                    <div className="badge badge-dash badge-error">
+                    <div className="badge badge-dash badge-error mx-auto whitespace-nowrap">
                       {getInspectionStatusLabel(item.status)}
                     </div>
                   )}

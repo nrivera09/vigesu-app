@@ -21,8 +21,10 @@ import html2pdf from "html2pdf.js";
 import { CiEdit } from "react-icons/ci";
 import { IoCloseOutline } from "react-icons/io5";
 import { generatePDF } from "@/shared/utils/generatePDF";
+import { useTranslations } from "next-intl";
 
 const GeneratePdfPage = () => {
+  const tWorkOrders = useTranslations("workorders");
   const [isEditable, setIsEditable] = useState<boolean>(false);
   const pathname = usePathname();
   const { downloadPDF } = useDownloadPDF();
@@ -93,7 +95,10 @@ const GeneratePdfPage = () => {
   return (
     <>
       <div className="header-page flex flex-row items-center justify-between min-h-[70px] bg-base-200 px-6 gap-2">
-        <BackButton title={`Ready to print #${id}`} link={`../../`} />
+        <BackButton
+          title={`${tWorkOrders("print.0")} #${id}`}
+          link={`../../`}
+        />
         <div className="flex flex-row gap-2">
           <ActionButton
             className={`${
@@ -106,19 +111,19 @@ const GeneratePdfPage = () => {
                 <IoCloseOutline className="w-[20px] h-[20px] opacity-70" />
               )
             }
-            label={isEditable ? "Disable edition" : "Enable edition"}
+            label={isEditable ? tWorkOrders("print.2") : tWorkOrders("print.1")}
             onClick={() => setIsEditable((prev) => !prev)}
           />
           <ActionButton
             className="!bg-black text-white"
             icon={<FiPrinter className="w-[20px] h-[20px] opacity-70" />}
-            label={`Print order `}
+            label={tWorkOrders("print.3")}
             onClick={() => handlePrint()}
           />
           <ActionButton
             className="!bg-red-500 text-white"
             icon={<AiOutlineFilePdf className="w-[20px] h-[20px] opacity-70" />}
-            label={`Download PDF `}
+            label={tWorkOrders("print.4")}
             onClick={() =>
               generatePDF("pdf-content", `WorkOrder - ${data.workOrderId}.pdf`)
             }

@@ -13,6 +13,7 @@ import { useAuthStore } from "@/shared/stores/useAuthStore";
 
 import { setCookie, getCookie, deleteCookie } from "cookies-next";
 import { toast } from "sonner";
+import LanguageSwitcher from "@/features/locale/LanguageSwitcher";
 
 const loginSchema = z.object({
   userName: z.string().min(1, "El usuario es obligatorio"),
@@ -26,6 +27,7 @@ type LoginData = z.infer<typeof schema>;
 export default function Home() {
   const router = useRouter();
   const t = useTranslations("home");
+  const tToasts = useTranslations("toast");
   const setAuth = useAuthStore((state) => state.setAuth);
 
   const [loading, setLoading] = useState(false);
@@ -55,11 +57,11 @@ export default function Home() {
           token: res.data.token,
           user: res.data.user,
         });
+        toast.success(`${tToasts("ok")}: ${tToasts("msj.1")}`);
 
-        toast.success("¡Login correcto!");
         router.push("/dashboard");
       } else {
-        toast.error("Respuesta inválida del servidor");
+        toast.error(`${tToasts("error")}: ${tToasts("msj.2")}`);
       }
     } catch (err: unknown) {
       const error = err as {
@@ -72,9 +74,11 @@ export default function Home() {
 
       const backendErrors = error?.response?.data?.errors;
       if (Array.isArray(backendErrors) && backendErrors.length) {
-        toast.error(backendErrors[0].value?.join(", "));
+        toast.error(
+          `${tToasts("error")}: ${backendErrors[0].value?.join(", ")}`
+        );
       } else {
-        toast.error("Error desconocido al iniciar sesión");
+        toast.error(`${tToasts("error")}: ${err})}`);
       }
     } finally {
       setLoading(false);
@@ -84,9 +88,11 @@ export default function Home() {
   return (
     <main className="h-dvh w-full flex sm:flex-col md:flex-row flex-col items-center justify-center">
       <div className="login-form h-full flex flex-col items-center justify-center w-full md:w-[50%] py-5 fixed md:relative ">
-        <div className="w-full h-[30px] flex items-center justify-center">
-          <div className="container flex flex-row items-center justify-between">
+        <div className="w-full h-[39px] flex items-center justify-center">
+          <div className="container flex flex-row items-center justify-between h-full">
             <p className="uppercase font-bold text-[20px]">visegu</p>
+
+            <LanguageSwitcher design="header-dashboard" />
           </div>
         </div>
         <div className="flex flex-1 p-[15px] md:p-0 items-center justify-center w-full max-w-[500px] md:max-w-[500px]">

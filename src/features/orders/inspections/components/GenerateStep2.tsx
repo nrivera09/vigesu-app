@@ -13,12 +13,13 @@ import clsx from "clsx";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
+import { useTranslations } from "next-intl";
 
 const GenerateStep2 = () => {
   const router = useRouter();
   const store = useInspectionFullStore.getState();
   const { fullInspection, groupName, groupId } = useInspectionFullStore();
-
+  const tToasts = useTranslations("toast");
   const goStep = (question: IFullQuestion) => {
     useInspectionFullStore.getState().setStepWizard(3);
     useInspectionFullStore.getState().setCompleteStep2(true);
@@ -67,14 +68,14 @@ const GenerateStep2 = () => {
     try {
       const response = await axiosInstance.post("/Inspection", payload);
 
-      toast.success("Inspección enviada correctamente");
+      toast.success(`${tToasts("ok")}: ${tToasts("login.28")}`);
 
       //  RESET COMPLETO
       useInspectionFullStore.getState().resetFullInspection();
 
       router.push("./");
     } catch (error) {
-      toast.error("❌ Error al enviar inspección");
+      toast.error(`${tToasts("error")}: ${tToasts("login.29")}`);
       console.error(error);
     }
   };

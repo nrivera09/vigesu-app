@@ -17,8 +17,12 @@ import { usePathname } from "next/navigation";
 import Loading from "@/shared/components/shared/Loading";
 import html2canvas from "html2canvas";
 import { getWorkOrderStatusLabel } from "@/shared/utils/utils";
+import { useTranslations } from "next-intl";
 
 const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
+  const tToasts = useTranslations("toast");
+  const tGeneral = useTranslations("general");
+  const t = useTranslations("workorders");
   const router = useRouter();
   const pathname = usePathname();
   const [syncStatus, setSyncStatus] = useState<{
@@ -61,10 +65,10 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
 
         await fetchData(currentPage);
 
-        toast.success("¡Sincronización exitosa!");
+        toast.success(`${tToasts("ok")}: ${tToasts("login.14")}`);
       }, 1000);
     } catch (error) {
-      toast.error("Error al sincronizar.");
+      toast.error(`${tToasts("error")}: ${error}`);
       setSyncStatus((prev) => ({ ...prev, [workOrderId]: "idle" }));
     }
   };
@@ -104,10 +108,10 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
         }
       );
 
-      toast.success("PDF enviado correctamente a QuickBooks");
+      toast.success(`${tToasts("ok")}: ${tToasts("login.15")}`);
     } catch (err) {
       console.error("Error al enviar el PDF:", err);
-      toast.error("Error al enviar el PDF a QuickBooks");
+      toast.error(`${tToasts("error")}: ${err}`);
     }
   };
 
@@ -126,8 +130,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
       setAllData(response.items);
       setTotalRecords(response.totalCount ?? 0);
     } catch (error) {
-      toast.error(`${error}`);
-      //console.error("Error fetching work orders:", error);
+      toast.error(`${tToasts("error")}: ${error}`);
     } finally {
       setLoading(false);
     }
@@ -202,12 +205,12 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
       <table className="table w-full">
         <thead>
           <tr>
-            <th className="w-[8%]">Sel</th>
-            <th className="w-[18%]">Client</th>
-            <th className="w-[18%]">Worker</th>
-            <th className="w-[18%]">Status</th>
-            <th className="w-[18%] text-center">Sync Quickbook</th>
-            <th className="w-[20%]"></th>
+            <th className="w-[8%]"> {t("home.9")}</th>
+            <th className="w-[18%]"> {t("home.10")}</th>
+            <th className="w-[18%] text-center"> {t("home.11")}</th>
+            <th className="w-[18%] text-center"> {t("home.12")}</th>
+            <th className="w-[18%] text-center"> {t("home.13")}</th>
+            <th className="w-[20%] text-center"></th>
           </tr>
         </thead>
         <tbody>
@@ -235,29 +238,29 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
                   {item.customerName}
                 </td>
                 <td
-                  className="truncate"
+                  className="truncate text-center"
                   onClick={() =>
                     router.push(`${pathname}/edit/${item.workOrderId}`)
                   }
                 >
                   {item.employeeName}
                 </td>
-                <td>
-                  <div className="!hidden badge badge-neutral !h-auto">
+                <td className="text-center">
+                  <div className="!hidden badge badge-neutral !h-auto mx-auto whitespace-nowrap">
                     {getWorkOrderStatusLabel(item.statusWorkOrder)}
                   </div>
                   {item.statusWorkOrder === 0 && (
-                    <div className="badge badge-dash badge-info">
+                    <div className="badge badge-dash badge-info mx-auto whitespace-nowrap">
                       {getWorkOrderStatusLabel(item.statusWorkOrder)}
                     </div>
                   )}
                   {item.statusWorkOrder === 1 && (
-                    <div className="badge badge-dash badge-error">
+                    <div className="badge badge-dash badge-error mx-auto whitespace-nowrap">
                       {getWorkOrderStatusLabel(item.statusWorkOrder)}
                     </div>
                   )}
                   {item.statusWorkOrder === 2 && (
-                    <div className="badge badge-dash badge-success">
+                    <div className="badge badge-dash badge-success mx-auto whitespace-nowrap">
                       {getWorkOrderStatusLabel(item.statusWorkOrder)}
                     </div>
                   )}
@@ -300,7 +303,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
                         icon={
                           <FaRegEye className="w-[20px] h-[20px] opacity-70" />
                         }
-                        label="Watch"
+                        label={tGeneral("btnWatch")}
                         onClick={() =>
                           router.push(`${pathname}/edit/${item.workOrderId}`)
                         }
@@ -310,7 +313,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
                       icon={
                         <FiPrinter className="w-[20px] h-[20px] opacity-70" />
                       }
-                      label="Print"
+                      label={tGeneral("btnPrint")}
                       onClick={() =>
                         router.push(
                           `${pathname}/generate-pdf/${item.workOrderId}`
@@ -323,7 +326,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
                         icon={
                           <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
                         }
-                        label="Delete"
+                        label={tGeneral("btnDelete")}
                         onClick={() => updateWorkOrderState(item.workOrderId)}
                       />
                     )}

@@ -30,6 +30,7 @@ import { toast } from "sonner";
 import ImageUploader from "../../create-order/ImageUploader";
 import { useAuthUser } from "@/shared/stores/useAuthUser";
 import EmailConfirmationModal from "./EmailConfirmationModal";
+import { useTranslations } from "next-intl";
 
 interface GenerateStep1Props {
   ClientName: string;
@@ -37,7 +38,7 @@ interface GenerateStep1Props {
 
 const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
   const [showModal, setShowModal] = useState(false);
-
+  const tToasts = useTranslations("toast");
   const { userName, employeeName, rol, employeeId } = useAuthUser();
   const [inspectionFiles, setInspectionFiles] = useState<File[]>([]);
 
@@ -150,13 +151,6 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
 
     console.log("📤 Enviando payload a API:", payload);
     try {
-      /*const response = await axiosInstance.post("/Inspection", payload);
-
-      toast.success("Inspección enviada correctamente");
-
-      useInspectionFullStore.getState().resetFullInspection();
-
-      router.push("./");*/
       const response = await axiosInstance.post("/Inspection", payload);
       const inspectionId = response.data; // ✅ número entero simple, como mencionaste
 
@@ -178,11 +172,11 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
           }
         );
       }
-      toast.success("Inspección enviada correctamente");
+      toast.success(`${tToasts("ok")}: ${tToasts("login.28")}`);
       useInspectionFullStore.getState().resetFullInspection();
       router.push("./");
     } catch (error) {
-      toast.error("❌ Error al enviar inspección");
+      toast.error(`${tToasts("error")}: ${tToasts("login.29")}`);
       console.error(error);
     }
   };

@@ -170,7 +170,7 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
           <div className="dashboard-info p-5 flex flex-col gap-2 min-h-[78px]">
             <div className="flex items-center justify-start gap-2">
               <p className="text-white font-medium tracking-[1px] text-xl">
-                Dashboard
+                {t("module0.title")}
               </p>
               <p className="bg-red-400 text-white text-xs px-2 w-[23px] h-[14px] flex items-center justify-center rounded-full shadow-2xl">
                 <span className="relative top-[1px]">12</span>
@@ -180,7 +180,9 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
               {totalInspections && totalInspections > 0 ? (
                 <div>
                   {totalInspections}{" "}
-                  <span className="text-emerald-500 ">Inspections</span>
+                  <span className="text-emerald-500 ">
+                    {t("module0.inspections")}
+                  </span>
                 </div>
               ) : (
                 <div className="flex flex-row items-center justify-center gap-2">
@@ -192,7 +194,9 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
                     />
                   )}
                   {totalInspections}{" "}
-                  <span className="text-emerald-500 ">Inspections</span>
+                  <span className="text-emerald-500 ">
+                    {t("module0.inspections")}
+                  </span>
                 </div>
               )}
               <TbPointFilled className="text-xs text-shadow-emerald-800" />
@@ -200,7 +204,9 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
               {totalOrders && totalOrders > 0 ? (
                 <div>
                   {totalOrders}{" "}
-                  <span className="text-emerald-500 ">Orders</span>
+                  <span className="text-emerald-500 ">
+                    {t("module0.orders")}
+                  </span>
                 </div>
               ) : (
                 <div className="flex flex-row items-center justify-center gap-2">
@@ -212,7 +218,9 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
                     />
                   )}
                   {totalOrders}{" "}
-                  <span className="text-emerald-500 ">Orders</span>
+                  <span className="text-emerald-500 ">
+                    {t("module0.orders")}
+                  </span>
                 </div>
               )}
             </div>
@@ -220,7 +228,7 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
 
           <nav className="p-5 flex flex-1 flex-col">
             <SidebarSection
-              title="Documents"
+              title={t("menus.name1")}
               links={ordersLinks}
               activeHref={activeHref}
             />
@@ -228,13 +236,13 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
               <>
                 {rol === 1 && (
                   <SidebarSection
-                    title="Catalogs"
+                    title={t("menus.name2")}
                     links={inspectionsLinks}
                     activeHref={activeHref}
                   />
                 )}
                 <SidebarSection
-                  title="Configuration"
+                  title={t("menus.name3")}
                   links={configurationLinks}
                   activeHref={activeHref}
                 />

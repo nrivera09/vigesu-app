@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import debounce from "lodash/debounce";
 import Loading from "@/shared/components/shared/Loading";
+import { useTranslations } from "next-intl";
 
 type EmployeeOption = { id: string; name: string };
 
@@ -23,6 +24,7 @@ const schema = z.object({
 
 const CreateOrder = () => {
   const router = useRouter();
+  const tToasts = useTranslations("toast");
   const signatureRef = useRef<SignaturePadRef>(null);
 
   const [disablePassword, setDisablePassword] = useState(false);
@@ -86,17 +88,17 @@ const CreateOrder = () => {
     const signatureBlob = signatureRef.current?.getImageBlob();
 
     if (!validation.success) {
-      toast.error("Completa todos los campos obligatorios.");
+      toast.error(`${tToasts("error")}: ${tToasts("login.7")}`);
       return;
     }
 
     if (!employeeIdSelected || !employeeNameSelected) {
-      toast.error("Selecciona un empleado de la lista.");
+      toast.error(`${tToasts("error")}: ${tToasts("login.8")}`);
       return;
     }
 
     if (!signatureBlob) {
-      toast.error("La firma es obligatoria.");
+      toast.error(`${tToasts("error")}: ${tToasts("login.9")}`);
       return;
     }
 
@@ -113,11 +115,11 @@ const CreateOrder = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      toast.success("Usuario creado con éxito");
+      toast.success(`${tToasts("ok")}: ${tToasts("login.10")}`);
       router.push("./");
     } catch (error) {
       console.error(error);
-      toast.error("Error al crear usuario");
+      toast.error(`${tToasts("error")}: ${error}`);
     }
   };
 

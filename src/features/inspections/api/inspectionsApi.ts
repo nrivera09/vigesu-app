@@ -38,6 +38,6 @@ export const getTotalWorkOrders = async () => {
     const data = response.data.totalCount;
     return data ?? 0;
   } catch (error) {
-    toast.error(`${error}`);
+    console.log(`${error}`);
   }
 };

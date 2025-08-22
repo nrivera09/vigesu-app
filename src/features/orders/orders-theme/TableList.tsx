@@ -10,9 +10,11 @@ import {
   TemplateInspection,
 } from "../inspections/api/inspectionApi";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 const TableList = ({ objFilter, setRefreshFlag }: TableListProps) => {
   const router = useRouter();
+  const tToasts = useTranslations("toast");
   const pathname = usePathname();
 
   const [allData, setAllData] = useState<TemplateInspection[]>([]);
@@ -27,7 +29,7 @@ const TableList = ({ objFilter, setRefreshFlag }: TableListProps) => {
       setAllData(data.items);
       setTotalPages(data.totalPages);
     } catch (error) {
-      toast.error("Error al cargar datos");
+      toast.error(`${tToasts("error")}: ${tToasts("login.32")}`);
       console.error(error);
     } finally {
       setLoading(false);

@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "next-intl";
 import React, { useCallback, useState } from "react";
 import { useDropzone, FileWithPath } from "react-dropzone";
 
@@ -12,7 +13,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   accept = { "image/*": [], "application/pdf": [] },
 }) => {
   const [files, setFiles] = useState<FileWithPath[]>([]);
-
+  const tUploadPhoto = useTranslations("uploadPhoto");
   const onDrop = useCallback(
     (acceptedFiles: FileWithPath[]) => {
       const renamedFiles: File[] = acceptedFiles.map((file) => {
@@ -44,7 +45,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
 
   return (
     <div className="mb-6">
-      <h3 className="font-bold mb-2">Attach Photos or Take Pictures</h3>
+      <h3 className="font-bold mb-2">{tUploadPhoto("attach")}</h3>
 
       <div
         {...getRootProps()}
@@ -62,11 +63,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
             pointerEvents: "none",
           }}
         />
-        <p>
-          {isDragActive
-            ? "Drop the files here ..."
-            : "Click to upload or take a photo with your camera"}
-        </p>
+        <p>{isDragActive ? tUploadPhoto("drop") : tUploadPhoto("upload")}</p>
       </div>
 
       {files.length > 0 && (
