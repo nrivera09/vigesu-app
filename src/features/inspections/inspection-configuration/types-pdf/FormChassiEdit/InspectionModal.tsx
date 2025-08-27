@@ -6,6 +6,13 @@ import { AiOutlineSave } from "react-icons/ai";
 import { debounce } from "lodash";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
 
+type Group = { groupId: number; name: string; status: number };
+type TemplateInspectionQuestion = {
+  templateInspectionQuestionId: number;
+  question: string;
+  typeQuestion: number;
+};
+
 interface Props {
   onClose: () => void;
   onSave: (
@@ -19,28 +26,32 @@ interface Props {
     }
   ) => void;
   templateId: number;
+
+  // datos para prellenar (editar o duplicar)
+  initialData?: {
+    question: string;
+    answers: AnswerNode[];
+    group:
+      | { groupId: number }
+      | { groupId: number; name: string; status: number };
+    selectedQuestion: {
+      templateInspectionQuestionId: number;
+      question: string;
+      typeQuestion: number;
+    };
+  };
 }
 
-const InspectionModal: React.FC<Props> = ({ onClose, onSave, templateId }) => {
+const InspectionModal: React.FC<Props> = ({
+  onClose,
+  onSave,
+  templateId,
+  initialData,
+}) => {
   const [question, setQuestion] = useState("");
   const [answers, setAnswers] = useState<AnswerNode[]>([]);
-  const [groupInput, setGroupInput] = useState("");
-  const [groups, setGroups] = useState<
-    { groupId: number; name: string; status: number }[]
-  >([]);
-  interface Group {
-    groupId: number;
-    name: string;
-    status: number;
-  }
-
-  interface TemplateInspectionQuestion {
-    templateInspectionQuestionId: number;
-    question: string;
-    typeQuestion: number;
-    // Add other properties if needed
-  }
-
+  const [groupInput, setGroupInput] = useState(""); // (se mantiene por compatibilidad)
+  const [groups, setGroups] = useState<Group[]>([]);
   const [groupSuggestions, setGroupSuggestions] = useState<Group[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [questionSuggestions, setQuestionSuggestions] = useState<
@@ -52,6 +63,20 @@ const InspectionModal: React.FC<Props> = ({ onClose, onSave, templateId }) => {
   const [selectedQuestion, setSelectedQuestion] =
     useState<TemplateInspectionQuestion | null>(null);
 
+  const hasAppliedInitial = useRef(false);
+
+  // helpers
+  const genId = () => `${Date.now()}_${Math.random().toString(16).slice(2)}`;
+
+  const ensureAnswerIds = (nodes: AnswerNode[]): AnswerNode[] =>
+    (nodes ?? []).map((n) => ({
+      id: n.id ?? genId(),
+      label: n.label,
+      color: n.color,
+      useParts: !!n.useParts,
+      children: ensureAnswerIds(n.children ?? []),
+    }));
+
   const debouncedGroupSearch = useRef(
     debounce((text: string, data: Group[]) => {
       const filtered = data.filter((g) =>
@@ -61,6 +86,7 @@ const InspectionModal: React.FC<Props> = ({ onClose, onSave, templateId }) => {
     }, 300)
   ).current;
 
+  // cargar grupos
   useEffect(() => {
     axiosInstance
       .get("/Group")
@@ -68,6 +94,7 @@ const InspectionModal: React.FC<Props> = ({ onClose, onSave, templateId }) => {
       .catch((err) => console.error("Error al cargar grupos:", err));
   }, []);
 
+  // cargar preguntas del template
   useEffect(() => {
     if (!templateId) return;
 
@@ -81,6 +108,65 @@ const InspectionModal: React.FC<Props> = ({ onClose, onSave, templateId }) => {
       .catch((err) => console.error("Error al cargar preguntas:", err));
   }, [templateId]);
 
+  // aplicar prellenado (una sola vez)
+  useEffect(() => {
+    if (hasAppliedInitial.current) return;
+
+    if (initialData) {
+      setQuestion(initialData.question ?? "");
+      setAnswers(ensureAnswerIds(initialData.answers ?? []));
+
+      if (groups.length > 0) {
+        const g =
+          groups.find((gr) => gr.groupId === initialData.group.groupId) || null;
+        if (g) setSelectedGroup(g);
+      }
+
+      if (questionSuggestions.length > 0) {
+        const q = questionSuggestions.find(
+          (qq) =>
+            qq.templateInspectionQuestionId ===
+            initialData.selectedQuestion.templateInspectionQuestionId
+        );
+        if (q) setSelectedQuestion(q);
+      }
+
+      hasAppliedInitial.current = true;
+    }
+  }, [
+    initialData,
+    groups.length,
+    questionSuggestions.length,
+    groups,
+    questionSuggestions,
+  ]);
+
+  // si los grupos llegan después, resolver selección por id
+  useEffect(() => {
+    if (!initialData) return;
+    if (selectedGroup) return;
+    if (groups.length === 0) return;
+
+    const g =
+      groups.find((gr) => gr.groupId === initialData.group.groupId) || null;
+    if (g) setSelectedGroup(g);
+  }, [groups, initialData, selectedGroup]);
+
+  // si las preguntas llegan después, resolver selección por id
+  useEffect(() => {
+    if (!initialData) return;
+    if (selectedQuestion) return;
+    if (questionSuggestions.length === 0) return;
+
+    const q = questionSuggestions.find(
+      (qq) =>
+        qq.templateInspectionQuestionId ===
+        initialData.selectedQuestion.templateInspectionQuestionId
+    );
+    if (q) setSelectedQuestion(q);
+  }, [questionSuggestions, initialData, selectedQuestion]);
+
+  // filtros por escritura (opcional)
   useEffect(() => {
     if (question.trim().length >= 3) {
       const filtered = questionSuggestions.filter((q) =>
@@ -90,13 +176,13 @@ const InspectionModal: React.FC<Props> = ({ onClose, onSave, templateId }) => {
     } else {
       setFilteredQuestions([]);
     }
-  }, [question]);
+  }, [question, questionSuggestions]);
 
   const addAnswer = () => {
     setAnswers((prev) => [
       ...prev,
       {
-        id: `${Date.now()}`,
+        id: genId(),
         label: "",
         color: "#f87171",
         useParts: false,
@@ -107,7 +193,7 @@ const InspectionModal: React.FC<Props> = ({ onClose, onSave, templateId }) => {
 
   const updateAnswer = (index: number, updated: AnswerNode) => {
     const newList = [...answers];
-    newList[index] = updated;
+    newList[index] = { ...updated, id: updated.id ?? genId() };
     setAnswers(newList);
   };
 
@@ -131,19 +217,13 @@ const InspectionModal: React.FC<Props> = ({ onClose, onSave, templateId }) => {
       return alert("Debe agregar al menos una respuesta válida");
     if (!selectedGroup) return alert("Debe seleccionar un grupo válido");
     if (!selectedQuestion) return alert("Debe seleccionar una pregunta válida");
-    onSave(
-      question,
-      validAnswers,
-      selectedGroup,
-      selectedQuestion
-        ? {
-            templateInspectionQuestionId:
-              selectedQuestion.templateInspectionQuestionId,
-            question: selectedQuestion.question,
-            typeQuestion: selectedQuestion.typeQuestion,
-          }
-        : selectedQuestion
-    );
+
+    onSave(question, validAnswers, selectedGroup, {
+      templateInspectionQuestionId:
+        selectedQuestion.templateInspectionQuestionId,
+      question: selectedQuestion.question,
+      typeQuestion: selectedQuestion.typeQuestion,
+    });
     onClose();
   };
 
@@ -186,9 +266,6 @@ const InspectionModal: React.FC<Props> = ({ onClose, onSave, templateId }) => {
               );
               setSelectedQuestion(found ?? null);
               setQuestion(found?.question ?? "");
-              if (found) {
-                console.log("Pregunta seleccionada:", found);
-              }
             }}
           >
             <option value="" disabled>
@@ -233,7 +310,8 @@ const InspectionModal: React.FC<Props> = ({ onClose, onSave, templateId }) => {
             disabled={
               !question.trim() ||
               answers.filter((a) => a.label.trim() !== "").length === 0 ||
-              !selectedGroup
+              !selectedGroup ||
+              !selectedQuestion
             }
           >
             <AiOutlineSave className="w-[20px] h-[20px] opacity-70" />

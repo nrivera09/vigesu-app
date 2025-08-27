@@ -7,6 +7,7 @@ import { IoAddCircleOutline } from "react-icons/io5";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
 import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
 import { GrDuplicate } from "react-icons/gr";
+import { MdEdit } from "react-icons/md";
 import {
   ExportedAnswer,
   ExportedQuestion,
@@ -47,6 +48,50 @@ const newLocalId = (): string => {
 // --- tipo local interno (no modifica tus tipos globales) ---
 type LocalQuestion = ExportedQuestion & { _localId: string };
 
+// --- draft que le pasaremos al modal para prellenado ---
+type ModalDraft = {
+  questionText: string;
+  answers: AnswerNode[];
+  groupId: number;
+  selectedQuestion: {
+    templateInspectionQuestionId: number;
+    question: string;
+    typeQuestion: number;
+  };
+};
+
+// --------- mapeos Answer <-> AnswerNode (para el prefill del modal) ----------
+const toAnswerNodes = (answers: ExportedAnswer[] = []): AnswerNode[] =>
+  (answers ?? []).map((a) => ({
+    // importante: si viene id numérico del backend lo guardamos como string
+    id: a.id != null ? String(a.id) : newLocalId(),
+    label: a.response,
+    color: a.color,
+    useParts: !!a.usingItem,
+    children: toAnswerNodes(a.subTypeInspectionDetailAnswers ?? []),
+  }));
+
+/**
+ * Convierte AnswerNode[] a ExportedAnswer[].
+ * - Si preserveIds=true y el node.id es numérico => se preserva como id.
+ * - Si el node.id no es numérico => id undefined (nuevo).
+ */
+const nodesToExportedAnswers = (
+  nodes: AnswerNode[] = [],
+  preserveIds: boolean
+): ExportedAnswer[] =>
+  (nodes ?? []).map((n) => ({
+    id: preserveIds && /^\d+$/.test(n.id) ? Number(n.id) : undefined, // nuevo si no es numérico
+    response: n.label,
+    color: n.color,
+    usingItem: !!n.useParts,
+    isPrintable: true,
+    subTypeInspectionDetailAnswers: nodesToExportedAnswers(
+      n.children ?? [],
+      preserveIds
+    ),
+  }));
+
 // ---------------------------------------------------
 
 interface FormChassiProps {
@@ -79,7 +124,43 @@ const FormChassi: React.FC<FormChassiProps> = ({
   const [openModal, setOpenModal] = useState(false);
   const [questions, setQuestions] = useState<LocalQuestion[]>([]);
 
-  // Guarda del modal (agregar nueva)
+  // estado para saber si estamos editando o creando/duplicando
+  const [editingLocalId, setEditingLocalId] = useState<string | null>(null);
+
+  // draft para prellenar el modal en editar/duplicar
+  const [modalDraft, setModalDraft] = useState<ModalDraft | null>(null);
+
+  // ---------- UTILIDADES ----------
+  const countOccurrences = (
+    templateInspectionQuestionId: number,
+    excludeLocalId?: string
+  ) =>
+    questions.filter(
+      (q) =>
+        q.status !== STATUS_DELETED &&
+        q.templateInspectionQuestionId === templateInspectionQuestionId &&
+        (!excludeLocalId || q._localId !== excludeLocalId)
+    ).length;
+
+  const buildDraftFromLocalQuestion = (q: LocalQuestion): ModalDraft => ({
+    questionText: q.question,
+    answers: toAnswerNodes(q.typeInspectionDetailAnswers ?? []),
+    groupId: q.groupId,
+    selectedQuestion: {
+      templateInspectionQuestionId: q.templateInspectionQuestionId,
+      question: q.question,
+      typeQuestion: q.typeQuestion,
+    },
+  });
+
+  // ---------- ABRIR MODAL (crear) ----------
+  const openCreate = () => {
+    setEditingLocalId(null);
+    setModalDraft(null); // modal vacío
+    setOpenModal(true);
+  };
+
+  // ---------- GUARDAR DESDE MODAL (crear o editar) ----------
   const handleSave = (
     question: string,
     answers: AnswerNode[],
@@ -96,64 +177,118 @@ const FormChassi: React.FC<FormChassiProps> = ({
       return;
     }
 
-    const mapAnswersRecursive = (nodes: AnswerNode[]): ExportedAnswer[] =>
-      (nodes ?? []).map((a) => ({
-        id: undefined, // nuevas
-        response: a.label,
-        color: a.color,
-        usingItem: a.useParts ?? false,
-        isPrintable: true,
-        subTypeInspectionDetailAnswers: mapAnswersRecursive(a.children ?? []),
-      }));
+    const tplId = selectedQuestion.templateInspectionQuestionId;
 
-    const formattedAnswers = dedupeAnswers(mapAnswersRecursive(validAnswers));
+    if (editingLocalId) {
+      // --- EDITAR ---
+      // Validación: misma pregunta no más de 2 (excluyendo este localId)
+      const occ = countOccurrences(tplId, editingLocalId);
+      if (occ + 1 > 2) {
+        alert(
+          "Esta pregunta ya está usada dos veces. Cambie la selección de pregunta antes de guardar."
+        );
+        return;
+      }
+
+      // En edición: PRESERVAR ids existentes (si el node.id es numérico)
+      const formattedAnswers = dedupeAnswers(
+        nodesToExportedAnswers(validAnswers, true)
+      );
+
+      setQuestions((prev) =>
+        prev.map((q) => {
+          if (q._localId !== editingLocalId) return q;
+          return {
+            ...q,
+            templateInspectionQuestionId: tplId,
+            question,
+            typeQuestion: selectedQuestion.typeQuestion,
+            groupId: group.groupId,
+            status: STATUS_ACTIVE,
+            typeInspectionDetailAnswers: formattedAnswers,
+          };
+        })
+      );
+
+      setEditingLocalId(null);
+      setModalDraft(null);
+      setOpenModal(false);
+      return;
+    }
+
+    // --- CREAR (nuevo o duplicado) ---
+    // Validación: misma pregunta no más de 2
+    const occ = countOccurrences(tplId);
+    if (occ + 1 > 2) {
+      alert(
+        "Esta pregunta ya está usada dos veces. Cambie la selección de pregunta antes de guardar."
+      );
+      return;
+    }
+
+    // En creación/duplicado: NO preservar ids (todas las respuestas nuevas)
+    const formattedAnswers = dedupeAnswers(
+      nodesToExportedAnswers(validAnswers, false)
+    );
 
     const newEntry: LocalQuestion = {
       _localId: newLocalId(),
-      typeInspectionDetailId: undefined, // nueva (lo asigna backend)
-      templateInspectionQuestionId:
-        selectedQuestion.templateInspectionQuestionId,
+      typeInspectionDetailId: undefined, // NUEVO (backend asigna)
+      templateInspectionQuestionId: tplId,
       question,
       typeQuestion: selectedQuestion.typeQuestion,
       groupId: group.groupId,
-      status: STATUS_ACTIVE, // 0
+      status: STATUS_ACTIVE,
       typeInspectionDetailAnswers: formattedAnswers,
     };
 
     setQuestions((prev) => [...prev, newEntry]);
+    setModalDraft(null);
+    setOpenModal(false);
   };
 
-  // Duplicar: conserva IDs (si tu backend así lo requiere)
+  // ---------- DUPLICAR ----------
+  // Copia completa pero SIN ids, y abre modal con prellenado
   const handleDuplicateById = (localId: string) => {
-    setQuestions((prev) => {
-      const idx = prev.findIndex((q) => q._localId === localId);
-      if (idx === -1) return prev;
-      const original = prev[idx];
+    const original = questions.find((q) => q._localId === localId);
+    if (!original) return;
 
-      const duplicated: LocalQuestion = {
-        ...original,
-        _localId: newLocalId(),
-        question: original.question + " (copy)",
-        status: STATUS_ACTIVE,
-      };
+    const occ = countOccurrences(original.templateInspectionQuestionId);
+    if (occ >= 2) {
+      alert(
+        "Esta pregunta ya está usada dos veces. Se abrirá el formulario para que cambie la selección."
+      );
+    }
 
-      return [...prev, duplicated];
-    });
+    const draft = buildDraftFromLocalQuestion(original);
+    // NOTA: no removemos aquí ids; se remueven al guardar por estar en modo 'crear'
+    setEditingLocalId(null);
+    setModalDraft(draft);
+    setOpenModal(true);
   };
 
-  // Eliminar: si es nuevo se quita; si existe, status=1 para eliminar en backend
+  // ---------- EDITAR ----------
+  const handleEditById = (localId: string) => {
+    const q = questions.find((x) => x._localId === localId);
+    if (!q) return;
+
+    const draft = buildDraftFromLocalQuestion(q);
+    setEditingLocalId(localId);
+    setModalDraft(draft);
+    setOpenModal(true);
+  };
+
+  // ---------- ELIMINAR ----------
   const handleDeleteById = (localId: string) => {
     setQuestions((prev) => {
       const idx = prev.findIndex((q) => q._localId === localId);
       if (idx === -1) return prev;
       const q = prev[idx];
 
-      // Nuevo (sin id) -> se remueve del array (no viaja)
       if (!q.typeInspectionDetailId || q.typeInspectionDetailId === 0) {
         return prev.filter((x) => x._localId !== localId);
       }
 
-      // Existente -> enviar con status=1
       const next = [...prev];
       next[idx] = { ...q, status: STATUS_DELETED };
       return next;
@@ -225,7 +360,7 @@ const FormChassi: React.FC<FormChassiProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-1 gap-5  p-2">
           <button
             type="button"
-            onClick={() => setOpenModal(!openModal)}
+            onClick={openCreate}
             className="btn min-w-[30px] min-h-[39px] p-2 rounded-md "
           >
             <IoAddCircleOutline className="text-2xl" />
@@ -271,6 +406,15 @@ const FormChassi: React.FC<FormChassiProps> = ({
                     </td>
                     <td className="text-right">
                       <div className="flex w-full flex-row gap-2 items-center justify-end">
+                        {/* EDITAR */}
+                        <ActionButton
+                          icon={
+                            <MdEdit className="w-[20px] h-[20px] opacity-70 " />
+                          }
+                          label="Editar"
+                          onClick={() => handleEditById(localId)}
+                        />
+                        {/* DUPLICAR */}
                         <ActionButton
                           icon={
                             <GrDuplicate className="w-[20px] h-[20px] opacity-70 " />
@@ -278,6 +422,7 @@ const FormChassi: React.FC<FormChassiProps> = ({
                           label="Duplicar"
                           onClick={() => handleDuplicateById(localId)}
                         />
+                        {/* ELIMINAR */}
                         <ActionButton
                           icon={
                             <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
@@ -301,7 +446,11 @@ const FormChassi: React.FC<FormChassiProps> = ({
             <button
               type="button"
               className="btn"
-              onClick={() => setOpenModal(!openModal)}
+              onClick={() => {
+                setOpenModal(false);
+                setEditingLocalId(null);
+                setModalDraft(null);
+              }}
             >
               Close
             </button>
@@ -311,9 +460,24 @@ const FormChassi: React.FC<FormChassiProps> = ({
 
       {openModal && (
         <InspectionModal
-          onClose={() => setOpenModal(false)}
+          onClose={() => {
+            setOpenModal(false);
+            setEditingLocalId(null);
+            setModalDraft(null);
+          }}
           onSave={handleSave}
           templateId={templateId}
+          // prellenado para editar/duplicar
+          initialData={
+            modalDraft
+              ? {
+                  question: modalDraft.questionText,
+                  answers: modalDraft.answers,
+                  group: { groupId: modalDraft.groupId },
+                  selectedQuestion: modalDraft.selectedQuestion,
+                }
+              : undefined
+          }
         />
       )}
     </>
