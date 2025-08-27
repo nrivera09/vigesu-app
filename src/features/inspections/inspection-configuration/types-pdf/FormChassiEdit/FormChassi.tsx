@@ -38,12 +38,9 @@ const dedupeAnswers = (answers: ExportedAnswer[]): ExportedAnswer[] => {
   return out;
 };
 
-const newLocalId = (): string => {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
-  }
-  return `local_${Date.now()}_${Math.random().toString(16).slice(2)}`;
-};
+// Genera IDs NO numéricos para el UI
+const newLocalId = (): string =>
+  `n_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 
 // --- tipo local interno (no modifica tus tipos globales) ---
 type LocalQuestion = ExportedQuestion & { _localId: string };
@@ -63,7 +60,6 @@ type ModalDraft = {
 // --------- mapeos Answer <-> AnswerNode (para el prefill del modal) ----------
 const toAnswerNodes = (answers: ExportedAnswer[] = []): AnswerNode[] =>
   (answers ?? []).map((a) => ({
-    // importante: si viene id numérico del backend lo guardamos como string
     id: a.id != null ? String(a.id) : newLocalId(),
     label: a.response,
     color: a.color,
@@ -71,24 +67,48 @@ const toAnswerNodes = (answers: ExportedAnswer[] = []): AnswerNode[] =>
     children: toAnswerNodes(a.subTypeInspectionDetailAnswers ?? []),
   }));
 
-/**
- * Convierte AnswerNode[] a ExportedAnswer[].
- * - Si preserveIds=true y el node.id es numérico => se preserva como id.
- * - Si el node.id no es numérico => id undefined (nuevo).
- */
-const nodesToExportedAnswers = (
+/** Junta todos los IDs reales de backend (numéricos) de una pregunta */
+const collectExistingIds = (
+  answers: ExportedAnswer[] = [],
+  out = new Set<number>()
+): Set<number> => {
+  for (const a of answers ?? []) {
+    if (typeof a.id === "number" && a.id > 0) out.add(a.id);
+    if (a.subTypeInspectionDetailAnswers?.length) {
+      collectExistingIds(a.subTypeInspectionDetailAnswers, out);
+    }
+  }
+  return out;
+};
+
+/** Convierte AnswerNode[] a ExportedAnswer[] preservando solo IDs de whitelist */
+const nodesToExportedAnswersWithWhitelist = (
   nodes: AnswerNode[] = [],
-  preserveIds: boolean
+  whitelist: Set<number>
 ): ExportedAnswer[] =>
-  (nodes ?? []).map((n) => ({
-    id: preserveIds && /^\d+$/.test(n.id) ? Number(n.id) : undefined, // nuevo si no es numérico
-    response: n.label,
-    color: n.color,
-    usingItem: !!n.useParts,
-    isPrintable: true,
-    subTypeInspectionDetailAnswers: nodesToExportedAnswers(
-      n.children ?? [],
-      preserveIds
+  (nodes ?? []).map((n) => {
+    const num = /^\d+$/.test(n.id) ? Number(n.id) : NaN;
+    const preserve = Number.isFinite(num) && whitelist.has(num);
+    return {
+      id: preserve ? num : undefined,
+      response: n.label,
+      color: n.color,
+      usingItem: !!n.useParts,
+      isPrintable: true,
+      subTypeInspectionDetailAnswers: nodesToExportedAnswersWithWhitelist(
+        n.children ?? [],
+        whitelist
+      ),
+    };
+  });
+
+/** Fuerza todos los IDs de respuestas a 0 (para Duplicar) */
+const forceIdsToZero = (answers: ExportedAnswer[] = []): ExportedAnswer[] =>
+  (answers ?? []).map((a) => ({
+    ...a,
+    id: 0,
+    subTypeInspectionDetailAnswers: forceIdsToZero(
+      a.subTypeInspectionDetailAnswers ?? []
     ),
   }));
 
@@ -124,8 +144,9 @@ const FormChassi: React.FC<FormChassiProps> = ({
   const [openModal, setOpenModal] = useState(false);
   const [questions, setQuestions] = useState<LocalQuestion[]>([]);
 
-  // estado para saber si estamos editando o creando/duplicando
+  // estado de edición/creación y flag de duplicado
   const [editingLocalId, setEditingLocalId] = useState<string | null>(null);
+  const [isDuplicating, setIsDuplicating] = useState(false);
 
   // draft para prellenar el modal en editar/duplicar
   const [modalDraft, setModalDraft] = useState<ModalDraft | null>(null);
@@ -156,7 +177,8 @@ const FormChassi: React.FC<FormChassiProps> = ({
   // ---------- ABRIR MODAL (crear) ----------
   const openCreate = () => {
     setEditingLocalId(null);
-    setModalDraft(null); // modal vacío
+    setIsDuplicating(false);
+    setModalDraft(null);
     setOpenModal(true);
   };
 
@@ -181,7 +203,6 @@ const FormChassi: React.FC<FormChassiProps> = ({
 
     if (editingLocalId) {
       // --- EDITAR ---
-      // Validación: misma pregunta no más de 2 (excluyendo este localId)
       const occ = countOccurrences(tplId, editingLocalId);
       if (occ + 1 > 2) {
         alert(
@@ -190,9 +211,13 @@ const FormChassi: React.FC<FormChassiProps> = ({
         return;
       }
 
-      // En edición: PRESERVAR ids existentes (si el node.id es numérico)
+      const original = questions.find((q) => q._localId === editingLocalId);
+      const whitelist = collectExistingIds(
+        original?.typeInspectionDetailAnswers ?? []
+      );
+
       const formattedAnswers = dedupeAnswers(
-        nodesToExportedAnswers(validAnswers, true)
+        nodesToExportedAnswersWithWhitelist(validAnswers, whitelist)
       );
 
       setQuestions((prev) =>
@@ -216,8 +241,7 @@ const FormChassi: React.FC<FormChassiProps> = ({
       return;
     }
 
-    // --- CREAR (nuevo o duplicado) ---
-    // Validación: misma pregunta no más de 2
+    // --- CREAR / DUPLICAR ---
     const occ = countOccurrences(tplId);
     if (occ + 1 > 2) {
       alert(
@@ -226,29 +250,34 @@ const FormChassi: React.FC<FormChassiProps> = ({
       return;
     }
 
-    // En creación/duplicado: NO preservar ids (todas las respuestas nuevas)
-    const formattedAnswers = dedupeAnswers(
-      nodesToExportedAnswers(validAnswers, false)
+    // creación normal => ids nuevos (undefined)
+    // duplicado => mismos datos pero TODOS los ids en 0
+    const baseAnswers = dedupeAnswers(
+      nodesToExportedAnswersWithWhitelist(validAnswers, new Set<number>())
     );
+    const answersForInsert = isDuplicating
+      ? forceIdsToZero(baseAnswers)
+      : baseAnswers;
 
     const newEntry: LocalQuestion = {
       _localId: newLocalId(),
-      typeInspectionDetailId: undefined, // NUEVO (backend asigna)
+      // duplicado => 0, nuevo => undefined (lo asigna el back)
+      typeInspectionDetailId: isDuplicating ? 0 : undefined,
       templateInspectionQuestionId: tplId,
       question,
       typeQuestion: selectedQuestion.typeQuestion,
       groupId: group.groupId,
       status: STATUS_ACTIVE,
-      typeInspectionDetailAnswers: formattedAnswers,
+      typeInspectionDetailAnswers: answersForInsert,
     };
 
     setQuestions((prev) => [...prev, newEntry]);
     setModalDraft(null);
     setOpenModal(false);
+    setIsDuplicating(false);
   };
 
   // ---------- DUPLICAR ----------
-  // Copia completa pero SIN ids, y abre modal con prellenado
   const handleDuplicateById = (localId: string) => {
     const original = questions.find((q) => q._localId === localId);
     if (!original) return;
@@ -261,8 +290,8 @@ const FormChassi: React.FC<FormChassiProps> = ({
     }
 
     const draft = buildDraftFromLocalQuestion(original);
-    // NOTA: no removemos aquí ids; se remueven al guardar por estar en modo 'crear'
     setEditingLocalId(null);
+    setIsDuplicating(true); // <- clave para resetear ids a 0 al guardar
     setModalDraft(draft);
     setOpenModal(true);
   };
@@ -274,6 +303,7 @@ const FormChassi: React.FC<FormChassiProps> = ({
 
     const draft = buildDraftFromLocalQuestion(q);
     setEditingLocalId(localId);
+    setIsDuplicating(false);
     setModalDraft(draft);
     setOpenModal(true);
   };
@@ -307,7 +337,7 @@ const FormChassi: React.FC<FormChassiProps> = ({
       onQuestionsChange(questions.some((q) => q.status !== STATUS_DELETED));
   }, [questions, onQuestionsChange]);
 
-  // 2) exportar al padre (manda TODO; los status=1 irán al backend para eliminar)
+  // 2) exportar al padre
   useEffect(() => {
     if (!onQuestionsExport) return;
 
@@ -450,6 +480,7 @@ const FormChassi: React.FC<FormChassiProps> = ({
                 setOpenModal(false);
                 setEditingLocalId(null);
                 setModalDraft(null);
+                setIsDuplicating(false);
               }}
             >
               Close
@@ -464,6 +495,7 @@ const FormChassi: React.FC<FormChassiProps> = ({
             setOpenModal(false);
             setEditingLocalId(null);
             setModalDraft(null);
+            setIsDuplicating(false);
           }}
           onSave={handleSave}
           templateId={templateId}

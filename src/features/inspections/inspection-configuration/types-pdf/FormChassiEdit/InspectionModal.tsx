@@ -50,7 +50,7 @@ const InspectionModal: React.FC<Props> = ({
 }) => {
   const [question, setQuestion] = useState("");
   const [answers, setAnswers] = useState<AnswerNode[]>([]);
-  const [groupInput, setGroupInput] = useState(""); // (se mantiene por compatibilidad)
+  const [groupInput, setGroupInput] = useState(""); // por compatibilidad
   const [groups, setGroups] = useState<Group[]>([]);
   const [groupSuggestions, setGroupSuggestions] = useState<Group[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
@@ -65,8 +65,8 @@ const InspectionModal: React.FC<Props> = ({
 
   const hasAppliedInitial = useRef(false);
 
-  // helpers
-  const genId = () => `${Date.now()}_${Math.random().toString(16).slice(2)}`;
+  // helpers -> ids locales no numéricos
+  const genId = () => `n_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 
   const ensureAnswerIds = (nodes: AnswerNode[]): AnswerNode[] =>
     (nodes ?? []).map((n) => ({

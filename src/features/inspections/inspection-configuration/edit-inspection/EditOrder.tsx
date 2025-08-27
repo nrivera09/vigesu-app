@@ -131,9 +131,9 @@ const mapAnswerFromApi = (a: BackendAnswer): ExportedAnswer => {
   };
 };
 
-// 👉 ExportedAnswer[] -> API Answer[] (RECURSIVO, NO string[])
+// 👉 ExportedAnswer[] -> API Answer[] (RECURSIVO)
 type ApiAnswer = {
-  typeInspectionDetailAnswerId: number;
+  typeInspectionDetailAnswerId: number | null; // 0 o id existente o null
   response: string;
   color: string;
   usingItem: boolean;
@@ -142,26 +142,40 @@ type ApiAnswer = {
 };
 
 const toApiAnswers = (answers: ExportedAnswer[] = []): ApiAnswer[] =>
-  (answers ?? []).map((ans) => ({
-    typeInspectionDetailAnswerId: safeNumber(ans?.id, 0),
-    response: ans?.response ?? "",
-    color: ans?.color ?? "",
-    usingItem: !!ans?.usingItem,
-    isPrintable: ans?.isPrintable ?? true,
-    subTypeInspectionDetailAnswers: toApiAnswers(
-      ans?.subTypeInspectionDetailAnswers ?? []
-    ),
-  }));
+  (answers ?? []).map((ans) => {
+    let idOut: number | null = null;
+    if (ans?.id === 0)
+      idOut = 0; // duplicado => 0
+    else if (typeof ans?.id === "number" && ans.id > 0)
+      idOut = ans.id; // existente
+    else idOut = null; // nuevo creado desde cero
+
+    return {
+      typeInspectionDetailAnswerId: idOut,
+      response: ans?.response ?? "",
+      color: ans?.color ?? "",
+      usingItem: !!ans?.usingItem,
+      isPrintable: ans?.isPrintable ?? true,
+      subTypeInspectionDetailAnswers: toApiAnswers(
+        ans?.subTypeInspectionDetailAnswers ?? []
+      ),
+    };
+  });
 
 // Convierte preguntas al shape EXACTO del backend
 const toApiQuestionsRaw = (qs: ExportedQuestion[]) =>
   (qs ?? []).map((q) => ({
-    typeInspectionDetailId: safeNumber(q.typeInspectionDetailId, 0),
+    // si viene 0 (duplicado) lo respetamos; si viene undefined => null
+    typeInspectionDetailId:
+      q.typeInspectionDetailId === 0
+        ? 0
+        : q.typeInspectionDetailId != null
+          ? q.typeInspectionDetailId
+          : null,
     templateInspectionQuestionId: safeNumber(q.templateInspectionQuestionId, 0),
     groupId: safeNumber(q.groupId, 0),
     question: q.question ?? "",
     typeQuestion: safeNumber(q.typeQuestion, 0),
-    // 0 activo, 1 eliminado
     status: q.status === STATUS_DELETED ? STATUS_DELETED : STATUS_ACTIVE,
     typeInspectionDetailAnswers: toApiAnswers(q.typeInspectionDetailAnswers),
   }));
@@ -343,7 +357,6 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
           question: q.question,
           typeQuestion: safeNumber(q.typeQuestion, 0),
           groupId: q.groupId,
-          // normaliza a 0/1 (0 activo, 1 eliminado)
           status:
             safeNumber(q.status, STATUS_ACTIVE) === STATUS_DELETED
               ? STATUS_DELETED
@@ -395,7 +408,7 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
 
     const currentQuestions = latestQuestionsRef.current;
 
-    // Quita del payload los NUEVOS que el usuario eliminó (sin id y status=1)
+    // Filtra nuevos que ya fueron marcados como eliminados
     const cleanedQuestions = currentQuestions.filter((q) => {
       const isNew = !q.typeInspectionDetailId || q.typeInspectionDetailId === 0;
       const isDeleted = q.status === STATUS_DELETED;
@@ -406,7 +419,6 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
     const details = toApiQuestionsRaw(cleanedQuestions);
 
     const payload = {
-      // 🔴 Requerido por backend (corrige "command is required")
       command: "Update" as const,
       typeInspectionId: Number(id),
       templateInspectionId: Number(currentTemplateId),
@@ -415,7 +427,6 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
       name: data.name,
       description: data.description,
       status: Number(data.status) || STATUS_ACTIVE,
-      // 👇 Viajan activos (0) y eliminados (1) existentes
       typeInspectionQuestions: details,
     };
 
