@@ -74,7 +74,8 @@
       "29": "Error al enviar inspección",
       "30": "Primero debe seleccionar la respuesta",
       "31": "Grupo completado con éxito.",
-      "32": "Error al cargar datos"
+      "32": "Error al cargar datos",
+      "33": "Inspección editada con éxito"
     }
   },
   "workorders": {

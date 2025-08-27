@@ -74,7 +74,8 @@
       "29": "Error sending inspection",
       "30": "You must first select the answer",
       "31": "Group completed successfully.",
-      "32": "Error loading data"
+      "32": "Error loading data",
+      "33": "Inspection successfully edited"
     }
   },
   "workorders": {
