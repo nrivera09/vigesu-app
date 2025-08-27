@@ -29,7 +29,7 @@ const TableList = ({ objFilter, setRefreshFlag }: TableListProps) => {
       setAllData(data.items);
       setTotalPages(data.totalPages);
     } catch (error) {
-      toast.error(`${tToasts("error")}: ${tToasts("login.32")}`);
+      toast.error(`${tToasts("error")}: ${tToasts("msj.32")}`);
       console.error(error);
     } finally {
       setLoading(false);

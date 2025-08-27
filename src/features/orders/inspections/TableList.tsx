@@ -49,7 +49,7 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
       setAllData(items);
       setTotalCount(totalCount);
     } catch (error) {
-      toast.error(`${tToasts("error")}: ${tToasts("login.21")}`);
+      toast.error(`${tToasts("error")}: ${tToasts("msj.21")}`);
     } finally {
       setLoading(false);
     }
@@ -179,11 +179,11 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
           return updated;
         });
         await fetchData();
-        toast.success(`${tToasts("ok")}: ${tToasts("login.14")}`);
+        toast.success(`${tToasts("ok")}: ${tToasts("msj.14")}`);
       }, 800);
     } catch (error) {
       console.error("Error al sincronizar:", error);
-      toast.error(`${tToasts("error")}: ${tToasts("login.22")}`);
+      toast.error(`${tToasts("error")}: ${tToasts("msj.22")}`);
       setSyncStatus((prev) => ({ ...prev, [inspectionId]: "idle" }));
     }
   };
@@ -204,10 +204,10 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
         payload
       );
 
-      toast.success(`${tToasts("ok")}: ${tToasts("login.23")}`);
+      toast.success(`${tToasts("ok")}: ${tToasts("msj.23")}`);
       fetchData();
     } catch (error) {
-      toast.error(`${tToasts("error")}: ${tToasts("login.24")}`);
+      toast.error(`${tToasts("error")}: ${tToasts("msj.24")}`);
       console.error(error);
     }
   };

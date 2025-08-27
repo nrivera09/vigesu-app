@@ -436,9 +436,9 @@ const EditOrder = () => {
           console.log("Upload result:", res.data);
 
           if (res.data !== 1) {
-            toast.error(`${tToasts("error")}: ${tToasts("login.18")}`);
+            toast.error(`${tToasts("error")}: ${tToasts("msj.18")}`);
           } else {
-            toast.success(`${tToasts("ok")}: ${tToasts("login.19")}`);
+            toast.success(`${tToasts("ok")}: ${tToasts("msj.19")}`);
           }
         } catch (error) {
           toast.error(`${tToasts("error")}: ${error}`);
@@ -475,7 +475,7 @@ const EditOrder = () => {
 
       setFiles([]);
 
-      toast.success(`${tToasts("ok")}: ${tToasts("login.20")}`);
+      toast.success(`${tToasts("ok")}: ${tToasts("msj.20")}`);
 
       //router.push(parentPath);
     } catch (error) {
@@ -530,7 +530,7 @@ const EditOrder = () => {
   return (
     <form
       onSubmit={handleSubmit(onSubmit, (errors) => {
-        toast.error(`${tToasts("error")}: ${tToasts("login.11")}`);
+        toast.error(`${tToasts("error")}: ${tToasts("msj.11")}`);
       })}
     >
       <div className=" border-[#00000014] border-1 p-2 mb-6 rounded-md flex flex-col gap-4">

@@ -189,7 +189,7 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
       const res = await axiosInstance.post("/TypeInspection", payload);
       //console.log(" Enviado correctamente:", res.data);
 
-      toast.success(`${tToasts("ok")}: ${tToasts("login.5")}`);
+      toast.success(`${tToasts("ok")}: ${tToasts("msj.5")}`);
       router.push("../");
     } catch (error) {
       //console.error("❌ Error al guardar:", error);

@@ -312,7 +312,7 @@ const CreateOrder = () => {
         console.log("📸 Archivos subidos correctamente");
       }
 
-      toast.success(`${tToasts("ok")}: ${tToasts("login.16")}`);
+      toast.success(`${tToasts("ok")}: ${tToasts("msj.16")}`);
       router.push(parentPath);
     } catch (error) {
       //console.error("❌ Error al procesar el formulario", error);
@@ -323,7 +323,7 @@ const CreateOrder = () => {
 
   const handleAddRow = () => {
     if (newItem.idParts === 0) {
-      setNewItemError(tToasts("login.17"));
+      setNewItemError(tToasts("msj.17"));
       return;
     }
 

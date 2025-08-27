@@ -65,7 +65,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
 
         await fetchData(currentPage);
 
-        toast.success(`${tToasts("ok")}: ${tToasts("login.14")}`);
+        toast.success(`${tToasts("ok")}: ${tToasts("msj.14")}`);
       }, 1000);
     } catch (error) {
       toast.error(`${tToasts("error")}: ${error}`);
@@ -108,7 +108,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
         }
       );
 
-      toast.success(`${tToasts("ok")}: ${tToasts("login.15")}`);
+      toast.success(`${tToasts("ok")}: ${tToasts("msj.15")}`);
     } catch (err) {
       console.error("Error al enviar el PDF:", err);
       toast.error(`${tToasts("error")}: ${err}`);

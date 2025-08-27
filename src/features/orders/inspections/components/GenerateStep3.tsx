@@ -97,7 +97,7 @@ const GenerateStep3 = () => {
     const selected = isSelected(answerId, selectedTree);
 
     if (!selected) {
-      toast.error(`${tToasts("error")}: ${tToasts("login.30")}`);
+      toast.error(`${tToasts("error")}: ${tToasts("msj.30")}`);
       return;
     }
 
@@ -494,7 +494,7 @@ const GenerateStep3 = () => {
     }
 
     // Si ya no quedan preguntas en este grupo, regresa al listado
-    toast.success(`${tToasts("ok")}: ${tToasts("login.31")}`);
+    toast.success(`${tToasts("ok")}: ${tToasts("msj.31")}`);
     store.setStepWizard(2);
   };
 
@@ -556,7 +556,7 @@ const GenerateStep3 = () => {
       }
     }
 
-    toast.success(`${tToasts("ok")}: ${tToasts("login.31")}`);
+    toast.success(`${tToasts("ok")}: ${tToasts("msj.31")}`);
     store.setStepWizard(2);
   };
 

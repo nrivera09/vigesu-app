@@ -22,7 +22,7 @@ const EmailConfirmationModal: React.FC<Props> = ({
 
   const handleSend = async () => {
     if (!email.includes("@")) {
-      toast.warning(`${tToasts("warning")}: ${tToasts("login.25")}`);
+      toast.warning(`${tToasts("warning")}: ${tToasts("msj.25")}`);
       return;
     }
 
@@ -38,11 +38,11 @@ const EmailConfirmationModal: React.FC<Props> = ({
 
       if (!res.ok || json.error) throw new Error("Fallo al enviar correo");
 
-      toast.success(`${tToasts("ok")}: ${tToasts("login.26")}`);
+      toast.success(`${tToasts("ok")}: ${tToasts("msj.26")}`);
       onClose();
       onConfirm(); // Ejecuta handleFinalSubmit
     } catch (err) {
-      toast.error(`${tToasts("error")}: ${tToasts("login.27")}`);
+      toast.error(`${tToasts("error")}: ${tToasts("msj.27")}`);
       console.error(err);
     } finally {
       setLoading(false);

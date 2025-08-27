@@ -45,7 +45,7 @@ const WorkOrderPdf = forwardRef<HTMLDivElement, Props>(
         setGetItem(items);
       } catch (error) {
         console.error("Error fetching template data:", error);
-        toast.error(`${tToasts("error")}: ${tToasts("login.3")}`);
+        toast.error(`${tToasts("error")}: ${tToasts("msj.3")}`);
         return [];
       }
     };

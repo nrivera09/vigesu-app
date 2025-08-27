@@ -172,11 +172,11 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
           }
         );
       }
-      toast.success(`${tToasts("ok")}: ${tToasts("login.28")}`);
+      toast.success(`${tToasts("ok")}: ${tToasts("msj.28")}`);
       useInspectionFullStore.getState().resetFullInspection();
       router.push("./");
     } catch (error) {
-      toast.error(`${tToasts("error")}: ${tToasts("login.29")}`);
+      toast.error(`${tToasts("error")}: ${tToasts("msj.29")}`);
       console.error(error);
     }
   };

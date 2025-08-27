@@ -88,17 +88,17 @@ const CreateOrder = () => {
     const signatureBlob = signatureRef.current?.getImageBlob();
 
     if (!validation.success) {
-      toast.error(`${tToasts("error")}: ${tToasts("login.7")}`);
+      toast.error(`${tToasts("error")}: ${tToasts("msj.7")}`);
       return;
     }
 
     if (!employeeIdSelected || !employeeNameSelected) {
-      toast.error(`${tToasts("error")}: ${tToasts("login.8")}`);
+      toast.error(`${tToasts("error")}: ${tToasts("msj.8")}`);
       return;
     }
 
     if (!signatureBlob) {
-      toast.error(`${tToasts("error")}: ${tToasts("login.9")}`);
+      toast.error(`${tToasts("error")}: ${tToasts("msj.9")}`);
       return;
     }
 
@@ -115,7 +115,7 @@ const CreateOrder = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      toast.success(`${tToasts("ok")}: ${tToasts("login.10")}`);
+      toast.success(`${tToasts("ok")}: ${tToasts("msj.10")}`);
       router.push("./");
     } catch (error) {
       console.error(error);

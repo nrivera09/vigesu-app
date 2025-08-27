@@ -68,14 +68,14 @@ const GenerateStep2 = () => {
     try {
       const response = await axiosInstance.post("/Inspection", payload);
 
-      toast.success(`${tToasts("ok")}: ${tToasts("login.28")}`);
+      toast.success(`${tToasts("ok")}: ${tToasts("msj.28")}`);
 
       //  RESET COMPLETO
       useInspectionFullStore.getState().resetFullInspection();
 
       router.push("./");
     } catch (error) {
-      toast.error(`${tToasts("error")}: ${tToasts("login.29")}`);
+      toast.error(`${tToasts("error")}: ${tToasts("msj.29")}`);
       console.error(error);
     }
   };

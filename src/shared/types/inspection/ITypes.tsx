@@ -13,6 +13,7 @@ export interface TableListProps {
 }
 
 export interface ExportedAnswer {
+  id?: number;
   response: string;
   color: string;
   usingItem: boolean;

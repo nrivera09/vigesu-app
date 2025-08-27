@@ -127,12 +127,12 @@ const EditOrder = () => {
   const handleUpdate = async () => {
     const validation = schema.safeParse(form);
     if (!validation.success) {
-      toast.error(`${tToasts("error")}: ${tToasts("login.11")}`);
+      toast.error(`${tToasts("error")}: ${tToasts("msj.11")}`);
       return;
     }
 
     if (!employeeIdSelected || !employeeNameSelected) {
-      toast.error(`${tToasts("error")}: ${tToasts("login.12")}`);
+      toast.error(`${tToasts("error")}: ${tToasts("msj.12")}`);
       return;
     }
 
@@ -155,7 +155,7 @@ const EditOrder = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      toast.success(`${tToasts("ok")}: ${tToasts("login.13")}`);
+      toast.success(`${tToasts("ok")}: ${tToasts("msj.13")}`);
       router.push("../"); // vuelve al listado de usuarios de este módulo
     } catch (error) {
       console.error("PUT user error", error);

@@ -1,16 +1,19 @@
-//  Nuevo formulario con Zod y react-hook-form para validación cruzada
 "use client";
 
-import { COMPANY_INFO } from "@/config/constants";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { z } from "zod";
-import { useForm, UseFormRegister, FieldErrors } from "react-hook-form";
+import {
+  useForm,
+  UseFormRegister,
+  FieldErrors,
+  UseFormTrigger,
+} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import FormChassi from "../types-pdf/FormChassiEdit/FormChassi";
 import { debounce } from "lodash";
+import type { DebouncedFunc } from "lodash";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
 import { CustomerOption } from "@/shared/utils/orderMapper";
-import { WorkOrderStatusLabel } from "../../models/inspections.types";
 import {
   ExportedAnswer,
   ExportedQuestion,
@@ -26,6 +29,148 @@ import {
 import { MdEdit } from "react-icons/md";
 import { useTranslations } from "next-intl";
 
+// ---------- Tipos de API ----------
+interface TemplateItem {
+  templateInspectionId: number;
+  name: string;
+}
+interface TemplateRes {
+  items: TemplateItem[];
+}
+
+interface BackendAnswerObject {
+  typeInspectionDetailAnswerId?: number;
+  id?: number;
+  response?: string;
+  color?: string;
+  usingItem?: boolean;
+  isPrintable?: boolean;
+  subTypeInspectionDetailAnswers?: BackendAnswer[];
+}
+type BackendAnswer = string | BackendAnswerObject;
+
+interface TypeInspectionQuestionFromApi {
+  typeInspectionDetailId?: number;
+  templateInspectionQuestionId: number;
+  question: string;
+  typeQuestion: number | string;
+  groupId: number;
+  status: number | string;
+  typeInspectionDetailAnswers?: BackendAnswer[];
+}
+
+interface TypeInspectionGetResponse {
+  customerName: string;
+  status: number | string;
+  name: string;
+  templateInspectionId: number | string;
+  description?: string;
+  customerId: number | string;
+  typeInspectionQuestions: TypeInspectionQuestionFromApi[];
+}
+
+interface CustomerIdRes {
+  name?: string;
+}
+
+// ---------- HELPERS ----------
+const safeNumber = (val: unknown, fallback = 0) => {
+  const n = Number(val);
+  return Number.isFinite(n) ? n : fallback;
+};
+
+const dedupeAnswers = (answers: ExportedAnswer[]): ExportedAnswer[] => {
+  const seen = new Set<string>();
+  const out: ExportedAnswer[] = [];
+  for (const a of answers ?? []) {
+    const key =
+      `${(a.response || "").trim()}|${a.color || ""}|` +
+      `${a.usingItem ? 1 : 0}|${a.isPrintable ? 1 : 0}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      out.push({
+        ...a,
+        subTypeInspectionDetailAnswers: dedupeAnswers(
+          a.subTypeInspectionDetailAnswers ?? []
+        ),
+      });
+    }
+  }
+  return out;
+};
+
+const mapAnswerFromApi = (a: BackendAnswer): ExportedAnswer => {
+  if (typeof a === "string") {
+    return {
+      id: undefined,
+      response: a,
+      color: "",
+      usingItem: false,
+      isPrintable: true,
+      subTypeInspectionDetailAnswers: [],
+    };
+  }
+  return {
+    id:
+      a.typeInspectionDetailAnswerId != null
+        ? safeNumber(a.typeInspectionDetailAnswerId, 0)
+        : a.id != null
+          ? safeNumber(a.id, 0)
+          : undefined,
+    response: a.response ?? "",
+    color: a.color ?? "",
+    usingItem: !!a.usingItem,
+    isPrintable: a.isPrintable ?? true,
+    subTypeInspectionDetailAnswers: Array.isArray(
+      a.subTypeInspectionDetailAnswers
+    )
+      ? a.subTypeInspectionDetailAnswers.map(mapAnswerFromApi)
+      : [],
+  };
+};
+
+// Aplana ExportedAnswer[] a string[] para payload
+const flattenAnswerLabels = (answers: ExportedAnswer[]): string[] => {
+  const out: string[] = [];
+  const dfs = (arr: ExportedAnswer[]) => {
+    for (const a of arr ?? []) {
+      const label = (a.response ?? "").toString().trim();
+      if (label) out.push(label);
+      if (Array.isArray(a.subTypeInspectionDetailAnswers)) {
+        dfs(a.subTypeInspectionDetailAnswers);
+      }
+    }
+  };
+  dfs(answers ?? []);
+  return Array.from(new Set(out));
+};
+
+// Convierte preguntas al shape EXACTO del backend (SIN "command")
+const toApiQuestionsRaw = (qs: ExportedQuestion[]) =>
+  (qs ?? []).map((q) => ({
+    typeInspectionDetailId: safeNumber(q.typeInspectionDetailId, 0),
+    templateInspectionQuestionId: safeNumber(q.templateInspectionQuestionId, 0),
+    groupId: safeNumber(q.groupId, 0),
+    question: q.question ?? "",
+    typeQuestion: safeNumber(q.typeQuestion, 0),
+    status: safeNumber(q.status, InspectionStatus.Active),
+    typeInspectionDetailAnswers: (q.typeInspectionDetailAnswers ?? []).map(
+      (ans: ExportedAnswer) => ({
+        // 👇 respeta IDs (para duplicados también se mandan iguales)
+        typeInspectionDetailAnswerId: safeNumber(ans?.id, 0),
+        response: ans?.response ?? "",
+        color: ans?.color ?? "",
+        usingItem: !!ans?.usingItem,
+        isPrintable: ans?.isPrintable ?? true,
+        subTypeInspectionDetailAnswers: flattenAnswerLabels(
+          ans?.subTypeInspectionDetailAnswers ?? []
+        ),
+      })
+    ),
+  }));
+
+// -----------------------------------------------------
+
 interface EditOrderProps {
   changeTitle?: (newTitle: string) => void;
   isLoadingStatus?: () => void;
@@ -39,15 +184,14 @@ const baseSchema = z.object({
   description: z.string().optional(),
 });
 
+type FormFields = z.infer<typeof baseSchema>;
+
 const EditOrder = ({ changeTitle }: EditOrderProps) => {
   const { id } = useParams<{ id: string }>();
   const initialQuestionsRef = useRef<ExportedQuestion[] | null>(null);
+  const latestQuestionsRef = useRef<ExportedQuestion[]>([]);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-
-  const [exportedQuestions, setExportedQuestions] = useState<
-    ExportedQuestion[]
-  >([]);
 
   const [templates, setTemplates] = useState<{ id: number; name: string }[]>(
     []
@@ -57,13 +201,14 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
   const [selectedCustomer, setSelectedCustomer] =
     useState<CustomerOption | null>(null);
 
-  const tToasts = useTranslations("toast");
   const [customerOptions, setCustomerOptions] = useState<CustomerOption[]>([]);
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
   const [hasAtLeastOneQuestion, setHasAtLeastOneQuestion] = useState(false);
   const inputCustomerRef = useRef<HTMLInputElement>(null);
 
   const [isLoadingCustomer, setIsLoadingCustomer] = useState(false);
+
+  const tToasts = useTranslations("toast");
 
   const {
     register,
@@ -72,7 +217,7 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
     formState: { errors, isValid },
     watch,
     trigger,
-  } = useForm<z.infer<typeof baseSchema>>({
+  } = useForm<FormFields>({
     resolver: zodResolver(baseSchema),
     mode: "onChange",
     defaultValues: {
@@ -84,12 +229,18 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
     },
   });
 
-  const [objFilterForm, setObjFilterForm] = useState({
+  const [objFilterForm, setObjFilterForm] = useState<{
+    client: string;
+    status: string;
+    workorder: string;
+    worker: string;
+    creationdate?: Date;
+  }>({
     client: "",
     status: "",
     workorder: "",
     worker: "",
-    creationdate: undefined as Date | undefined,
+    creationdate: undefined,
   });
 
   // Handle Customer Input
@@ -97,7 +248,7 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
     try {
       let url = `/QuickBooks/Customers/GetCustomerName?RealmId=9341454759827689`;
       if (name) url += `&Name=${encodeURIComponent(name)}`;
-      const response = await axiosInstance.get(url);
+      const response = await axiosInstance.get<CustomerOption[]>(url);
       setCustomerOptions(response.data ?? []);
     } catch (error) {
       console.error("Error buscando clientes:", error);
@@ -106,15 +257,16 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
     }
   };
 
-  const debouncedSearchCustomer = useRef(
-    debounce((value: string) => {
-      if (value.length >= 3) {
-        searchCustomer(value);
-      } else {
-        setCustomerOptions([]);
-      }
-    }, 500)
-  ).current;
+  const debouncedSearchCustomer: DebouncedFunc<(value: string) => void> =
+    useRef(
+      debounce((value: string) => {
+        if (value.length >= 3) {
+          searchCustomer(value);
+        } else {
+          setCustomerOptions([]);
+        }
+      }, 500)
+    ).current;
 
   const handleCustomerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -127,7 +279,7 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
       setIsLoadingCustomer(false);
     }
 
-    setObjFilterForm({ ...objFilterForm, client: value });
+    setObjFilterForm((prev) => ({ ...prev, client: value }));
   };
 
   const currentTheme = watch("theme");
@@ -135,7 +287,7 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
 
   const getCustomerName = async (customerId: string) => {
     if (!customerId) return "";
-    const res = await axiosInstance.get(
+    const res = await axiosInstance.get<CustomerIdRes>(
       `/QuickBooks/Customers/GetCustomerId?CustomerId=${customerId}&RealmId=9341454759827689`
     );
     return res.data?.name ?? "";
@@ -143,21 +295,21 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
 
   useEffect(() => {
     trigger();
-  }, [currentTheme]);
+  }, [currentTheme, trigger]);
 
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
         const [templateRes, inspectionRes] = await Promise.all([
-          axiosInstance.get("/TemplateInspection"),
-          axiosInstance.get(
+          axiosInstance.get<TemplateRes>("/TemplateInspection"),
+          axiosInstance.get<TypeInspectionGetResponse>(
             `/TypeInspection/GetTypeInspectionId?TypeInspectionId=${id}`
           ),
         ]);
 
         const items = templateRes.data.items;
         setTemplates(
-          items.map((t: { templateInspectionId: number; name: string }) => ({
+          items.map((t) => ({
             id: t.templateInspectionId,
             name: t.name,
           }))
@@ -185,32 +337,30 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
 
         setValue("client", customerName);
 
-        const mappedQuestions: ExportedQuestion[] =
-          data.typeInspectionQuestions.map((q: ExportedQuestion) => ({
-            typeInspectionDetailId: q.typeInspectionDetailId ?? 0,
-            templateInspectionQuestionId: q.templateInspectionQuestionId,
-            question: q.question,
-            typeQuestion: q.typeQuestion,
-            groupId: q.groupId,
-            status: q.status,
-            typeInspectionDetailAnswers: q.typeInspectionDetailAnswers.map(
-              (a: ExportedAnswer) => ({
-                response: a.response,
-                color: a.color,
-                usingItem: a.usingItem,
-                isPrintable: a.isPrintable,
-                subTypeInspectionDetailAnswers:
-                  a.subTypeInspectionDetailAnswers ?? [], // ← ahora string[]
-              })
-            ),
-          }));
+        // ---------- Mapeo robusto de preguntas desde la API ----------
+        const mappedQuestions: ExportedQuestion[] = (
+          data.typeInspectionQuestions ?? []
+        ).map((q) => ({
+          typeInspectionDetailId: q.typeInspectionDetailId ?? 0,
+          templateInspectionQuestionId: q.templateInspectionQuestionId,
+          question: q.question,
+          typeQuestion: safeNumber(q.typeQuestion, 0),
+          groupId: q.groupId,
+          status: safeNumber(q.status, InspectionStatus.Active),
+          typeInspectionDetailAnswers: dedupeAnswers(
+            (q.typeInspectionDetailAnswers ?? []).map(mapAnswerFromApi)
+          ),
+        }));
 
         if (!initialQuestionsRef.current) {
           initialQuestionsRef.current = mappedQuestions;
-          setExportedQuestions(mappedQuestions);
+          latestQuestionsRef.current = mappedQuestions; // seed ref
           setHasAtLeastOneQuestion(mappedQuestions.length > 0);
+        } else {
+          setHasAtLeastOneQuestion(
+            (latestQuestionsRef.current ?? []).length > 0
+          );
         }
-        setHasAtLeastOneQuestion(mappedQuestions.length > 0);
       } catch (err) {
         console.error("Error al cargar datos iniciales", err);
       } finally {
@@ -219,16 +369,12 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
     };
 
     fetchInitialData();
-  }, []);
+  }, [id, setValue]);
 
   useEffect(() => {
     const selected = templates.find((t) => String(t.id) === currentTemplateId);
     setSelectedTemplateName(selected?.name ?? "");
   }, [currentTemplateId, templates]);
-
-  useEffect(() => {
-    console.log("ExportedQuestions actualizados:", exportedQuestions);
-  }, [exportedQuestions]);
 
   const inputClass = (hasError: boolean) =>
     `flex-1 input input-lg bg-[#f6f3f4] w-full text-center font-bold text-3xl transition-all border-1 text-lg font-normal ${
@@ -236,32 +382,56 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
     }`;
   const labelClass = () => `font-medium w-[30%] break-words`;
 
-  const onSubmit = async (data: z.infer<typeof baseSchema>) => {
+  const onSubmit = async (data: FormFields) => {
     if (!hasAtLeastOneQuestion) {
       alert("Debe agregar al menos una pregunta con respuestas");
       return;
     }
 
+    const currentQuestions = latestQuestionsRef.current;
+
+    // 1) Sacamos del payload los items NUEVOS que el user haya eliminado (id 0 y status Inactive)
+    const cleanedQuestions = currentQuestions.filter((q) => {
+      const isNew = !q.typeInspectionDetailId || q.typeInspectionDetailId === 0;
+      const isInactive = q.status === InspectionStatus.Inactive;
+      // nuevos + inactivos -> no se envían
+      if (isNew && isInactive) return false;
+      return true;
+    });
+
+    // 2) Mapeo final EXACTO para el backend (sin 'command')
+    const details = toApiQuestionsRaw(cleanedQuestions);
+
     const payload = {
-      typeInspectionId: Number(id), //  aquí lo agregamos
+      // sin 'command' en raíz (tal cual pusiste que te funciona en Swagger)
+      typeInspectionId: Number(id),
       templateInspectionId: Number(currentTemplateId),
       customerId: String(selectedCustomer?.id ?? ""),
       customerName: data.client,
       name: data.name,
       description: data.description,
       status: Number(data.status) || InspectionStatus.Active,
-      typeInspectionQuestions: exportedQuestions,
+      typeInspectionQuestions: details, // 👈 duplicados conservan id; eliminados nuevos no viajan; eliminados existentes viajan con status=0
     };
 
     try {
       await axiosInstance.put(`/TypeInspection/${id}`, payload);
-      toast.success(`${tToasts("ok")}: ${tToasts("login.6")}`);
+      toast.success(`${tToasts("ok")}: ${tToasts("msj.33")}`);
       router.push("../");
     } catch (error) {
       toast.error(`${tToasts("error")}: ${error}`);
       console.error(error);
     }
   };
+
+  // --- handlers memoizados ---
+  const handleQuestionsChange = useCallback((hasQuestions: boolean) => {
+    setHasAtLeastOneQuestion(hasQuestions);
+  }, []);
+
+  const handleQuestionsExport = useCallback((updated: ExportedQuestion[]) => {
+    latestQuestionsRef.current = updated;
+  }, []);
 
   if (isLoading) return <Loading />;
 
@@ -298,58 +468,21 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
                   </button>
                 </div>
               ) : (
-                <div className="relative flex-1">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      className={inputClass(!!errors.client)}
-                      {...register("client")}
-                      value={objFilterForm.client}
-                      onChange={handleCustomerChange}
-                      ref={inputCustomerRef}
-                      autoComplete="off"
-                    />
-                    {isLoadingCustomer && (
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
-                        <Loading
-                          height="h-[39px]"
-                          enableLabel={false}
-                          size="loading-sm "
-                        />
-                      </div>
-                    )}
-                  </div>
-                  {showCustomerDropdown && (
-                    <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto absolute mt-1 flex flex-col !cursor-pointer">
-                      {customerOptions.map((option) => (
-                        <li key={option.id} className="text-sm">
-                          <button
-                            type="button"
-                            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                            onClick={() => {
-                              if (inputCustomerRef.current) {
-                                setIsLoadingCustomer(false);
-                                inputCustomerRef.current.value = option.name;
-                                setObjFilterForm((prev) => ({
-                                  ...prev,
-                                  client: option.name,
-                                }));
-                                setValue("client", option.name);
-                                setSelectedCustomer(option);
-                                setShowCustomerDropdown(false);
-                                setCustomerOptions([]);
-                                debouncedSearchCustomer.cancel();
-                                trigger("client");
-                              }
-                            }}
-                          >
-                            {option.name}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
+                <CustomerSelector
+                  inputClass={inputClass}
+                  errors={errors}
+                  register={register}
+                  objFilterForm={objFilterForm}
+                  setObjFilterForm={setObjFilterForm}
+                  isLoadingCustomer={isLoadingCustomer}
+                  inputCustomerRef={inputCustomerRef}
+                  showCustomerDropdown={showCustomerDropdown}
+                  setShowCustomerDropdown={setShowCustomerDropdown}
+                  customerOptions={customerOptions}
+                  debouncedSearchCustomer={debouncedSearchCustomer}
+                  trigger={trigger}
+                  handleCustomerChange={handleCustomerChange}
+                />
               )}
             </div>
 
@@ -372,6 +505,7 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
               </select>
             </div>
           </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5  p-2 mb-0 rounded-md">
             <div className="flex flex-row gap-2 items-center justify-center col-span-1">
               <span className={labelClass()}>Name</span>
@@ -400,6 +534,7 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
               </select>
             </div>
           </div>
+
           <div className="grid grid-cols-1 md:grid-cols-1 gap-2 mt-3 p-2">
             <div className="flex flex-col gap-2 items-left justify-center">
               <span className={`${labelClass()} !w-full`}>Description</span>
@@ -409,27 +544,30 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
                 placeholder="Write work description..."
                 {...register("description")}
               />
-
-              <button
-                type="button"
-                className="!hidden btn min-w-[30px] min-h-[39px] p-2 rounded-md mt-3"
-              >
-                Add group
-              </button>
             </div>
           </div>
         </div>
 
         {selectedTemplateName && (
           <FormChassi
-            register={register}
-            errors={errors}
-            onQuestionsChange={(hasQuestions) =>
-              setHasAtLeastOneQuestion(hasQuestions)
+            register={
+              register as unknown as UseFormRegister<{
+                client: string;
+                name: string;
+                theme: string;
+                status?: string;
+              }>
             }
-            onQuestionsExport={(updatedQuestions) => {
-              setExportedQuestions(updatedQuestions);
-            }}
+            errors={
+              errors as FieldErrors<{
+                client: string;
+                name: string;
+                theme: string;
+                status?: string;
+              }>
+            }
+            onQuestionsChange={handleQuestionsChange}
+            onQuestionsExport={handleQuestionsExport}
             templateName={selectedTemplateName}
             templateId={Number(currentTemplateId)}
             initialQuestions={initialQuestionsRef.current || []}
@@ -453,3 +591,97 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
 };
 
 export default EditOrder;
+
+// --- Subcomponente local para selector de cliente (tipado, sin any) ---
+interface CustomerSelectorProps {
+  inputClass: (hasError: boolean) => string;
+  errors: FieldErrors<FormFields>;
+  register: UseFormRegister<FormFields>;
+  objFilterForm: {
+    client: string;
+    status: string;
+    workorder: string;
+    worker: string;
+    creationdate?: Date;
+  };
+  setObjFilterForm: React.Dispatch<
+    React.SetStateAction<{
+      client: string;
+      status: string;
+      workorder: string;
+      worker: string;
+      creationdate?: Date;
+    }>
+  >;
+  isLoadingCustomer: boolean;
+  inputCustomerRef: React.RefObject<HTMLInputElement | null>;
+  showCustomerDropdown: boolean;
+  setShowCustomerDropdown: React.Dispatch<React.SetStateAction<boolean>>;
+  customerOptions: CustomerOption[];
+  debouncedSearchCustomer: DebouncedFunc<(value: string) => void>;
+  trigger: UseFormTrigger<FormFields>;
+  handleCustomerChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+const CustomerSelector: React.FC<CustomerSelectorProps> = ({
+  inputClass,
+  errors,
+  register,
+  objFilterForm,
+  setObjFilterForm,
+  isLoadingCustomer,
+  inputCustomerRef,
+  showCustomerDropdown,
+  setShowCustomerDropdown,
+  customerOptions,
+  debouncedSearchCustomer,
+  trigger,
+  handleCustomerChange,
+}) => {
+  return (
+    <div className="relative flex-1">
+      <div className="relative">
+        <input
+          type="text"
+          className={inputClass(!!errors.client)}
+          {...register("client")}
+          value={objFilterForm.client}
+          onChange={handleCustomerChange}
+          ref={inputCustomerRef}
+          autoComplete="off"
+        />
+        {isLoadingCustomer && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
+            <Loading height="h-[39px]" enableLabel={false} size="loading-sm " />
+          </div>
+        )}
+      </div>
+      {showCustomerDropdown && (
+        <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto absolute mt-1 flex flex-col !cursor-pointer">
+          {customerOptions.map((option) => (
+            <li key={option.id} className="text-sm">
+              <button
+                type="button"
+                className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                onClick={() => {
+                  if (inputCustomerRef.current) {
+                    setObjFilterForm((prev) => ({
+                      ...prev,
+                      client: option.name,
+                    }));
+                    inputCustomerRef.current.value = option.name;
+                    debouncedSearchCustomer.cancel();
+                    trigger("client");
+                    setShowCustomerDropdown(false);
+                  }
+                }}
+              >
+                {option.name}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
