@@ -10,12 +10,11 @@ import FormChassi from "../types-pdf/FormChassi/FormChassi";
 import { debounce } from "lodash";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
 import { CustomerOption } from "@/shared/utils/orderMapper";
-import { WorkOrderStatusLabel } from "../../models/inspections.types";
 import { ExportedQuestion } from "@/shared/types/inspection/ITypes";
 import Loading from "@/shared/components/shared/Loading";
 import AlertInfo from "@/shared/components/shared/AlertInfo";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   InspectionStatus,
   InspectionStatusLabel,
@@ -49,8 +48,12 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
   );
   const [selectedTemplateName, setSelectedTemplateName] = useState<string>("");
 
+  // ⬇️ Guarda tanto id como name del cliente seleccionado
   const [selectedCustomer, setSelectedCustomer] =
     useState<CustomerOption | null>(null);
+
+  const pathname = usePathname();
+  const parentPath = pathname.replace(/\/[^/]+$/, "");
 
   const [customerOptions, setCustomerOptions] = useState<CustomerOption[]>([]);
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
@@ -92,7 +95,7 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
     try {
       let url = `/QuickBooks/Customers/GetCustomerName?RealmId=9341454759827689`;
       if (name) url += `&Name=${encodeURIComponent(name)}`;
-      const response = await axiosInstance.get(url);
+      const response = await axiosInstance.get<CustomerOption[]>(url);
       setCustomerOptions(response.data ?? []);
     } catch (error) {
       console.error("Error buscando clientes:", error);
@@ -115,14 +118,18 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
     const value = e.target.value;
     setShowCustomerDropdown(true);
 
+    // Si el usuario vuelve a tipear, invalido el cliente seleccionado
+    setSelectedCustomer(null);
+
     if (value.length >= 1) {
-      setIsLoadingCustomer(true); // 🔥 Mostrar desde el primer caracter
+      setIsLoadingCustomer(true);
     } else {
-      setIsLoadingCustomer(false); // 🔕 Apagar si el campo queda vacío
+      setIsLoadingCustomer(false);
     }
 
     debouncedSearchCustomer(value);
     setObjFilterForm({ ...objFilterForm, client: value });
+    setValue("client", value);
   };
 
   const currentTheme = watch("theme");
@@ -130,14 +137,13 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
 
   useEffect(() => {
     trigger();
-  }, [currentTheme]);
+  }, [currentTheme, trigger]);
 
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
         const [templateRes] = await Promise.all([
           axiosInstance.get("/TemplateInspection"),
-          // Puedes agregar otros endpoints iniciales aquí
         ]);
 
         const items = templateRes.data.items;
@@ -150,7 +156,7 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
       } catch (err) {
         console.error("Error al cargar datos iniciales", err);
       } finally {
-        setIsLoading(false); // 👈 Aquí desactivas el loading
+        setIsLoading(false);
       }
     };
 
@@ -174,11 +180,17 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
       return;
     }
 
+    // Validación: debe existir un cliente seleccionado de la lista
+    if (!selectedCustomer?.id) {
+      toast.error("Selecciona un cliente de la lista para continuar.");
+      return;
+    }
+
     const payload = {
-      command: "Create", // 🔧 requerido por el backend
+      command: "Create" as const, // requerido por el backend
       templateInspectionId: Number(currentTemplateId),
-      customerId: selectedCustomer?.id ?? "",
-      customerName: data.client,
+      customerId: String(selectedCustomer.id), // ⬅️ AHORA se envía el id correcto
+      customerName: selectedCustomer.name, // opcional: mantén coherencia con lo seleccionado
       name: data.name,
       description: data.description,
       status: Number(data.status) || InspectionStatus.Active,
@@ -187,12 +199,10 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
 
     try {
       const res = await axiosInstance.post("/TypeInspection", payload);
-      //console.log(" Enviado correctamente:", res.data);
-
       toast.success(`${tToasts("ok")}: ${tToasts("msj.5")}`);
-      router.push("../");
+
+      router.push(parentPath);
     } catch (error) {
-      //console.error("❌ Error al guardar:", error);
       toast.error(`${tToasts("error")}: ${error}`);
     }
   };
@@ -235,26 +245,30 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
 
                 {showCustomerDropdown && (
                   <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto absolute mt-1">
-                    {customerOptions.map((option, idx) => (
+                    {customerOptions.map((option) => (
                       <li key={option.id} className="cursor-pointer text-sm">
                         <button
                           type="button"
                           className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                           onClick={() => {
                             setIsLoadingCustomer(false);
+                            // ⬇️ Guarda id + name del cliente seleccionado
+                            setSelectedCustomer(option);
+
                             if (inputCustomerRef.current) {
                               const selectedName = option.name;
                               inputCustomerRef.current.value = selectedName;
-                              setObjFilterForm({
-                                ...objFilterForm,
-                                client: selectedName,
-                              });
-                              setValue("client", selectedName);
-                              trigger("client");
-                              setShowCustomerDropdown(false);
-                              setCustomerOptions([]);
-                              debouncedSearchCustomer.cancel();
                             }
+                            setObjFilterForm((prev) => ({
+                              ...prev,
+                              client: option.name,
+                            }));
+                            setValue("client", option.name);
+                            trigger("client");
+
+                            setShowCustomerDropdown(false);
+                            setCustomerOptions([]);
+                            debouncedSearchCustomer.cancel();
                           }}
                         >
                           {option.name}

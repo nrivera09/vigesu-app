@@ -11,7 +11,10 @@ import {
   ExportedAnswer,
   ExportedQuestion,
 } from "@/shared/types/inspection/ITypes";
-import { InspectionStatus } from "../../models/typeInspection";
+
+// --------- Estados backend ----------
+const STATUS_ACTIVE = 0 as const;
+const STATUS_DELETED = 1 as const;
 
 // --------- HELPERS ----------
 const dedupeAnswers = (answers: ExportedAnswer[]): ExportedAnswer[] => {
@@ -95,8 +98,7 @@ const FormChassi: React.FC<FormChassiProps> = ({
 
     const mapAnswersRecursive = (nodes: AnswerNode[]): ExportedAnswer[] =>
       (nodes ?? []).map((a) => ({
-        // respuestas nuevas sin id (el backend las crea)
-        id: undefined,
+        id: undefined, // nuevas
         response: a.label,
         color: a.color,
         usingItem: a.useParts ?? false,
@@ -108,20 +110,20 @@ const FormChassi: React.FC<FormChassiProps> = ({
 
     const newEntry: LocalQuestion = {
       _localId: newLocalId(),
-      typeInspectionDetailId: undefined, // nueva (el backend asigna)
+      typeInspectionDetailId: undefined, // nueva (lo asigna backend)
       templateInspectionQuestionId:
         selectedQuestion.templateInspectionQuestionId,
       question,
       typeQuestion: selectedQuestion.typeQuestion,
       groupId: group.groupId,
-      status: InspectionStatus.Active,
+      status: STATUS_ACTIVE, // 0
       typeInspectionDetailAnswers: formattedAnswers,
     };
 
     setQuestions((prev) => [...prev, newEntry]);
   };
 
-  // Duplicar: conserva IDs (tal como dices que te funciona en Swagger)
+  // Duplicar: conserva IDs (si tu backend así lo requiere)
   const handleDuplicateById = (localId: string) => {
     setQuestions((prev) => {
       const idx = prev.findIndex((q) => q._localId === localId);
@@ -131,31 +133,29 @@ const FormChassi: React.FC<FormChassiProps> = ({
       const duplicated: LocalQuestion = {
         ...original,
         _localId: newLocalId(),
-        // 👇 conservamos el MISMO id del detalle y de las respuestas
-        //    esto replica exactamente el comportamiento que logras en Swagger
         question: original.question + " (copy)",
-        status: InspectionStatus.Active,
+        status: STATUS_ACTIVE,
       };
 
       return [...prev, duplicated];
     });
   };
 
-  // Eliminar: si es nuevo se quita; si existe, se mantiene con status=Inactive
+  // Eliminar: si es nuevo se quita; si existe, status=1 para eliminar en backend
   const handleDeleteById = (localId: string) => {
     setQuestions((prev) => {
       const idx = prev.findIndex((q) => q._localId === localId);
       if (idx === -1) return prev;
       const q = prev[idx];
 
-      // Si es nueva -> eliminar del array (no viaja en payload)
+      // Nuevo (sin id) -> se remueve del array (no viaja)
       if (!q.typeInspectionDetailId || q.typeInspectionDetailId === 0) {
         return prev.filter((x) => x._localId !== localId);
       }
 
-      // Si existe en backend -> mantenerla pero status=Inactive (status=0)
+      // Existente -> enviar con status=1
       const next = [...prev];
-      next[idx] = { ...q, status: InspectionStatus.Inactive };
+      next[idx] = { ...q, status: STATUS_DELETED };
       return next;
     });
   };
@@ -169,17 +169,13 @@ const FormChassi: React.FC<FormChassiProps> = ({
   // 1) informar si hay preguntas visibles
   useEffect(() => {
     if (onQuestionsChange)
-      onQuestionsChange(
-        questions.some((q) => q.status !== InspectionStatus.Inactive)
-      );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [questions]);
+      onQuestionsChange(questions.some((q) => q.status !== STATUS_DELETED));
+  }, [questions, onQuestionsChange]);
 
-  // 2) exportar al padre (manda TODO, incluidos Inactive, para que el backend los procese)
+  // 2) exportar al padre (manda TODO; los status=1 irán al backend para eliminar)
   useEffect(() => {
     if (!onQuestionsExport) return;
 
-    // quitamos _localId antes de exportar
     const cleaned: ExportedQuestion[] = questions.map((q) => {
       const { _localId: _omit, ...rest } = q;
       return {
@@ -191,8 +187,7 @@ const FormChassi: React.FC<FormChassiProps> = ({
     });
 
     onQuestionsExport(cleaned);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [questions]);
+  }, [questions, onQuestionsExport]);
 
   // carga inicial (edición)
   useEffect(() => {
@@ -207,9 +202,7 @@ const FormChassi: React.FC<FormChassiProps> = ({
       ),
     }));
     setQuestions(seeded);
-    // solo al montar
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [initialQuestions]);
 
   const inputClass = (hasError: boolean) =>
     `flex-1 input input-lg bg-[#f6f3f4] w-full text-center font-bold text-3xl transition-all border-1 text-lg font-normal ${
@@ -219,7 +212,7 @@ const FormChassi: React.FC<FormChassiProps> = ({
   const labelClass = () => `font-medium w-[30%] break-words`;
 
   const visibleRows = questions
-    .filter((q) => q.status !== InspectionStatus.Inactive)
+    .filter((q) => q.status !== STATUS_DELETED)
     .map((q) => ({ q, localId: q._localId }));
 
   return (

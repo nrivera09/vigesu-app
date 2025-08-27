@@ -22,12 +22,13 @@ import Loading from "@/shared/components/shared/Loading";
 import AlertInfo from "@/shared/components/shared/AlertInfo";
 import { toast } from "sonner";
 import { useParams, useRouter } from "next/navigation";
-import {
-  InspectionStatus,
-  InspectionStatusLabel,
-} from "../models/typeInspection";
+import { InspectionStatusLabel } from "../models/typeInspection";
 import { MdEdit } from "react-icons/md";
 import { useTranslations } from "next-intl";
+
+// --------- Estados backend ----------
+const STATUS_ACTIVE = 0 as const;
+const STATUS_DELETED = 1 as const;
 
 // ---------- Tipos de API ----------
 interface TemplateItem {
@@ -99,6 +100,7 @@ const dedupeAnswers = (answers: ExportedAnswer[]): ExportedAnswer[] => {
   return out;
 };
 
+// mapea backend->front (respuestas)
 const mapAnswerFromApi = (a: BackendAnswer): ExportedAnswer => {
   if (typeof a === "string") {
     return {
@@ -129,23 +131,29 @@ const mapAnswerFromApi = (a: BackendAnswer): ExportedAnswer => {
   };
 };
 
-// Aplana ExportedAnswer[] a string[] para payload
-const flattenAnswerLabels = (answers: ExportedAnswer[]): string[] => {
-  const out: string[] = [];
-  const dfs = (arr: ExportedAnswer[]) => {
-    for (const a of arr ?? []) {
-      const label = (a.response ?? "").toString().trim();
-      if (label) out.push(label);
-      if (Array.isArray(a.subTypeInspectionDetailAnswers)) {
-        dfs(a.subTypeInspectionDetailAnswers);
-      }
-    }
-  };
-  dfs(answers ?? []);
-  return Array.from(new Set(out));
+// 👉 ExportedAnswer[] -> API Answer[] (RECURSIVO, NO string[])
+type ApiAnswer = {
+  typeInspectionDetailAnswerId: number;
+  response: string;
+  color: string;
+  usingItem: boolean;
+  isPrintable: boolean;
+  subTypeInspectionDetailAnswers: ApiAnswer[];
 };
 
-// Convierte preguntas al shape EXACTO del backend (SIN "command")
+const toApiAnswers = (answers: ExportedAnswer[] = []): ApiAnswer[] =>
+  (answers ?? []).map((ans) => ({
+    typeInspectionDetailAnswerId: safeNumber(ans?.id, 0),
+    response: ans?.response ?? "",
+    color: ans?.color ?? "",
+    usingItem: !!ans?.usingItem,
+    isPrintable: ans?.isPrintable ?? true,
+    subTypeInspectionDetailAnswers: toApiAnswers(
+      ans?.subTypeInspectionDetailAnswers ?? []
+    ),
+  }));
+
+// Convierte preguntas al shape EXACTO del backend
 const toApiQuestionsRaw = (qs: ExportedQuestion[]) =>
   (qs ?? []).map((q) => ({
     typeInspectionDetailId: safeNumber(q.typeInspectionDetailId, 0),
@@ -153,20 +161,9 @@ const toApiQuestionsRaw = (qs: ExportedQuestion[]) =>
     groupId: safeNumber(q.groupId, 0),
     question: q.question ?? "",
     typeQuestion: safeNumber(q.typeQuestion, 0),
-    status: safeNumber(q.status, InspectionStatus.Active),
-    typeInspectionDetailAnswers: (q.typeInspectionDetailAnswers ?? []).map(
-      (ans: ExportedAnswer) => ({
-        // 👇 respeta IDs (para duplicados también se mandan iguales)
-        typeInspectionDetailAnswerId: safeNumber(ans?.id, 0),
-        response: ans?.response ?? "",
-        color: ans?.color ?? "",
-        usingItem: !!ans?.usingItem,
-        isPrintable: ans?.isPrintable ?? true,
-        subTypeInspectionDetailAnswers: flattenAnswerLabels(
-          ans?.subTypeInspectionDetailAnswers ?? []
-        ),
-      })
-    ),
+    // 0 activo, 1 eliminado
+    status: q.status === STATUS_DELETED ? STATUS_DELETED : STATUS_ACTIVE,
+    typeInspectionDetailAnswers: toApiAnswers(q.typeInspectionDetailAnswers),
   }));
 
 // -----------------------------------------------------
@@ -337,7 +334,7 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
 
         setValue("client", customerName);
 
-        // ---------- Mapeo robusto de preguntas desde la API ----------
+        // ---------- Mapeo preguntas desde API ----------
         const mappedQuestions: ExportedQuestion[] = (
           data.typeInspectionQuestions ?? []
         ).map((q) => ({
@@ -346,7 +343,11 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
           question: q.question,
           typeQuestion: safeNumber(q.typeQuestion, 0),
           groupId: q.groupId,
-          status: safeNumber(q.status, InspectionStatus.Active),
+          // normaliza a 0/1 (0 activo, 1 eliminado)
+          status:
+            safeNumber(q.status, STATUS_ACTIVE) === STATUS_DELETED
+              ? STATUS_DELETED
+              : STATUS_ACTIVE,
           typeInspectionDetailAnswers: dedupeAnswers(
             (q.typeInspectionDetailAnswers ?? []).map(mapAnswerFromApi)
           ),
@@ -355,10 +356,14 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
         if (!initialQuestionsRef.current) {
           initialQuestionsRef.current = mappedQuestions;
           latestQuestionsRef.current = mappedQuestions; // seed ref
-          setHasAtLeastOneQuestion(mappedQuestions.length > 0);
+          setHasAtLeastOneQuestion(
+            mappedQuestions.some((qq) => qq.status !== STATUS_DELETED)
+          );
         } else {
           setHasAtLeastOneQuestion(
-            (latestQuestionsRef.current ?? []).length > 0
+            (latestQuestionsRef.current ?? []).some(
+              (qq) => qq.status !== STATUS_DELETED
+            )
           );
         }
       } catch (err) {
@@ -390,28 +395,28 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
 
     const currentQuestions = latestQuestionsRef.current;
 
-    // 1) Sacamos del payload los items NUEVOS que el user haya eliminado (id 0 y status Inactive)
+    // Quita del payload los NUEVOS que el usuario eliminó (sin id y status=1)
     const cleanedQuestions = currentQuestions.filter((q) => {
       const isNew = !q.typeInspectionDetailId || q.typeInspectionDetailId === 0;
-      const isInactive = q.status === InspectionStatus.Inactive;
-      // nuevos + inactivos -> no se envían
-      if (isNew && isInactive) return false;
+      const isDeleted = q.status === STATUS_DELETED;
+      if (isNew && isDeleted) return false;
       return true;
     });
 
-    // 2) Mapeo final EXACTO para el backend (sin 'command')
     const details = toApiQuestionsRaw(cleanedQuestions);
 
     const payload = {
-      // sin 'command' en raíz (tal cual pusiste que te funciona en Swagger)
+      // 🔴 Requerido por backend (corrige "command is required")
+      command: "Update" as const,
       typeInspectionId: Number(id),
       templateInspectionId: Number(currentTemplateId),
       customerId: String(selectedCustomer?.id ?? ""),
       customerName: data.client,
       name: data.name,
       description: data.description,
-      status: Number(data.status) || InspectionStatus.Active,
-      typeInspectionQuestions: details, // 👈 duplicados conservan id; eliminados nuevos no viajan; eliminados existentes viajan con status=0
+      status: Number(data.status) || STATUS_ACTIVE,
+      // 👇 Viajan activos (0) y eliminados (1) existentes
+      typeInspectionQuestions: details,
     };
 
     try {
