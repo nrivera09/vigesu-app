@@ -1,7 +1,9 @@
 import React from "react";
 import { useInspectionFullStore } from "../../store/inspection/inspectionFullStore";
+import { useTranslations } from "next-intl";
 
 const Wizard = () => {
+  const t = useTranslations("inspections");
   const {
     stepWizard,
     completeStep1,
@@ -35,7 +37,7 @@ const Wizard = () => {
           stepWizard >= 1 ? "step-neutral" : ""
         } ${completeStep1 ? "cursor-pointer" : "cursor-not-allowed"}`}
       >
-        Select a group
+        {t("wizard.1")}
       </li>
       <li
         onClick={() => goToStep(2)}
@@ -43,7 +45,7 @@ const Wizard = () => {
           stepWizard >= 2 ? "step-neutral" : ""
         } ${completeStep1 ? "cursor-pointer" : "cursor-not-allowed"}`}
       >
-        Select a question
+        {t("wizard.2")}
       </li>
       <li
         onClick={() => goToStep(3)}
@@ -51,7 +53,7 @@ const Wizard = () => {
           stepWizard >= 3 ? "step-neutral" : ""
         } ${completeStep2 ? "cursor-pointer" : "cursor-not-allowed"}`}
       >
-        Select an answer
+        {t("wizard.3")}
       </li>
       <li
         onClick={() => goToStep(4)}
@@ -59,7 +61,7 @@ const Wizard = () => {
           stepWizard >= 4 ? "step-neutral" : ""
         } ${completeStep3 ? "cursor-pointer" : "cursor-not-allowed"}`}
       >
-        Set images
+        {t("wizard.4")}
       </li>
     </ul>
   );

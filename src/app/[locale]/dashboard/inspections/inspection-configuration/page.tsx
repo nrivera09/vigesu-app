@@ -87,7 +87,10 @@ const Page = () => {
     <>
       <div className="gap-4 flex flex-col  min-h-full ">
         <div className="header-page flex flex-row items-center justify-between min-h-[70px] bg-base-200 px-6 gap-2">
-          <BackButton title={!title ? "New Inspection configuration" : title} />
+          <BackButton
+            title={!title ? "New Inspection configuration" : title}
+            disableArrow
+          />
           <div className="flex flex-row gap-2">
             <Link
               href={`${pathname}/create`}

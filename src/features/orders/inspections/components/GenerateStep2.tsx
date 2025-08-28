@@ -16,9 +16,16 @@ import { axiosInstance } from "@/shared/utils/axiosInstance";
 import { useTranslations } from "next-intl";
 
 const GenerateStep2 = () => {
+  const t = useTranslations("inspections");
   const router = useRouter();
   const store = useInspectionFullStore.getState();
-  const { fullInspection, groupName, groupId } = useInspectionFullStore();
+  const {
+    fullInspection,
+    groupName,
+    groupId,
+    setCompleteStep2,
+    setCompleteStep3,
+  } = useInspectionFullStore();
   const tToasts = useTranslations("toast");
   const goStep = (question: IFullQuestion) => {
     useInspectionFullStore.getState().setStepWizard(3);
@@ -127,12 +134,10 @@ const GenerateStep2 = () => {
           <button
             disabled={enableFinalButton > 0}
             className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-fit mx-auto text-[13px]"
-            onClick={() => useInspectionFullStore.getState().setStepWizard(1)}
+            onClick={() => useInspectionFullStore.getState().setStepWizard(3)}
           >
-            You have completed all the questions,{" "}
-            <span className="underline text-red-400">
-              click and go to the next group
-            </span>
+            {t("step2.1")}{" "}
+            <span className="underline text-red-400">{t("step2.1_5")}</span>
           </button>
         )}
       </div>

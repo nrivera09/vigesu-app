@@ -23,8 +23,10 @@ import GenerateStep1 from "./GenerateStep1";
 import GenerateStep2 from "./GenerateStep2";
 import GenerateStep3 from "./GenerateStep3";
 import GenerateStep4 from "./GenerateStep4";
+import { useTranslations } from "next-intl";
 
 const GenerateStep0 = () => {
+  const t = useTranslations("inspections");
   const { fullInspection, groupName, stepWizard, resetFullInspection } =
     useInspectionFullStore();
   const router = useRouter();
@@ -226,12 +228,12 @@ const GenerateStep0 = () => {
   return (
     <>
       <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
-        <legend className="fieldset-legend text-lg">Generator options</legend>
+        <legend className="fieldset-legend text-lg">{t("step0.1")}</legend>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4">
           {/* Client */}
           <div className="flex flex-col">
             <legend className="fieldset-legend text-lg font-normal">
-              Client
+              {t("step0.2")}
             </legend>
             <div className="relative">
               <div className="relative">
@@ -275,7 +277,7 @@ const GenerateStep0 = () => {
           {/* Tipo de inspección */}
           <div className="flex flex-col">
             <legend className="fieldset-legend text-lg font-normal">
-              Tipo de inspección
+              {t("step0.3")}
             </legend>
             <select
               className="select w-full text-lg input-lg disabled:border-gray-200"
@@ -283,7 +285,7 @@ const GenerateStep0 = () => {
               value={selectedType?.typeInspectionId || ""}
               onChange={handleTypeChange}
             >
-              <option value="">Seleccione una opción</option>
+              <option value="">{t("step0.4")}</option>
               {typeOptions.map((type) => (
                 <option
                   key={type.typeInspectionId}

@@ -152,6 +152,56 @@
       "4": "Descargar PDF"
     }
   },
+  "inspections": {
+    "home": {
+      "0": "Inspecciones",
+      "1": "Opciones de búsqueda",
+      "2": "Cliente",
+      "3": "Buscar",
+      "4": "Nuevo",
+      "5": "#",
+      "6": "Cliente",
+      "7": "Empleado",
+      "8": "Fecha",
+      "9": "Sincronizar Quickbook",
+      "10": "Estado",
+      "11": "Ver",
+      "12": "Eliminar"
+    },
+    "wizard": {
+      "1": "Seleccione un grupo",
+      "2": "Seleccione una pregunta",
+      "3": "Seleccione una respuesta",
+      "4": "Subir imágenes"
+    },
+    "step0": {
+      "1": "Generador de opciones",
+      "2": "Cliente",
+      "3": "Tipo de inspección",
+      "4": "Seleccione una inspección"
+    },
+    "step1": {
+      "1": "Completar y guardar inspección"
+    },
+    "step2": {
+      "1": "Haz completado todas las preguntas,",
+      "1_5": "Click aquí para ir al siguiente grupo"
+    },
+    "step3": {
+      "1": "Pregunta:",
+      "2": "Cancelar",
+      "3": "¿Cuál es la respuesta final?"
+    },
+    "step4": {
+      "1": "Item:",
+      "2": "Cantidad:",
+      "3": "Item",
+      "4": "Cantidad",
+      "5": "Cancelar",
+      "6": "Guardar",
+      "7": "Eliminar"
+    }
+  },
   "alerts": {
     "1": "Debe escribir al menos 3 caracteres en los campos para poder seleccionar una coincidencia.",
     "2": "Todos los espacios grises son editables, lo que significa que puede escribir en ellos y agregar la información requerida."

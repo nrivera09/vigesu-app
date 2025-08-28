@@ -436,7 +436,7 @@ const EditOrder = () => {
           console.log("Upload result:", res.data);
 
           if (res.data !== 1) {
-            toast.error(`${tToasts("error")}: ${tToasts("msj.18")}`);
+            //toast.error(`${tToasts("error")}: ${tToasts("msj.18")}`);
           } else {
             toast.success(`${tToasts("ok")}: ${tToasts("msj.19")}`);
           }

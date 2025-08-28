@@ -34,6 +34,7 @@ interface ExportedAnswer {
 }
 
 const GenerateStep3 = () => {
+  const t = useTranslations("inspections");
   const tToasts = useTranslations("toast");
   const { fullInspection, groupName, groupId, titleQuestion, fullQuestion } =
     useInspectionFullStore();
@@ -631,7 +632,7 @@ const GenerateStep3 = () => {
       <div className="card bg-base-200 p-6 shadow-xs">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
           <h1 className="text-2xl font-bold order-2 md:order-1">
-            Question: {titleQuestion}
+            {t("step3.1")} {titleQuestion}
           </h1>
           <label className="rounded-full bg-red-400 order-1 md:order-2  md:flex items-center justify-center text-white overflow-hidden px-3 gap-1 py-1  md:min-w-fit flex-row flex">
             <IoIosInformationCircleOutline className="size-6" />
@@ -705,7 +706,7 @@ const GenerateStep3 = () => {
           className="btn font-normal bg-red-300 text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full  md:max-w-[300px] mx-auto text-[13px] transition-all hover:bg-red-600"
           onClick={() => useInspectionFullStore.getState().setStepWizard(2)}
         >
-          Cancelar
+          {t("step3.2")}
         </button>
       </div>
 
@@ -736,9 +737,7 @@ const GenerateStep3 = () => {
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
           <div className="bg-white p-6 rounded-xl w-[90%] max-w-md relative">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold ">
-                ¿Cuál es la respuesta final?
-              </h2>
+              <h2 className="text-xl font-bold ">{t("step3.3")}</h2>
               <button
                 className="bg-black text-white w-[38px] h-[38px] absolute right-0 top-0 rounded-bl-3xl flex items-center justify-center transition-all cursor-pointer"
                 onClick={() => setShowRootPicker(!showRootPicker)}

@@ -235,7 +235,7 @@ const InspectionModal: React.FC<Props> = ({
             Select a group
           </label>
           <select
-            className="input input-lg bg-[#f6f3f4] w-full text-center text-lg font-normal"
+            className="input input-lg bg-[#f6f3f4] w-full text-center text-lg font-normal appearance-auto"
             value={selectedGroup?.groupId ?? ""}
             onChange={(e) => {
               const found = groups.find(
@@ -258,7 +258,7 @@ const InspectionModal: React.FC<Props> = ({
         <div className="mb-3">
           <label className="font-semibold mb-1 block text-lg">Question</label>
           <select
-            className="input input-lg bg-[#f6f3f4] w-full text-center text-lg font-normal"
+            className="input input-lg bg-[#f6f3f4] w-full text-center text-lg font-normal  appearance-auto"
             value={selectedQuestion?.templateInspectionQuestionId ?? ""}
             onChange={(e) => {
               const found = questionSuggestions.find(

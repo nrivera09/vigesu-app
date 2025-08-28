@@ -22,6 +22,7 @@ import { useTranslations } from "next-intl";
 
 const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
   const tToasts = useTranslations("toast");
+  const t = useTranslations("inspections");
   const router = useRouter();
   const pathname = usePathname();
 
@@ -224,12 +225,12 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
       <table className="table table-fixed w-full">
         <thead>
           <tr>
-            <th className="w-[5%] truncate">#</th>
-            <th className="w-[15%] truncate">Cliente</th>
-            <th className="w-[15%] truncate">Empleado</th>
-            <th className="w-[15%] truncate">Fecha</th>
-            <th className="w-[20%] text-center truncate">Sync Quickbook</th>
-            <th className="w-[10%] truncate">Estado</th>
+            <th className="w-[5%] truncate">{t("home.5")}</th>
+            <th className="w-[15%] truncate">{t("home.6")}</th>
+            <th className="w-[15%] truncate">{t("home.7")}</th>
+            <th className="w-[15%] truncate">{t("home.8")}</th>
+            <th className="w-[20%] text-center truncate">{t("home.9")}</th>
+            <th className="w-[10%] truncate">{t("home.10")}</th>
             <th className="w-[20%] truncate"></th>
           </tr>
         </thead>
@@ -297,7 +298,7 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
                       icon={
                         <FaRegEye className="w-[20px] h-[20px] opacity-70" />
                       }
-                      label="Watch"
+                      label={t("home.11")}
                       onClick={() =>
                         router.push(
                           `${pathname}/generate-pdf/${item?.templateInspectionId}/${item?.inspectionId}`
@@ -310,7 +311,7 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
                         icon={
                           <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
                         }
-                        label="Delete"
+                        label={t("home.12")}
                         onClick={() => deleteTypeInspection(item.inspectionId)}
                       />
                     )}

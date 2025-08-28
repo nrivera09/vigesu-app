@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
 import debounce from "lodash/debounce";
 import Loading from "@/shared/components/shared/Loading";
+import { useTranslations } from "next-intl";
 
 interface ItemOption {
   id: string;
@@ -28,6 +29,7 @@ const ModalUsingItem = ({
   onSave,
   initialItems,
 }: ModalUsingItemProps) => {
+  const t = useTranslations("inspections");
   const [isSearching, setIsSearching] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<ItemOption[]>([]);
@@ -102,7 +104,7 @@ const ModalUsingItem = ({
         <div className="mb-3 flex flex-row gap-4 items-center justify-center">
           <div className="flex flex-col flex-1">
             <legend className="fieldset-legend text-lg font-normal">
-              Item:
+              {t("step4.1")}
             </legend>
             <div className="relative">
               <input
@@ -166,7 +168,7 @@ const ModalUsingItem = ({
 
           <div className="max-w-[100px]">
             <legend className="fieldset-legend text-lg font-normal">
-              Cantidad:
+              {t("step4.2")}
             </legend>
             <input
               type="number"
@@ -194,8 +196,8 @@ const ModalUsingItem = ({
           <table className="table table-fixed w-full">
             <thead>
               <tr>
-                <th className="w-[40%] text-center truncate">Item</th>
-                <th className="w-[40%] text-center truncate">Cantidad</th>
+                <th className="w-[40%] text-center truncate">{t("step4.3")}</th>
+                <th className="w-[40%] text-center truncate">{t("step4.4")}</th>
                 <th className="w-[20%] text-center truncate"></th>
               </tr>
             </thead>
@@ -209,7 +211,7 @@ const ModalUsingItem = ({
                       icon={
                         <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
                       }
-                      label="Delete"
+                      label={t("step4.7")}
                       onClick={() => handleDeleteItem(item._uid!)}
                     />
                   </td>
@@ -222,7 +224,8 @@ const ModalUsingItem = ({
         {/* Botones de acción */}
         <div className="modal-action flex items-center justify-between">
           <button type="button" className="btn" onClick={onClose}>
-            <IoMdClose className="w-[20px] h-[20px] opacity-70" /> Cancelar
+            <IoMdClose className="w-[20px] h-[20px] opacity-70" />{" "}
+            {t("step4.5")}
           </button>
           <button
             type="button"
@@ -230,7 +233,7 @@ const ModalUsingItem = ({
             onClick={() => onSave(selectedItems)}
           >
             <AiOutlineSave className="w-[20px] h-[20px] opacity-70" />
-            Guardar
+            {t("step4.6")}
           </button>
         </div>
       </div>

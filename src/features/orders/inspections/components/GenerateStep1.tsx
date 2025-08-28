@@ -37,6 +37,7 @@ interface GenerateStep1Props {
 }
 
 const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
+  const t = useTranslations("inspections");
   const [showModal, setShowModal] = useState(false);
   const tToasts = useTranslations("toast");
   const { userName, employeeName, rol, employeeId } = useAuthUser();
@@ -278,7 +279,7 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
           }
           onClick={() => setShowModal(true)}
         >
-          Complete and save inspection
+          {t("step1.1")}
         </button>
       </div>
       <EmailConfirmationModal

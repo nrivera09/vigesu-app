@@ -1,17 +1,17 @@
 {
   "home": {
     "form-title": "Welcome",
-    "form-info": "Please login your credentials",
+    "form-info": "Please enter your credentials",
     "remember-password": "Remember me",
     "forgot-password": "Recover password?",
-    "mistakes-login": "Problems logging in?",
-    "btn-login": "Login"
+    "mistakes-login": "Problems signing in?",
+    "btn-login": "Log in"
   },
   "aside": {
     "menus": {
       "name1": "DOCUMENTS",
       "name2": "CATALOGS",
-      "name3": "CONFIGURATION"
+      "name3": "SETTINGS"
     },
     "module0": {
       "title": "Dashboard",
@@ -20,36 +20,36 @@
     },
     "module1": {
       "title": "DOCUMENTS",
-      "menu1": "Work orders",
+      "menu1": "Work Orders",
       "menu2": "Inspections"
     },
     "module2": {
       "title": "CATALOGS",
-      "menu1": "Inspection configuration",
+      "menu1": "Inspection Settings",
       "menu2": "Groups",
       "menu3": "Users"
     },
     "module3": {
-      "title": "Configuration",
+      "title": "Settings",
       "menu1": "Configurations",
-      "menu2": "IC theme"
+      "menu2": "IC Theme"
     }
   },
   "logout": {
-    "logout": "Sign out"
+    "logout": "Log out"
   },
   "toast": {
     "ok": "Successfully executed",
     "error": "An error occurred while processing the information",
-    "warning": "It is necessary",
+    "warning": "It is required",
     "msj": {
-      "1": "Login successfully!",
+      "1": "Login successful!",
       "2": "Invalid server response",
       "3": "Error fetching template data",
       "4": "Status updated successfully",
       "5": "Inspection order created successfully!",
       "6": "Order edited successfully",
-      "7": "Complete all required fields.",
+      "7": "Please complete all required fields.",
       "8": "Select an employee from the list.",
       "9": "Signature is required.",
       "10": "User created successfully",
@@ -58,111 +58,161 @@
       "13": "User updated successfully",
       "14": "Successful synchronization!",
       "15": "PDF successfully sent to QuickBooks",
-      "16": "Work Order created successfully!",
-      "17": "You must select a valid Service/Part",
-      "18": "No new file was uploaded",
+      "16": "Work order created successfully!",
+      "17": "You must select a valid Service/Spare Part",
+      "18": "No new file uploaded",
       "19": "Files uploaded successfully",
       "20": "Order updated successfully",
       "21": "Error loading inspections",
-      "22": "Error synchronizing",
+      "22": "Error during synchronization",
       "23": "Inspection deleted successfully",
       "24": "Error deleting inspection",
-      "25": "Enter a valid email",
+      "25": "Enter a valid email address",
       "26": "Email sent successfully",
       "27": "Error sending email",
       "28": "Inspection sent successfully",
       "29": "Error sending inspection",
-      "30": "You must first select the answer",
+      "30": "You must select the answer first",
       "31": "Group completed successfully.",
       "32": "Error loading data",
-      "33": "Inspection successfully edited"
+      "33": "Inspection edited successfully"
     }
   },
   "workorders": {
     "home": {
-      "0": "Work orders",
-      "1": "Search options",
-      "2": "Client",
+      "0": "Work Orders",
+      "1": "Search Options",
+      "2": "Customer",
       "3": "Status",
-      "4": "Pick a status",
-      "5": "Nro. Work order",
-      "6": "Worker",
-      "7": "Creation date",
+      "4": "Select a status",
+      "5": "Work Order No.",
+      "6": "Employee",
+      "7": "Creation Date",
       "8": "Search",
       "9": "",
-      "10": "Client",
-      "11": "Worker",
+      "10": "Customer",
+      "11": "Employee",
       "12": "Status",
-      "13": "Sync Quickbook",
+      "13": "Sync QuickBooks",
       "14": "New"
     },
     "new": {
-      "0": "New order",
+      "0": "New Order",
       "1": "Customer",
-      "2": "Location of repair",
-      "3": "Time start service",
+      "2": "Repair Location",
+      "3": "Service Start Time",
       "4": "Equipment #",
-      "5": "Date of repair",
-      "6": "Time finish service",
-      "7": "License plate #",
+      "5": "Repair Date",
+      "6": "Service End Time",
+      "7": "License Plate #",
       "8": "PO #",
       "9": "VIN #",
-      "10": "Mechanic name",
+      "10": "Mechanic's Name",
       "11": "Service/Parts",
       "12": "Quantity",
-      "13": "Work description",
-      "14": "Add row",
-      "15": "Tires Tread Deep",
+      "13": "Work Description",
+      "14": "Add Row",
+      "15": "Tire Tread Depth",
       "16": "Observation",
-      "17": "Attach Photos or Take Pictures",
-      "18": "Click to upload or take a photo with your camera",
+      "17": "Attach photos or take images",
+      "18": "Click to upload or take a picture with your camera",
       "19": "Save",
       "20": "Delete",
       "21": "Write work description..."
     },
     "edit": {
-      "0": "Edit order",
+      "0": "Edit Order",
       "1": "Customer",
-      "2": "Location of repair",
-      "3": "Time start service",
+      "2": "Repair Location",
+      "3": "Service Start Time",
       "4": "Equipment #",
-      "5": "Date of repair",
-      "6": "Time finish service",
-      "7": "License plate #",
+      "5": "Repair Date",
+      "6": "Service End Time",
+      "7": "License Plate #",
       "8": "PO #",
       "9": "VIN #",
-      "10": "Mechanic name",
+      "10": "Mechanic's Name",
       "11": "Service/Parts",
       "12": "Quantity",
-      "13": "Work description",
-      "14": "Add row",
-      "15": "Tires Tread Deep",
+      "13": "Work Description",
+      "14": "Add Row",
+      "15": "Tire Tread Depth",
       "16": "Observation",
-      "17": "Attach Photos or Take Pictures",
-      "18": "Click to upload or take a photo with your camera",
+      "17": "Attach photos or take images",
+      "18": "Click to upload or take a picture with your camera",
       "19": "Save",
       "20": "Delete",
       "21": "Write work description..."
     },
     "print": {
       "0": "Ready to print",
-      "1": "Enable edition",
-      "2": "Disable edition",
-      "3": "Print order",
+      "1": "Enable Editing",
+      "2": "Disable Editing",
+      "3": "Print Order",
       "4": "Download PDF"
     }
   },
+  "inspections": {
+    "home": {
+      "0": "Inspections",
+      "1": "Search Options",
+      "2": "Customer",
+      "3": "Search",
+      "4": "New",
+      "5": "#",
+      "6": "Customer",
+      "7": "Employee",
+      "8": "Date",
+      "9": "Sync QuickBooks",
+      "10": "Status",
+      "11": "View",
+      "12": "Delete"
+    },
+    "wizard": {
+      "1": "Select a group",
+      "2": "Select a question",
+      "3": "Select an answer",
+      "4": "Upload images"
+    },
+    "step0": {
+      "1": "Option Generator",
+      "2": "Customer",
+      "3": "Inspection Type",
+      "4": "Select an inspection"
+    },
+    "step1": {
+      "1": "Complete and save inspection"
+    },
+    "step2": {
+      "1": "You have completed all the questions,",
+      "1_5": "Click here to go to the next group"
+    },
+    "step3": {
+      "1": "Question:",
+      "2": "Cancel",
+      "3": "What is the final answer?"
+    },
+    "step4": {
+      "1": "Item:",
+      "2": "Quantity:",
+      "3": "Item",
+      "4": "Quantity",
+      "5": "Cancel",
+      "6": "Save",
+      "7": "Delete"
+    }
+  },
   "alerts": {
-    "1": "You need to type at least 3 characters in the fields so that you can select a match.",
-    "2": "All the grey spaces are editable, meaning you can write on them and add the required data."
+    "1": "You must type at least 3 characters in the fields to select a match.",
+    "2": "All gray spaces are editable, meaning you can type in them and add the required information."
   },
   "uploadPhoto": {
-    "drop": "Drop the files here ...",
-    "upload": "Click to upload or take a photo with your camera",
-    "attach": "Attach Photos or Take Pictures"
+    "drop": "Drop files here ...",
+    "upload": "Click to upload or take a picture with your camera",
+    "attach": "Attach photos or take images"
   },
   "general": {
-    "btnWatch": "Watch",
+    "btnWatch": "View",
     "btnPrint": "Print",
     "btnDelete": "Delete"
   }
