@@ -9,7 +9,7 @@ export interface AnswerNode {
   label: string;
   color: string;
   useParts?: boolean;
-  usePrint?: boolean;
+  usePrint?: boolean; // <- este campo es el que debe persisitir en memoria
   children?: AnswerNode[];
 }
 
@@ -42,19 +42,19 @@ const AnswerItem: React.FC<Props> = ({
       usePrint: false,
       children: [],
     };
-    updateField("children", [...(node.children || []), newChild]);
+    onChange({ ...node, children: [...(node.children || []), newChild] });
   };
 
   const updateChild = (index: number, updatedChild: AnswerNode) => {
     const updatedChildren = [...(node.children || [])];
     updatedChildren[index] = updatedChild;
-    updateField("children", updatedChildren);
+    onChange({ ...node, children: updatedChildren });
   };
 
   const deleteChild = (index: number) => {
     const updatedChildren = [...(node.children || [])];
     updatedChildren.splice(index, 1);
-    updateField("children", updatedChildren);
+    onChange({ ...node, children: updatedChildren });
   };
 
   return (
@@ -65,7 +65,7 @@ const AnswerItem: React.FC<Props> = ({
           value={node.label}
           onChange={(e) => updateField("label", e.target.value)}
           placeholder="Respuesta"
-          className="flex-1 input input-lg bg-[#f6f3f4] w-full text-left  transition-all border-1 text-lg font-normal border-gray-100 "
+          className="flex-1 input input-lg bg-[#f6f3f4] w-full text-left transition-all border-1 text-lg font-normal border-gray-100"
         />
 
         <button
@@ -75,6 +75,7 @@ const AnswerItem: React.FC<Props> = ({
         >
           <IoMdAdd className="w-[20px] h-[20px] opacity-70" />
         </button>
+
         <button
           type="button"
           onClick={onDelete}
@@ -82,6 +83,7 @@ const AnswerItem: React.FC<Props> = ({
         >
           <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
         </button>
+
         {level === 1 && (
           <input
             type="color"
@@ -103,8 +105,9 @@ const AnswerItem: React.FC<Props> = ({
             Usar Partes?
           </label>
         )}
+
         {level > 1 && (
-          <label className="label text-sm ">
+          <label className="label text-sm">
             <input
               type="checkbox"
               checked={node.usePrint ?? false}

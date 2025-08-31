@@ -26,8 +26,6 @@ interface Props {
     }
   ) => void;
   templateId: number;
-
-  // datos para prellenar (editar o duplicar)
   initialData?: {
     question: string;
     answers: AnswerNode[];
@@ -50,43 +48,28 @@ const InspectionModal: React.FC<Props> = ({
 }) => {
   const [question, setQuestion] = useState("");
   const [answers, setAnswers] = useState<AnswerNode[]>([]);
-  const [groupInput, setGroupInput] = useState(""); // por compatibilidad
   const [groups, setGroups] = useState<Group[]>([]);
-  const [groupSuggestions, setGroupSuggestions] = useState<Group[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [questionSuggestions, setQuestionSuggestions] = useState<
     TemplateInspectionQuestion[]
   >([]);
-  const [filteredQuestions, setFilteredQuestions] = useState<
-    TemplateInspectionQuestion[]
-  >([]);
   const [selectedQuestion, setSelectedQuestion] =
     useState<TemplateInspectionQuestion | null>(null);
-
   const hasAppliedInitial = useRef(false);
 
-  // helpers -> ids locales no numéricos
   const genId = () => `n_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 
+  // ✅ FIX: conservar usePrint al normalizar
   const ensureAnswerIds = (nodes: AnswerNode[]): AnswerNode[] =>
     (nodes ?? []).map((n) => ({
       id: n.id ?? genId(),
       label: n.label,
       color: n.color,
       useParts: !!n.useParts,
+      usePrint: !!n.usePrint, // <-- conservar
       children: ensureAnswerIds(n.children ?? []),
     }));
 
-  const debouncedGroupSearch = useRef(
-    debounce((text: string, data: Group[]) => {
-      const filtered = data.filter((g) =>
-        g.name.toLowerCase().includes(text.toLowerCase())
-      );
-      setGroupSuggestions(filtered);
-    }, 300)
-  ).current;
-
-  // cargar grupos
   useEffect(() => {
     axiosInstance
       .get("/Group")
@@ -94,10 +77,8 @@ const InspectionModal: React.FC<Props> = ({
       .catch((err) => console.error("Error al cargar grupos:", err));
   }, []);
 
-  // cargar preguntas del template
   useEffect(() => {
     if (!templateId) return;
-
     axiosInstance
       .get("/TemplateInspection/GetTemplateInspectionById", {
         params: { TemplateInspectionId: templateId },
@@ -111,10 +92,9 @@ const InspectionModal: React.FC<Props> = ({
   // aplicar prellenado (una sola vez)
   useEffect(() => {
     if (hasAppliedInitial.current) return;
-
     if (initialData) {
       setQuestion(initialData.question ?? "");
-      setAnswers(ensureAnswerIds(initialData.answers ?? []));
+      setAnswers(ensureAnswerIds(initialData.answers ?? [])); // <-- conserva usePrint
 
       if (groups.length > 0) {
         const g =
@@ -141,23 +121,17 @@ const InspectionModal: React.FC<Props> = ({
     questionSuggestions,
   ]);
 
-  // si los grupos llegan después, resolver selección por id
+  // si llegan luego
   useEffect(() => {
-    if (!initialData) return;
-    if (selectedGroup) return;
-    if (groups.length === 0) return;
-
+    if (!initialData || selectedGroup || groups.length === 0) return;
     const g =
       groups.find((gr) => gr.groupId === initialData.group.groupId) || null;
     if (g) setSelectedGroup(g);
   }, [groups, initialData, selectedGroup]);
 
-  // si las preguntas llegan después, resolver selección por id
   useEffect(() => {
-    if (!initialData) return;
-    if (selectedQuestion) return;
-    if (questionSuggestions.length === 0) return;
-
+    if (!initialData || selectedQuestion || questionSuggestions.length === 0)
+      return;
     const q = questionSuggestions.find(
       (qq) =>
         qq.templateInspectionQuestionId ===
@@ -165,18 +139,6 @@ const InspectionModal: React.FC<Props> = ({
     );
     if (q) setSelectedQuestion(q);
   }, [questionSuggestions, initialData, selectedQuestion]);
-
-  // filtros por escritura (opcional)
-  useEffect(() => {
-    if (question.trim().length >= 3) {
-      const filtered = questionSuggestions.filter((q) =>
-        q.question.toLowerCase().includes(question.toLowerCase())
-      );
-      setFilteredQuestions(filtered);
-    } else {
-      setFilteredQuestions([]);
-    }
-  }, [question, questionSuggestions]);
 
   const addAnswer = () => {
     setAnswers((prev) => [
@@ -186,6 +148,7 @@ const InspectionModal: React.FC<Props> = ({
         label: "",
         color: "#f87171",
         useParts: false,
+        usePrint: false, // <-- default explícito
         children: [],
       },
     ]);
@@ -201,13 +164,6 @@ const InspectionModal: React.FC<Props> = ({
     const newList = [...answers];
     newList.splice(index, 1);
     setAnswers(newList);
-  };
-
-  const handleGroupInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setGroupInput(value);
-    setSelectedGroup(null);
-    debouncedGroupSearch(value, groups);
   };
 
   const handleSubmit = () => {
@@ -258,7 +214,7 @@ const InspectionModal: React.FC<Props> = ({
         <div className="mb-3">
           <label className="font-semibold mb-1 block text-lg">Question</label>
           <select
-            className="input input-lg bg-[#f6f3f4] w-full text-center text-lg font-normal  appearance-auto"
+            className="input input-lg bg-[#f6f3f4] w-full text-center text-lg font-normal appearance-auto"
             value={selectedQuestion?.templateInspectionQuestionId ?? ""}
             onChange={(e) => {
               const found = questionSuggestions.find(
@@ -289,6 +245,7 @@ const InspectionModal: React.FC<Props> = ({
               Agregar Respuesta
             </button>
           </div>
+
           {answers.map((answer, index) => (
             <AnswerItem
               key={answer.id}
