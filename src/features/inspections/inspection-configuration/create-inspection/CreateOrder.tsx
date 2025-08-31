@@ -2,7 +2,7 @@
 "use client";
 
 import { COMPANY_INFO } from "@/config/constants";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { z } from "zod";
 import { useForm, UseFormRegister, FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -42,7 +42,6 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
   const [exportedQuestions, setExportedQuestions] = useState<
     ExportedQuestion[]
   >([]);
-
   const [templates, setTemplates] = useState<{ id: number; name: string }[]>(
     []
   );
@@ -145,7 +144,6 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
         const [templateRes] = await Promise.all([
           axiosInstance.get("/TemplateInspection"),
         ]);
-
         const items = templateRes.data.items;
         setTemplates(
           items.map((t: { templateInspectionId: number; name: string }) => ({
@@ -174,6 +172,15 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
     }`;
   const labelClass = () => `font-medium w-[30%] break-words`;
 
+  // ✅ Callbacks memoizados para evitar loops
+  const handleQuestionsChange = useCallback((has: boolean) => {
+    setHasAtLeastOneQuestion((prev) => (prev === has ? prev : has));
+  }, []);
+
+  const handleQuestionsExport = useCallback((q: ExportedQuestion[]) => {
+    setExportedQuestions(q);
+  }, []);
+
   const onSubmit = async (data: z.infer<typeof baseSchema>) => {
     if (!hasAtLeastOneQuestion) {
       alert("Debe agregar al menos una pregunta con respuestas");
@@ -189,8 +196,8 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
     const payload = {
       command: "Create" as const, // requerido por el backend
       templateInspectionId: Number(currentTemplateId),
-      customerId: String(selectedCustomer.id), // ⬅️ AHORA se envía el id correcto
-      customerName: selectedCustomer.name, // opcional: mantén coherencia con lo seleccionado
+      customerId: String(selectedCustomer.id), // ⬅️ id correcto
+      customerName: selectedCustomer.name,
       name: data.name,
       description: data.description,
       status: Number(data.status) || InspectionStatus.Active,
@@ -198,9 +205,8 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
     };
 
     try {
-      const res = await axiosInstance.post("/TypeInspection", payload);
+      await axiosInstance.post("/TypeInspection", payload);
       toast.success(`${tToasts("ok")}: ${tToasts("msj.5")}`);
-
       router.push(parentPath);
     } catch (error) {
       toast.error(`${tToasts("error")}: ${error}`);
@@ -252,8 +258,7 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
                           className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                           onClick={() => {
                             setIsLoadingCustomer(false);
-                            // ⬇️ Guarda id + name del cliente seleccionado
-                            setSelectedCustomer(option);
+                            setSelectedCustomer(option); // guarda id + name
 
                             if (inputCustomerRef.current) {
                               const selectedName = option.name;
@@ -349,10 +354,8 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
           <FormChassi
             register={register}
             errors={errors}
-            onQuestionsChange={(hasQuestions) =>
-              setHasAtLeastOneQuestion(hasQuestions)
-            }
-            onQuestionsExport={(q) => setExportedQuestions(q)}
+            onQuestionsChange={handleQuestionsChange} // ✅ memo
+            onQuestionsExport={handleQuestionsExport} // ✅ memo
             templateName={selectedTemplateName}
             templateId={Number(currentTemplateId)}
           />

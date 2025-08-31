@@ -6,6 +6,13 @@ import { AiOutlineSave } from "react-icons/ai";
 import { debounce } from "lodash";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
 
+type Group = { groupId: number; name: string; status: number };
+type TemplateInspectionQuestion = {
+  templateInspectionQuestionId: number;
+  question: string;
+  typeQuestion: number;
+};
+
 interface Props {
   onClose: () => void;
   onSave: (
@@ -19,48 +26,58 @@ interface Props {
     }
   ) => void;
   templateId: number;
+
+  // Prefill para editar/duplicar dentro del flujo de CREAR
+  initialData?: {
+    question: string;
+    answers: AnswerNode[];
+    group:
+      | { groupId: number }
+      | { groupId: number; name: string; status: number };
+    selectedQuestion: {
+      templateInspectionQuestionId: number;
+      question: string;
+      typeQuestion: number;
+    };
+  };
 }
 
-const InspectionModal: React.FC<Props> = ({ onClose, onSave, templateId }) => {
+const InspectionModal: React.FC<Props> = ({
+  onClose,
+  onSave,
+  templateId,
+  initialData,
+}) => {
   const [question, setQuestion] = useState("");
   const [answers, setAnswers] = useState<AnswerNode[]>([]);
-  const [groupInput, setGroupInput] = useState("");
-  const [groups, setGroups] = useState<
-    { groupId: number; name: string; status: number }[]
-  >([]);
-  interface Group {
-    groupId: number;
-    name: string;
-    status: number;
-  }
 
-  interface TemplateInspectionQuestion {
-    templateInspectionQuestionId: number;
-    question: string;
-    typeQuestion: number;
-    // Add other properties if needed
-  }
-
-  const [groupSuggestions, setGroupSuggestions] = useState<Group[]>([]);
+  const [groups, setGroups] = useState<Group[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
+
   const [questionSuggestions, setQuestionSuggestions] = useState<
-    TemplateInspectionQuestion[]
-  >([]);
-  const [filteredQuestions, setFilteredQuestions] = useState<
     TemplateInspectionQuestion[]
   >([]);
   const [selectedQuestion, setSelectedQuestion] =
     useState<TemplateInspectionQuestion | null>(null);
 
-  const debouncedGroupSearch = useRef(
-    debounce((text: string, data: Group[]) => {
-      const filtered = data.filter((g) =>
-        g.name.toLowerCase().includes(text.toLowerCase())
-      );
-      setGroupSuggestions(filtered);
-    }, 300)
-  ).current;
+  // flags para aplicar partes del prefill exactamente una vez CUANDO haya data
+  const appliedBaseRef = useRef(false);
+  const appliedGroupRef = useRef(false);
+  const appliedQuestionRef = useRef(false);
 
+  const genId = () => `n_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+
+  const ensureAnswerIds = (nodes: AnswerNode[]): AnswerNode[] =>
+    (nodes ?? []).map((n) => ({
+      id: n.id ?? genId(),
+      label: n.label,
+      color: n.color,
+      useParts: !!n.useParts,
+      usePrint: !!n.usePrint,
+      children: ensureAnswerIds(n.children ?? []),
+    }));
+
+  // --- cargar grupos
   useEffect(() => {
     axiosInstance
       .get("/Group")
@@ -68,9 +85,9 @@ const InspectionModal: React.FC<Props> = ({ onClose, onSave, templateId }) => {
       .catch((err) => console.error("Error al cargar grupos:", err));
   }, []);
 
+  // --- cargar preguntas del template
   useEffect(() => {
     if (!templateId) return;
-
     axiosInstance
       .get("/TemplateInspection/GetTemplateInspectionById", {
         params: { TemplateInspectionId: templateId },
@@ -81,47 +98,70 @@ const InspectionModal: React.FC<Props> = ({ onClose, onSave, templateId }) => {
       .catch((err) => console.error("Error al cargar preguntas:", err));
   }, [templateId]);
 
+  // 1) Prefill base (texto y respuestas) apenas hay initialData
   useEffect(() => {
-    if (question.trim().length >= 3) {
-      const filtered = questionSuggestions.filter((q) =>
-        q.question.toLowerCase().includes(question.toLowerCase())
-      );
-      setFilteredQuestions(filtered);
-    } else {
-      setFilteredQuestions([]);
+    if (appliedBaseRef.current) return;
+    if (!initialData) return;
+
+    setQuestion(initialData.question ?? "");
+    setAnswers(ensureAnswerIds(initialData.answers ?? []));
+    appliedBaseRef.current = true;
+  }, [initialData]);
+
+  // 2) Resolver selección de grupo CUANDO existan grupos
+  useEffect(() => {
+    if (appliedGroupRef.current) return;
+    if (!initialData) return;
+    if (groups.length === 0) return;
+
+    const g =
+      groups.find((gr) => gr.groupId === initialData.group.groupId) || null;
+    if (g) setSelectedGroup(g);
+    appliedGroupRef.current = true;
+  }, [groups, initialData]);
+
+  // 3) Resolver selección de pregunta CUANDO existan sugerencias
+  useEffect(() => {
+    if (appliedQuestionRef.current) return;
+    if (!initialData) return;
+    if (questionSuggestions.length === 0) return;
+
+    const q = questionSuggestions.find(
+      (qq) =>
+        qq.templateInspectionQuestionId ===
+        initialData.selectedQuestion.templateInspectionQuestionId
+    );
+    if (q) {
+      setSelectedQuestion(q);
+      setQuestion(q.question); // sincroniza el input con el label real
     }
-  }, [question]);
+    appliedQuestionRef.current = true;
+  }, [questionSuggestions, initialData]);
 
   const addAnswer = () => {
     setAnswers((prev) => [
       ...prev,
       {
-        id: `${Date.now()}`,
+        id: genId(),
         label: "",
         color: "#f87171",
         useParts: false,
+        usePrint: false,
         children: [],
       },
     ]);
   };
 
   const updateAnswer = (index: number, updated: AnswerNode) => {
-    const newList = [...answers];
-    newList[index] = updated;
-    setAnswers(newList);
+    const next = [...answers];
+    next[index] = { ...updated, id: updated.id ?? genId() };
+    setAnswers(next);
   };
 
   const deleteAnswer = (index: number) => {
-    const newList = [...answers];
-    newList.splice(index, 1);
-    setAnswers(newList);
-  };
-
-  const handleGroupInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setGroupInput(value);
-    setSelectedGroup(null);
-    debouncedGroupSearch(value, groups);
+    const next = [...answers];
+    next.splice(index, 1);
+    setAnswers(next);
   };
 
   const handleSubmit = () => {
@@ -131,20 +171,13 @@ const InspectionModal: React.FC<Props> = ({ onClose, onSave, templateId }) => {
       return alert("Debe agregar al menos una respuesta válida");
     if (!selectedGroup) return alert("Debe seleccionar un grupo válido");
     if (!selectedQuestion) return alert("Debe seleccionar una pregunta válida");
-    onSave(
-      question,
-      validAnswers,
-      selectedGroup,
-      selectedQuestion
-        ? {
-            templateInspectionQuestionId:
-              selectedQuestion.templateInspectionQuestionId,
-            question: selectedQuestion.question,
-            typeQuestion: selectedQuestion.typeQuestion,
-          }
-        : selectedQuestion
-    );
-    //onSave(question, validAnswers, selectedGroup, selectedQuestion);
+
+    onSave(question, validAnswers, selectedGroup, {
+      templateInspectionQuestionId:
+        selectedQuestion.templateInspectionQuestionId,
+      question: selectedQuestion.question,
+      typeQuestion: selectedQuestion.typeQuestion,
+    });
     onClose();
   };
 
@@ -187,9 +220,6 @@ const InspectionModal: React.FC<Props> = ({ onClose, onSave, templateId }) => {
               );
               setSelectedQuestion(found ?? null);
               setQuestion(found?.question ?? "");
-              if (found) {
-                console.log("Pregunta seleccionada:", found);
-              }
             }}
           >
             <option value="" disabled>
@@ -234,7 +264,8 @@ const InspectionModal: React.FC<Props> = ({ onClose, onSave, templateId }) => {
             disabled={
               !question.trim() ||
               answers.filter((a) => a.label.trim() !== "").length === 0 ||
-              !selectedGroup
+              !selectedGroup ||
+              !selectedQuestion
             }
           >
             <AiOutlineSave className="w-[20px] h-[20px] opacity-70" />

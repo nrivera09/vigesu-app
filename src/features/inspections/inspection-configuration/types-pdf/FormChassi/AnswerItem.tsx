@@ -9,7 +9,7 @@ export interface AnswerNode {
   label: string;
   color: string;
   useParts?: boolean;
-  usePrint?: boolean; // <- este campo es el que debe persisitir en memoria
+  usePrint?: boolean; // <- persiste en memoria
   children?: AnswerNode[];
 }
 
