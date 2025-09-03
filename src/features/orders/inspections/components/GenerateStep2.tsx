@@ -134,7 +134,7 @@ const GenerateStep2 = () => {
           <button
             disabled={enableFinalButton > 0}
             className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-fit mx-auto text-[13px]"
-            onClick={() => useInspectionFullStore.getState().setStepWizard(3)}
+            onClick={() => useInspectionFullStore.getState().setStepWizard(1)}
           >
             {t("step2.1")}{" "}
             <span className="underline text-red-400">{t("step2.1_5")}</span>
