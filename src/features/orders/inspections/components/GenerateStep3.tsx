@@ -1,4 +1,5 @@
-//  Versión corregida: guarda todas las respuestas seleccionadas por nivel correctamente y respeta subAnswers anidados
+//  Versión corregida: hijos colapsados; se despliegan 1x1 al seleccionar el padre
+"use client";
 import React, { useEffect, useState } from "react";
 import { useInspectionFullStore } from "../../store/inspection/inspectionFullStore";
 import { isColorLight } from "@/shared/utils/utils";
@@ -10,7 +11,6 @@ import clsx from "clsx";
 import { TypeQuestion, TypeQuestionLabel } from "../../models/workOrder.types";
 import { IoIosInformationCircleOutline } from "react-icons/io";
 import Lottie from "lottie-react";
-
 import checkLottie from "@/assets/lotties/check.json";
 import { toast } from "sonner";
 import AnswerSign from "./typeQuest/AnswerSign";
@@ -38,18 +38,16 @@ const GenerateStep3 = () => {
   const tToasts = useTranslations("toast");
   const { fullInspection, groupName, groupId, titleQuestion, fullQuestion } =
     useInspectionFullStore();
+
   const [selectedTree, setSelectedTree] = useState<IFullAnswer[]>([]);
   const [isSignValid, setIsSignValid] = useState(false);
-
   const [signUrl, setSignUrl] = useState<string | undefined>(undefined);
-
   const [showItemModal, setShowItemModal] = useState(false);
   const [modalAnswer, setModalAnswer] = useState<IFullAnswer | null>(null);
   const [initialItems, setInitialItems] = useState<ItemWithQuantity[]>([]);
   const [textResponse, setTextResponse] = useState("");
 
   const { resetTrigger } = useInspectionFullStore();
-
   const [showRootPicker, setShowRootPicker] = useState(false);
   const [selectedRootId, setSelectedRootId] = useState<string | null>(null);
 
@@ -61,7 +59,6 @@ const GenerateStep3 = () => {
   }, [resetTrigger]);
 
   const originalRoots = fullQuestion?.originalAnswers ?? [];
-
   const currentAnswers =
     fullQuestion?.originalAnswers ?? fullQuestion?.answers ?? [];
 
@@ -70,55 +67,58 @@ const GenerateStep3 = () => {
   const isText = fullQuestion?.typeQuestion === TypeQuestion.TextInput;
   const isSign = fullQuestion?.typeQuestion === TypeQuestion.Sign;
 
-  const openItemModal2 = (answer: IFullAnswer) => {
-    const findAnswerInTree = (tree: IFullAnswer[]): IFullAnswer | null => {
-      for (const node of tree) {
-        if (
-          node.typeInspectionDetailAnswerId ===
-          answer.typeInspectionDetailAnswerId
-        ) {
-          return node;
-        }
-        if (node.subAnswers?.length) {
-          const found = findAnswerInTree(node.subAnswers);
-          if (found) return found;
-        }
-      }
-      return null;
-    };
-
-    const nodeInTree = findAnswerInTree(selectedTree);
-    setModalAnswer(answer);
-    setInitialItems(nodeInTree?.selectedItems ?? []);
-    setShowItemModal(true);
-  };
-
-  const openItemModal = (answer: IFullAnswer) => {
-    const answerId = String(answer.typeInspectionDetailAnswerId);
-    const selected = isSelected(answerId, selectedTree);
-
-    if (!selected) {
-      toast.error(`${tToasts("error")}: ${tToasts("msj.30")}`);
-      return;
+  // ---------- utils selección ----------
+  const isSelected = (id: string, tree: IFullAnswer[]): boolean => {
+    for (const a of tree) {
+      if (String(a.typeInspectionDetailAnswerId) === id) return true;
+      if (a.subAnswers?.length && isSelected(id, a.subAnswers)) return true;
     }
-
-    const findAnswerInTree = (tree: IFullAnswer[]): IFullAnswer | null => {
-      for (const node of tree) {
-        if (String(node.typeInspectionDetailAnswerId) === answerId) return node;
-        if (node.subAnswers?.length) {
-          const found = findAnswerInTree(node.subAnswers);
-          if (found) return found;
-        }
-      }
-      return null;
-    };
-
-    const nodeInTree = findAnswerInTree(selectedTree);
-    setModalAnswer(answer);
-    setInitialItems(nodeInTree?.selectedItems ?? []);
-    setShowItemModal(true);
+    return false;
   };
 
+  const getAnswerFromTree = (
+    tree: IFullAnswer[],
+    id: string
+  ): IFullAnswer | undefined => {
+    for (const a of tree) {
+      if (String(a.typeInspectionDetailAnswerId) === id) return a;
+      if (a.subAnswers?.length) {
+        const found = getAnswerFromTree(a.subAnswers, id);
+        if (found) return found;
+      }
+    }
+    return undefined;
+  };
+
+  // ¿Algún descendiente de este nodo está seleccionado?
+  const hasSelectedDescendant = (node: IFullAnswer): boolean => {
+    if (!node.subAnswers?.length) return false;
+    return node.subAnswers.some(
+      (sub) =>
+        isSelected(String(sub.typeInspectionDetailAnswerId), selectedTree) ||
+        hasSelectedDescendant(sub)
+    );
+  };
+
+  const updateSelectedItems = (
+    tree: IFullAnswer[],
+    answerId: string,
+    items: ItemWithQuantity[]
+  ): IFullAnswer[] =>
+    tree.map((a) => {
+      if (String(a.typeInspectionDetailAnswerId) === answerId) {
+        return { ...a, selectedItems: items };
+      }
+      if (a.subAnswers?.length) {
+        return {
+          ...a,
+          subAnswers: updateSelectedItems(a.subAnswers, answerId, items),
+        };
+      }
+      return a;
+    });
+
+  // ---------- toggle con limpieza de ramas ----------
   const toggleAnswer = (
     tree: IFullAnswer[],
     answer: IFullAnswer,
@@ -126,19 +126,14 @@ const GenerateStep3 = () => {
   ): IFullAnswer[] => {
     const isRoot = !parentId;
 
-    //  SINGLE CHOICE: Solo 1 rama
     if (!isMultiple) {
+      // SINGLE: una opción por nivel
       if (isRoot) {
         return [{ ...answer, subAnswers: [] }];
       }
-
-      // Solo permite una subrespuesta por nivel
       return tree.map((node) => {
         if (String(node.typeInspectionDetailAnswerId) === parentId) {
-          return {
-            ...node,
-            subAnswers: [{ ...answer, subAnswers: [] }],
-          };
+          return { ...node, subAnswers: [{ ...answer, subAnswers: [] }] };
         }
         if (node.subAnswers?.length) {
           return {
@@ -150,7 +145,7 @@ const GenerateStep3 = () => {
       });
     }
 
-    //  MULTIPLE CHOICE: una raíz + múltiples ramas
+    // MULTIPLE: solo 1 raíz, múltiples por nivel debajo
     if (isMultiple) {
       if (isRoot) {
         const exists = tree.find(
@@ -159,18 +154,17 @@ const GenerateStep3 = () => {
             answer.typeInspectionDetailAnswerId
         );
         if (exists) {
+          // Quitar raíz (y su árbol)
           return tree.filter(
             (a) =>
               a.typeInspectionDetailAnswerId !==
               answer.typeInspectionDetailAnswerId
           );
         } else {
-          // Si ya hay otra raíz, la reemplaza (solo 1 raíz)
+          // Forzamos una sola raíz
           return [{ ...answer, subAnswers: [] }];
         }
       }
-
-      // Para subniveles, sí permite múltiples
       return tree.map((node) => {
         if (String(node.typeInspectionDetailAnswerId) === parentId) {
           const exists = node.subAnswers?.some(
@@ -196,55 +190,10 @@ const GenerateStep3 = () => {
         return node;
       });
     }
-
     return tree;
   };
 
-  const getAnswerFromTree = (
-    tree: IFullAnswer[],
-    id: string
-  ): IFullAnswer | undefined => {
-    for (const a of tree) {
-      if (String(a.typeInspectionDetailAnswerId) === id) return a;
-      if (a.subAnswers?.length) {
-        const found = getAnswerFromTree(a.subAnswers, id);
-        if (found) return found;
-      }
-    }
-    return undefined;
-  };
-
-  const hasRootWithChildren = (tree: IFullAnswer[]) => {
-    return tree.some((a) => a.subAnswers?.length);
-  };
-
-  const isSelected = (id: string, tree: IFullAnswer[]): boolean => {
-    for (const a of tree) {
-      if (String(a.typeInspectionDetailAnswerId) === id) return true;
-      if (a.subAnswers?.length && isSelected(id, a.subAnswers)) return true;
-    }
-    return false;
-  };
-
-  const updateSelectedItems = (
-    tree: IFullAnswer[],
-    answerId: string,
-    items: ItemWithQuantity[]
-  ): IFullAnswer[] => {
-    return tree.map((a) => {
-      if (String(a.typeInspectionDetailAnswerId) === answerId) {
-        return { ...a, selectedItems: items };
-      }
-      if (a.subAnswers?.length) {
-        return {
-          ...a,
-          subAnswers: updateSelectedItems(a.subAnswers, answerId, items),
-        };
-      }
-      return a;
-    });
-  };
-
+  // ---------- render recursivo con colapso ----------
   const renderAnswerRecursive = (
     answer: IFullAnswer,
     level: number = 0,
@@ -254,23 +203,19 @@ const GenerateStep3 = () => {
       answer.color === "#ffffff" ? "#171717" : answer.color;
     const isLight = isColorLight(backgroundColor);
     const textColor = isLight ? "#000000" : "#ffffff";
-    const selected = isSelected(
-      String(answer.typeInspectionDetailAnswerId),
-      selectedTree
-    );
+    const id = String(answer.typeInspectionDetailAnswerId);
+    const selected = isSelected(id, selectedTree);
 
-    const treeAnswer = getAnswerFromTree(
-      selectedTree,
-      String(answer.typeInspectionDetailAnswerId)
-    );
+    const treeAnswer = getAnswerFromTree(selectedTree, id);
     const hasItems =
       treeAnswer?.selectedItems?.length && treeAnswer.selectedItems.length > 0;
 
+    // Mostrar hijos SOLO si el nodo está seleccionado
+    // (o si hay un descendiente seleccionado cuando re-hidratas una respuesta guardada)
+    const showChildren = selected || hasSelectedDescendant(answer);
+
     return (
-      <div
-        key={answer.typeInspectionDetailAnswerId}
-        className="flex flex-col items-center"
-      >
+      <div key={id} className="flex flex-col items-center">
         <div className="flex flex-col items-center relative">
           {level > 0 && (
             <div className="absolute top-[-16px] h-4 w-px bg-gray-300" />
@@ -283,16 +228,14 @@ const GenerateStep3 = () => {
                 const updated = toggleAnswer(selectedTree, answer, parentId);
                 setSelectedTree(updated);
 
-                // ✅ Solo aplica si estamos seleccionando raíz
                 const isRoot = !parentId;
-
                 if (
                   isRoot &&
                   (isSingle || isMultiple) &&
-                  updated.length === 1 && // solo hay 1 respuesta raíz
-                  isLastQuestionInGroup // última pregunta del grupo
+                  updated.length === 1 &&
+                  isLastQuestionInGroup
                 ) {
-                  completeCurrentQuestion(updated[0].response); // llama directamente
+                  completeCurrentQuestion(updated[0].response);
                 }
               }}
             >
@@ -355,7 +298,6 @@ const GenerateStep3 = () => {
                 </div>
               ))}
 
-            {/* Mostrar cantidad de ítems si existen */}
             {selected &&
               answer.selectedItems &&
               answer.selectedItems.length > 0 && (
@@ -367,25 +309,15 @@ const GenerateStep3 = () => {
               )}
           </div>
 
-          {answer.subAnswers?.length > 0 && (
-            <div
-              className={clsx(
-                "mt-4 flex flex-row gap-4 pt-4",
-                selected
-                  ? "border-t border-black/10"
-                  : "opacity-40 pointer-events-none"
-              )}
-            >
+          {/* 🔽 SOLO renderiza los hijos cuando el padre está seleccionado */}
+          {showChildren && answer.subAnswers?.length > 0 && (
+            <div className="mt-4 flex flex-row gap-4 pt-4 border-t border-black/10">
               {answer.subAnswers.map((sub) => (
                 <div
                   key={sub.typeInspectionDetailAnswerId}
                   className="flex flex-col items-center"
                 >
-                  {renderAnswerRecursive(
-                    sub,
-                    level + 1,
-                    String(answer.typeInspectionDetailAnswerId)
-                  )}
+                  {renderAnswerRecursive(sub, level + 1, id)}
                 </div>
               ))}
             </div>
@@ -395,78 +327,76 @@ const GenerateStep3 = () => {
     );
   };
 
-  const exportTree = (answers: IFullAnswer[]): ExportedAnswer[] => {
-    return answers.map((a) => ({
+  const openItemModal = (answer: IFullAnswer) => {
+    const answerId = String(answer.typeInspectionDetailAnswerId);
+    const selected = isSelected(answerId, selectedTree);
+    if (!selected) {
+      toast.error(`${tToasts("error")}: ${tToasts("msj.30")}`);
+      return;
+    }
+    const findAnswerInTree = (tree: IFullAnswer[]): IFullAnswer | null => {
+      for (const node of tree) {
+        if (String(node.typeInspectionDetailAnswerId) === answerId) return node;
+        if (node.subAnswers?.length) {
+          const found = findAnswerInTree(node.subAnswers);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+    const nodeInTree = findAnswerInTree(selectedTree);
+    setModalAnswer(answer);
+    setInitialItems(nodeInTree?.selectedItems ?? []);
+    setShowItemModal(true);
+  };
+
+  const exportTree = (answers: IFullAnswer[]): ExportedAnswer[] =>
+    answers.map((a) => ({
       response: a.response,
       usingItem: a.usingItem,
       selectedItems: a.selectedItems ?? [],
       subAnswers: a.subAnswers?.length ? exportTree(a.subAnswers) : [],
     }));
-  };
 
   const completeSign = () => {
     const store = useInspectionFullStore.getState();
     const current = store.fullInspection;
-    const fullQuestion = store.fullQuestion;
-
-    if (!current || !fullQuestion) {
-      console.warn("❌ Datos incompletos, no se puede continuar.");
-      return;
-    }
-
-    const updatedQuestions = current.questions.map((q) => {
-      const match =
-        q.typeInspectionDetailId === fullQuestion.typeInspectionDetailId;
-
-      if (match) {
-        return {
-          ...q,
-          statusInspectionConfig: true,
-        };
-      }
-
-      return q;
-    });
-
-    store.setFullInspection({
-      ...current,
-      questions: updatedQuestions,
-    });
-
-    store.setStepWizard(2); // ← vuelve al paso 2
+    const fq = store.fullQuestion;
+    if (!current || !fq) return;
+    const updatedQuestions = current.questions.map((q) =>
+      q.typeInspectionDetailId === fq.typeInspectionDetailId
+        ? { ...q, statusInspectionConfig: true }
+        : q
+    );
+    store.setFullInspection({ ...current, questions: updatedQuestions });
+    store.setStepWizard(2);
   };
 
   const completeCurrentQuestionWithRoot = (rootLabel: string) => {
     const store = useInspectionFullStore.getState();
     const current = store.fullInspection;
-    const fullQuestion = store.fullQuestion;
-    if (!current || !fullQuestion) return;
+    const fq = store.fullQuestion;
+    if (!current || !fq) return;
 
-    // Actualiza SOLO la pregunta actual con el rootLabel elegido en el modal
     const updatedQuestions = current.questions.map((q) => {
-      if (q.typeInspectionDetailId === fullQuestion.typeInspectionDetailId) {
+      if (q.typeInspectionDetailId === fq.typeInspectionDetailId) {
         return {
           ...q,
-          finalResponse: rootLabel, // ← valor elegido en el modal
-          statusInspectionConfig: true, // ← marcada como respondida
+          finalResponse: rootLabel,
+          statusInspectionConfig: true,
           answers: selectedTree.length > 0 ? selectedTree : q.answers,
         };
       }
       return q;
     });
 
-    // Conjunto de preguntas del MISMO grupo (para decidir siguiente)
     const currentGroupQuestions = updatedQuestions.filter(
-      (q) =>
-        q.groupId === fullQuestion.groupId &&
-        q.groupName === fullQuestion.groupName
+      (q) => q.groupId === fq.groupId && q.groupName === fq.groupName
     );
-
     const groupCompleted = currentGroupQuestions.every(
       (q) => q.statusInspectionConfig
     );
 
-    // Persistimos TODO el estado de la inspección
     const updatedInspection = {
       ...current,
       questions: updatedQuestions,
@@ -476,10 +406,8 @@ const GenerateStep3 = () => {
     };
     store.setFullInspection(updatedInspection);
 
-    // Cierra el modal SIEMPRE
     setShowRootPicker(false);
 
-    // Si el grupo NO terminó, navega a la siguiente sin responder del mismo grupo
     if (!groupCompleted) {
       const nextUnanswered = currentGroupQuestions.find(
         (q) => !q.statusInspectionConfig
@@ -489,12 +417,11 @@ const GenerateStep3 = () => {
         store.setGroupId(nextUnanswered.groupId);
         store.setGroupName(nextUnanswered.groupName);
         store.setTitleQuestion(nextUnanswered.question);
-        store.setStepWizard(3); // 👉 pasa directo a la siguiente pregunta
+        store.setStepWizard(3);
         return;
       }
     }
 
-    // Si ya no quedan preguntas en este grupo, regresa al listado
     toast.success(`${tToasts("ok")}: ${tToasts("msj.31")}`);
     store.setStepWizard(2);
   };
@@ -502,17 +429,16 @@ const GenerateStep3 = () => {
   const completeCurrentQuestion = (responseValue: string | null = null) => {
     const store = useInspectionFullStore.getState();
     const current = store.fullInspection;
-    const fullQuestion = store.fullQuestion;
-    if (!current || !fullQuestion) return;
+    const fq = store.fullQuestion;
+    if (!current || !fq) return;
 
     let resolvedFinalResponse = responseValue ?? "";
-    // 🟢 Si es SingleChoice, obtener el texto de la raíz seleccionada
     if (isSingle && selectedTree.length === 1) {
       resolvedFinalResponse = selectedTree[0].response;
     }
 
     const updatedQuestions = current.questions.map((q) => {
-      if (q.typeInspectionDetailId === fullQuestion.typeInspectionDetailId) {
+      if (q.typeInspectionDetailId === fq.typeInspectionDetailId) {
         return {
           ...q,
           finalResponse: resolvedFinalResponse,
@@ -524,11 +450,8 @@ const GenerateStep3 = () => {
     });
 
     const currentGroupQuestions = updatedQuestions.filter(
-      (q) =>
-        q.groupId === fullQuestion.groupId &&
-        q.groupName === fullQuestion.groupName
+      (q) => q.groupId === fq.groupId && q.groupName === fq.groupName
     );
-
     const groupCompleted = currentGroupQuestions.every(
       (q) => q.statusInspectionConfig
     );
@@ -540,7 +463,6 @@ const GenerateStep3 = () => {
         (q) => q.statusInspectionConfig
       ),
     };
-
     store.setFullInspection(updatedInspection);
 
     if (!groupCompleted) {
@@ -573,32 +495,16 @@ const GenerateStep3 = () => {
         q.typeInspectionDetailId === fullQuestion?.typeInspectionDetailId
     );
 
-  const isAnswerInSelectedTree = (id: number, tree: IFullAnswer[]): boolean => {
-    for (const node of tree) {
-      if (node.typeInspectionDetailAnswerId === id) return true;
-      if (node.subAnswers && node.subAnswers.length > 0) {
-        if (isAnswerInSelectedTree(id, node.subAnswers)) return true;
-      }
-    }
-    return false;
-  };
-
-  useEffect(() => {
-    /*  console.log("📡 TREE RESPUESTAS EN TIEMPO REAL:", exportTree(selectedTree));*/
-  }, [selectedTree]);
-
   useEffect(() => {
     if (!fullQuestion || !fullInspection) return;
 
     const q = fullInspection.questions.find(
-      (q) => q.typeInspectionDetailId === fullQuestion.typeInspectionDetailId
+      (qq) => qq.typeInspectionDetailId === fullQuestion.typeInspectionDetailId
     );
 
-    // Siempre hidrata originalAnswers
     if (q && !q.originalAnswers && fullQuestion.answers) {
       q.originalAnswers = structuredClone(fullQuestion.answers);
     }
-
     if (q?.originalAnswers) {
       fullQuestion.originalAnswers = q.originalAnswers;
     }
@@ -606,19 +512,16 @@ const GenerateStep3 = () => {
     const alreadyAnswered = q?.statusInspectionConfig;
 
     if (alreadyAnswered && (isSingle || isMultiple)) {
-      // ✅ Permite volver a editar cualquier SingleChoice o MultipleChoice
       setSelectedTree(q.answers ?? []);
       setTextResponse(q.finalResponse ?? "");
       setSignUrl(q.finalResponse ?? "");
       setIsSignValid(!!q.finalResponse);
     } else if (alreadyAnswered && isText) {
-      // TextInput → mantener el texto sin editar
       setTextResponse(q.finalResponse ?? "");
     } else if (alreadyAnswered && isSign) {
       setSignUrl(q.finalResponse ?? "");
       setIsSignValid(!!q.finalResponse);
     } else {
-      // Nueva pregunta
       setSelectedTree([]);
       setTextResponse("");
       setSignUrl("");
@@ -647,10 +550,6 @@ const GenerateStep3 = () => {
             onComplete={(valid, url) => {
               setIsSignValid(valid);
               setSignUrl(url);
-
-              if (valid && isLastQuestionInGroup) {
-                //completeCurrentQuestion(url);
-              }
             }}
           />
         )}
@@ -681,9 +580,7 @@ const GenerateStep3 = () => {
             <button
               disabled={selectedTree.length === 0}
               className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px]"
-              onClick={() => {
-                setShowRootPicker(true);
-              }}
+              onClick={() => setShowRootPicker(true)}
             >
               {isLastQuestionInGroup ? "Save" : "Continue"}
             </button>
@@ -715,18 +612,13 @@ const GenerateStep3 = () => {
           onClose={() => setShowItemModal(false)}
           onSave={(items: ItemWithQuantity[]) => {
             if (!modalAnswer) return;
-
-            // 💡 Aseguramos usar siempre la última versión del árbol
-            setSelectedTree((prevTree) => {
-              const updated = updateSelectedItems(
-                prevTree,
+            setSelectedTree((prev) =>
+              updateSelectedItems(
+                prev,
                 String(modalAnswer.typeInspectionDetailAnswerId),
                 items
-              );
-              console.log("✅ Árbol actualizado con items:", updated);
-              return updated;
-            });
-
+              )
+            );
             setShowItemModal(false);
           }}
           initialItems={initialItems}
@@ -754,7 +646,7 @@ const GenerateStep3 = () => {
                     setShowRootPicker(false);
                     completeCurrentQuestionWithRoot(root.response);
                   }}
-                  className={`btn w-full min-h-[39px] p-2 rounded-md text-lg hover:opacity-85`}
+                  className="btn w-full min-h-[39px] p-2 rounded-md text-lg hover:opacity-85"
                   style={{
                     backgroundColor: root.color,
                     color: isColorLight(root.color) ? "#000" : "#fff",
