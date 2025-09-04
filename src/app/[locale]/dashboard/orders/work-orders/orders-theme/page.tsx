@@ -88,7 +88,7 @@ const Page = () => {
                   <input
                     type="text"
                     className="input input-lg text-lg w-full"
-                    placeholder="My awesome page"
+                    placeholder=""
                     onChange={(e) =>
                       setObjFilterForm({
                         ...objFilterForm,

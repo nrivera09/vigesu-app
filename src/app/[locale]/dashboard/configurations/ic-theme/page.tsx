@@ -48,7 +48,7 @@ const Page = () => {
     <>
       <div className="gap-4 flex flex-col  min-h-full ">
         <div className="header-page flex flex-row items-center justify-between min-h-[70px] bg-base-200 px-6 gap-2">
-          <BackButton />
+          <BackButton disableArrow />
           <div className="flex flex-row gap-2">
             <Link
               href={`${pathname}/new`}
@@ -83,12 +83,12 @@ const Page = () => {
               <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="flex flex-col col-span-1 sm:col-span-1 md:col-span-3">
                   <legend className="fieldset-legend text-lg font-normal">
-                    Form
+                    Report form
                   </legend>
                   <input
                     type="text"
                     className="input input-lg text-lg w-full"
-                    placeholder="My awesome page"
+                    placeholder=""
                     onChange={(e) =>
                       setObjFilterForm({
                         ...objFilterForm,

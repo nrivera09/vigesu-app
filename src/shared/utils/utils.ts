@@ -156,3 +156,25 @@ export const getTodayParts = () => {
     year: String(today.getFullYear()), // YYYY
   };
 };
+
+export const slugify = (text: string): string => {
+  return text
+    .toString()
+    .normalize("NFD") // elimina acentos/diacríticos
+    .replace(/[\u0300-\u036f]/g, "") // remueve marcas de acento
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "") // elimina caracteres no válidos
+    .replace(/\s+/g, "-") // reemplaza espacios por guiones
+    .replace(/-+/g, "-"); // evita guiones repetidos
+};
+
+export const deslugify = (slug: string): string => {
+  if (!slug) return "";
+
+  return slug
+    .replace(/-/g, " ") // remplaza guiones por espacios
+    .trim() // quita espacios al inicio/fin
+    .replace(/\s+/g, " ") // normaliza espacios dobles
+    .replace(/^./, (c) => c.toUpperCase()); // capitaliza la primera letra
+};

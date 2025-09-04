@@ -11,6 +11,7 @@ import {
 } from "../inspections/api/inspectionApi";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { slugify } from "@/shared/utils/utils";
 
 const TableList = ({ objFilter, setRefreshFlag }: TableListProps) => {
   const router = useRouter();
@@ -72,10 +73,13 @@ const TableList = ({ objFilter, setRefreshFlag }: TableListProps) => {
                   }
                   label="Preview"
                   onClick={() =>
-                    router.push(`${pathname}/${item.templateInspectionId}`)
+                    router.push(
+                      `${pathname}/${item.templateInspectionId}/${slugify(item.name)}`
+                    )
                   }
                 />
                 <ActionButton
+                  className="!hidden"
                   icon={<FiTrash2 className="w-[20px] h-[20px] opacity-70" />}
                   label="Delete"
                   onClick={() =>

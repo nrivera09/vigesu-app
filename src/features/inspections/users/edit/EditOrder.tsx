@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { DOMAIN } from "@/config/constants";
 import debounce from "lodash/debounce";
 import { useTranslations } from "next-intl";
+import { useAuthStore } from "@/shared/stores/useAuthStore";
 
 type EmployeeOption = { id: string; name: string };
 
@@ -23,6 +24,9 @@ const schema = z.object({
 });
 
 const EditOrder = () => {
+  const employeeId = useAuthStore((state) => state.user?.employeeId);
+  const employeeName = useAuthStore((state) => state.user?.employeeName);
+
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
   const tToasts = useTranslations("toast");
@@ -207,10 +211,8 @@ const EditOrder = () => {
         {/* Employee Name con autocomplete */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex flex-row gap-2 items-center justify-center md:col-span-2">
-            <span className="w-[15%] md:w-[15%] text-lg font-medium">
-              Employee Name
-            </span>
-            <div className="relative flex-1">
+            <span className="w-[30%] text-lg font-medium">Employee Name</span>
+            <div className="relative flex-1 w-full">
               <input
                 type="text"
                 className="input border-gray-100 input-lg bg-[#f6f3f4] w-full text-left text-lg font-normal"
@@ -276,10 +278,10 @@ const EditOrder = () => {
         </div>
 
         {/* Password */}
-        <div className="grid grid-cols-1 gap-4">
-          <div className="flex flex-row gap-2 items-center justify-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex flex-row gap-2 items-center justify-center md:col-span-2">
             <span className="w-[30%] text-lg font-medium">Password</span>
-            <div className="relative flex w-full">
+            <div className="relative flex-1 w-full">
               <input
                 type={!disablePassword ? "password" : "text"}
                 className="input border-gray-100 input-lg bg-[#f6f3f4] w-full text-left text-lg font-normal relative z-0"

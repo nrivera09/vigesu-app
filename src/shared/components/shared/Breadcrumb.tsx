@@ -24,7 +24,7 @@ const Breadcrumb: React.FC = () => {
 
             return (
               <li key={index} className={className}>
-                {!isLast ? <a href={path}>{label}</a> : <span>{label}</span>}
+                {<span>{label}</span>}
               </li>
             );
           })}

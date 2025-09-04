@@ -11,14 +11,15 @@ import { useRouter } from "next/navigation";
 import debounce from "lodash/debounce";
 import Loading from "@/shared/components/shared/Loading";
 import { useTranslations } from "next-intl";
+// Opcional si alguna vez quieres precargar algo del usuario logueado
+// import { useAuthStore } from "@/shared/stores/useAuthStore";
 
 type EmployeeOption = { id: string; name: string };
 
-// ❗️Ya no se valida employeeId (se obtiene del dropdown)
 const schema = z.object({
   userName: z.string().min(1),
   password: z.string().min(1),
-  employeeName: z.string().min(1), // el texto del input (consulta)
+  employeeName: z.string().min(1),
   rol: z.string().min(1),
 });
 
@@ -29,7 +30,6 @@ const CreateOrder = () => {
 
   const [disablePassword, setDisablePassword] = useState(false);
 
-  // 🔹 Form state (sin employeeId)
   const [objFilterForm, setObjFilterForm] = useState({
     userName: "",
     password: "",
@@ -37,28 +37,23 @@ const CreateOrder = () => {
     rol: "",
   });
 
-  // 🔹 Employee search state
   const [isSearchingEmp, setIsSearchingEmp] = useState(false);
   const [empResults, setEmpResults] = useState<EmployeeOption[]>([]);
   const [showEmpDropdown, setShowEmpDropdown] = useState(false);
-  const [employeeIdSelected, setEmployeeIdSelected] = useState<string | null>(
-    null
-  );
-  const [employeeNameSelected, setEmployeeNameSelected] = useState<
-    string | null
-  >(null);
+  const [selectedEmployee, setSelectedEmployee] =
+    useState<EmployeeOption | null>(null);
 
-  // Busca todos y filtra en cliente (el endpoint devuelve lista completa)
+  // --- Búsqueda ---
   const fetchEmployees = async (term: string) => {
     try {
       setIsSearchingEmp(true);
       const { data } = await axiosInstance.get<EmployeeOption[]>(
         "/QuickBooks/employees/GetEmployeeAll"
       );
-      const filtered =
-        (data ?? []).filter((e) =>
-          e.name.toLowerCase().includes(term.toLowerCase())
-        ) ?? [];
+      const base: EmployeeOption[] = Array.isArray(data) ? data : [];
+      const filtered = base.filter((e) =>
+        e.name.toLowerCase().includes(term.toLowerCase())
+      );
       setEmpResults(filtered);
     } catch (err) {
       console.error("Error fetching employees:", err);
@@ -68,7 +63,6 @@ const CreateOrder = () => {
     }
   };
 
-  // Debounce para la búsqueda
   const debouncedSearchEmp = useRef(
     debounce((term: string) => {
       if (term.trim().length >= 3) {
@@ -80,19 +74,63 @@ const CreateOrder = () => {
     }, 400)
   ).current;
 
-  // Limpieza del debounce al desmontar
   useEffect(() => () => debouncedSearchEmp.cancel(), [debouncedSearchEmp]);
+
+  // --- Handlers ---
+  const handleChangeEmployeeName: React.ChangeEventHandler<HTMLInputElement> = (
+    e
+  ) => {
+    const val = e.target.value;
+    setObjFilterForm((prev) => ({ ...prev, employeeName: val }));
+
+    // Solo limpiar selección si el texto difiere de la selección actual
+    if (selectedEmployee && val.trim() !== selectedEmployee.name) {
+      setSelectedEmployee(null);
+    }
+
+    if (val.trim().length === 0) {
+      setEmpResults([]);
+      setIsSearchingEmp(false);
+      setShowEmpDropdown(false);
+      return;
+    }
+
+    setShowEmpDropdown(true);
+    setIsSearchingEmp(true);
+    debouncedSearchEmp(val);
+  };
+
+  const handlePickEmployee = (opt: EmployeeOption) => {
+    setSelectedEmployee(opt);
+    setObjFilterForm((prev) => ({ ...prev, employeeName: opt.name }));
+    setEmpResults([]);
+    setShowEmpDropdown(false);
+    setIsSearchingEmp(false);
+  };
+
+  const handleEmployeeInputKeyDown: React.KeyboardEventHandler<
+    HTMLInputElement
+  > = (e) => {
+    if (e.key === "Enter") {
+      // Si hay un único match visible, selecciónalo con Enter
+      if (empResults.length === 1) {
+        e.preventDefault();
+        handlePickEmployee(empResults[0]);
+      }
+    }
+  };
 
   const handleSubmit = async () => {
     const validation = schema.safeParse(objFilterForm);
     const signatureBlob = signatureRef.current?.getImageBlob();
-
+    debugger;
     if (!validation.success) {
       toast.error(`${tToasts("error")}: ${tToasts("msj.7")}`);
       return;
     }
 
-    if (!employeeIdSelected || !employeeNameSelected) {
+    // Validar que exista selección efectiva
+    if (!selectedEmployee) {
       toast.error(`${tToasts("error")}: ${tToasts("msj.8")}`);
       return;
     }
@@ -106,8 +144,8 @@ const CreateOrder = () => {
       const formData = new FormData();
       formData.append("UserName", objFilterForm.userName);
       formData.append("Password", objFilterForm.password);
-      formData.append("EmployeeId", employeeIdSelected); // ✅ id seleccionado
-      formData.append("EmployeeName", employeeNameSelected); // ✅ name seleccionado
+      formData.append("EmployeeId", selectedEmployee.id);
+      formData.append("EmployeeName", selectedEmployee.name);
       formData.append("Rol", objFilterForm.rol);
       formData.append("SignatureImage", signatureBlob, "signature.png");
 
@@ -119,7 +157,7 @@ const CreateOrder = () => {
       router.push("./");
     } catch (error) {
       console.error(error);
-      toast.error(`${tToasts("error")}: ${error}`);
+      toast.error(`${tToasts("error")}: ${String(error)}`);
     }
   };
 
@@ -170,36 +208,19 @@ const CreateOrder = () => {
         {/* Employee Name (buscador con dropdown) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex flex-row gap-2 items-center justify-center md:col-span-2">
-            <span className="w-[15%] md:w-[15%] text-lg font-medium">
-              Employee Name
-            </span>
-            <div className="relative flex-1">
+            <span className="w-[30%] text-lg font-medium">Employee Name</span>
+            <div className="relative flex w-full">
               <input
                 type="text"
                 className="input border-gray-100 input-lg bg-[#f6f3f4] w-full text-left text-lg font-normal"
                 value={objFilterForm.employeeName}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setObjFilterForm({ ...objFilterForm, employeeName: val });
-                  setEmployeeIdSelected(null);
-                  setEmployeeNameSelected(null);
-
-                  if (val.trim().length === 0) {
-                    setEmpResults([]);
-                    setIsSearchingEmp(false);
-                    setShowEmpDropdown(false);
-                    return;
-                  }
-
-                  setShowEmpDropdown(true);
-                  setIsSearchingEmp(true);
-                  debouncedSearchEmp(val);
-                }}
+                onChange={handleChangeEmployeeName}
                 onFocus={() => {
                   if (objFilterForm.employeeName.trim().length >= 3) {
                     setShowEmpDropdown(true);
                   }
                 }}
+                onKeyDown={handleEmployeeInputKeyDown}
                 autoComplete="off"
               />
 
@@ -211,17 +232,7 @@ const CreateOrder = () => {
                       <button
                         type="button"
                         className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                        onClick={() => {
-                          setEmployeeIdSelected(opt.id);
-                          setEmployeeNameSelected(opt.name);
-                          setObjFilterForm({
-                            ...objFilterForm,
-                            employeeName: opt.name,
-                          });
-                          setEmpResults([]);
-                          setShowEmpDropdown(false);
-                          setIsSearchingEmp(false);
-                        }}
+                        onClick={() => handlePickEmployee(opt)}
                       >
                         {opt.name}
                       </button>
@@ -241,8 +252,8 @@ const CreateOrder = () => {
         </div>
 
         {/* Password */}
-        <div className="grid grid-cols-1 gap-4">
-          <div className="flex flex-row gap-2 items-center justify-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex flex-row gap-2 items-center justify-center md:col-span-2">
             <span className="w-[30%] text-lg font-medium">Password</span>
             <div className="relative flex w-full">
               <input
@@ -291,6 +302,7 @@ const CreateOrder = () => {
         <button
           onClick={handleSubmit}
           className=" mt-8 btn bg-black text-white rounded-full pr-3 py-6 w-full md:w-[300px] mx-auto"
+          type="button"
         >
           <span className="py-1 px-2 text-white font-normal rounded-full md:block text-[13px]">
             Save

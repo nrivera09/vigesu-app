@@ -6,17 +6,9 @@ interface PDFViewerProps {
 }
 
 const PDFViewer = ({ file, height }: PDFViewerProps) => {
-  const [fileName, setFileName] = useState("");
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const fileGet = `${window.location.origin}/assets/files/${file}`;
-      console.log("fileGet", fileGet);
-      setFileName(fileGet);
-    }
-  }, [file]);
   return (
     <embed
-      src={fileName}
+      src={file}
       width="100%"
       height={height ?? 600}
       type="application/pdf"
