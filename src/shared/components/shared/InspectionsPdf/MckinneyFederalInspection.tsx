@@ -1,9 +1,11 @@
+import { DOMAIN } from "@/config/constants";
 import { TypeQuestion } from "@/features/orders/models/workOrder.types";
 import { PropsPDF } from "@/shared/types/inspection/ITypes";
+import { buildQuestionMatcherGeneric } from "@/shared/utils/buildQuestionMatcher";
 import { getAnswersFromDetails } from "@/shared/utils/getAnswerValue";
 import { it } from "@faker-js/faker";
 import clsx from "clsx";
-import React, { FC } from "react";
+import React, { FC, useMemo } from "react";
 
 type InspectionDetailAnswerItem = {
   inspectionDetailAnswerItemId: number;
@@ -42,6 +44,11 @@ const MckinneyFederalInspection: React.FC<PropsPDF> = ({
 }) => {
   console.log("data: ", data);
   console.log("inspectionDetails: ", inspectionDetails);
+
+  const matchById = useMemo(
+    () => buildQuestionMatcherGeneric(data, inspectionDetails),
+    [data, inspectionDetails]
+  );
 
   const getAnswerValue = (templateQuestionId: number) => {
     const match = inspectionDetails
@@ -104,10 +111,6 @@ const MckinneyFederalInspection: React.FC<PropsPDF> = ({
       default:
         value = match.finalResponse?.trim() ?? "";
     }
-
-    console.log(
-      `🔎 [MATCH] QID:${templateQuestionId} | Type:${typeQuestion} | FinalResponse:"${match.finalResponse}" | Answers:[${match.inspectionDetailAnswers?.map((a) => a.response)}] | Value:"${value}"`
-    );
 
     return value || "";
   };
@@ -520,7 +523,7 @@ crossmembers above slider rail**`}
         </div>
       </div>
       <div className="my-5 mt-8">
-        <div className="flex flex-row">
+        <div className="flex flex-col md:flex-row">
           <div className="w-full md:w-1/2">
             <BoxDataSmallLine
               label="Company Name:"
@@ -529,23 +532,26 @@ crossmembers above slider rail**`}
               font={`text-normal`}
             />
           </div>
+          <div className="w-full md:w-1/2 flex flex-row items-center justify-center gap-1">
+            <span className="font-bold  whitespace-nowrap text-normal">
+              Inspector Name Printed:
+            </span>
+            {matchById(108)?.detail?.finalResponse && (
+              <img
+                src={`${DOMAIN}${matchById(108)?.detail?.finalResponse}`}
+                className="max-w-full mx-auto object-contain h-12 mb-3 border-b-1 border-solid border-l-0 border-r-0 border-t-0 w-full"
+              />
+            )}
+          </div>
         </div>
         <div className="flex flex-col gap-3 md:flex-row">
-          <div className="w-full md:w-1/2">
-            <BoxDataSmallLine
-              label="Inspector Name Printed:"
-              value=""
-              className="!border-0 "
-              font={`text-normal`}
-            />
-          </div>
           <div className="w-full md:w-1/2 relative top-[12px]">
             <BoxDataSmallLine
               label="Inspection Conducted By:"
               value={getAnswerValue(109)}
               className="!border-0"
               font={`text-normal`}
-              signature={`(Inspector Signature)`}
+              signature={``}
             />
           </div>
           <div className="w-full md:w-1/2">
@@ -671,7 +677,7 @@ const BoxData: FC<BoxDataProps> = ({
           <input
             type="text"
             className="border-b w-full text-center"
-            value={data1}
+            defaultValue={data1}
           />
         </div>
         <div className="w-1/2 flex flex-row gap-1">
@@ -679,7 +685,7 @@ const BoxData: FC<BoxDataProps> = ({
           <input
             type="text"
             className="border-b w-full text-center"
-            value={data2}
+            defaultValue={data2}
           />
         </div>
       </div>
@@ -689,7 +695,7 @@ const BoxData: FC<BoxDataProps> = ({
           <input
             type="text"
             className="border-b w-full text-center"
-            value={data3}
+            defaultValue={data3}
           />
         </div>
         <div className="w-1/2 flex flex-row gap-1">
@@ -697,7 +703,7 @@ const BoxData: FC<BoxDataProps> = ({
           <input
             type="text"
             className="border-b w-full text-center"
-            value={data4}
+            defaultValue={data4}
           />
         </div>
       </div>

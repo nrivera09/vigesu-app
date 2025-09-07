@@ -36,9 +36,10 @@ const TreadDepthTable: React.FC<TreadDepthTableProps> = ({
               {showAxleColumn && <th></th>}
               <th
                 colSpan={columnCount}
-                className="border p-2 bg-gray-200 uppercase !text-[11px]"
+                className="border p-2 bg-gray-200 uppercase !text-[11px] h-[47px]"
               >
                 <span
+                  className="truncate"
                   dangerouslySetInnerHTML={{ __html: nameTable || "" }}
                   contentEditable={isEditable}
                   suppressContentEditableWarning
@@ -51,7 +52,7 @@ const TreadDepthTable: React.FC<TreadDepthTableProps> = ({
             {headers.map((label, index) => (
               <th
                 key={index}
-                className="border p-2 bg-gray-200 text-center !text-[11px]"
+                className="border p-2 bg-gray-200 text-center !text-[11px] h-[47px]"
               >
                 <span
                   contentEditable={isEditable}

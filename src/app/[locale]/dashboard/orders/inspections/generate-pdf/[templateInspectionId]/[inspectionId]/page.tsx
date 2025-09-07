@@ -39,7 +39,17 @@ const GeneratePdfPage = () => {
 
   const pdfRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const handlePrint = useReactToPrint({ contentRef });
+  const handlePrint = useReactToPrint({
+    contentRef: pdfRef, // ✅ v3 usa contentRef, no 'content'
+    documentTitle: `Inspection - ${templateData?.name ?? "Inspection"}`,
+
+    pageStyle: `
+    @page { size: auto; margin: 12mm; }
+    @media print {
+      html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  `,
+  });
 
   useEffect(() => {
     const fetchData = async () => {

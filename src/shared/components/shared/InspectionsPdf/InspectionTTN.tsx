@@ -1,12 +1,26 @@
 import { PropsPDF } from "@/shared/types/inspection/ITypes";
+import { buildQuestionMatcherGeneric } from "@/shared/utils/buildQuestionMatcher";
+import { getTodayParts } from "@/shared/utils/utils";
 import clsx from "clsx";
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useMemo, useState } from "react";
 
 const InspectionTTN: React.FC<PropsPDF> = ({
   data,
   inspectionDetails,
   isEditable,
 }) => {
+  const { day, month, year } = getTodayParts();
+  console.log("data", data);
+  console.log("details", inspectionDetails);
+  const matchById = useMemo(
+    () => buildQuestionMatcherGeneric(data, inspectionDetails),
+    [data, inspectionDetails]
+  );
+  console.log(
+    "d: ",
+    matchById(356)?.detail?.finalResponse,
+    matchById(357)?.detail?.finalResponse
+  );
   return (
     <>
       <div className="header">
@@ -72,37 +86,79 @@ const InspectionTTN: React.FC<PropsPDF> = ({
                 <td className="border p-2">
                   <span className="truncate font-bold">TRACTOR</span>
                 </td>
-                <td className="border p-2 text-center"></td>
-                <td className="border p-2 text-center"></td>
-                <td className="border p-2 text-center"></td>
-                <td className="border p-2 text-center"></td>
-                <td className="border p-2 text-center"></td>
-                <td className="border p-2 text-center"></td>
-                <td className="border p-2 text-center"></td>
+                <td className="border p-2 text-center">
+                  {matchById(346)?.detail?.finalResponse}
+                </td>
+                <td className="border p-2 text-center">
+                  {matchById(347)?.detail?.finalResponse}
+                </td>
+                <td className="border p-2 text-center">
+                  {matchById(348)?.detail?.finalResponse}
+                </td>
+                <td className="border p-2 text-center">
+                  {matchById(349)?.detail?.finalResponse}
+                </td>
+                <td className="border p-2 text-center">
+                  {matchById(350)?.detail?.finalResponse}
+                </td>
+                <td className="border p-2 text-center">
+                  {matchById(351)?.detail?.finalResponse}
+                </td>
+                <td className="border p-2 text-center">
+                  {matchById(352)?.detail?.finalResponse}
+                </td>
               </tr>
               <tr>
                 <td className="border p-2">
                   <span className="truncate font-bold">TRAILER</span>
                 </td>
-                <td className="border p-2 text-center"></td>
-                <td className="border p-2 text-center"></td>
-                <td className="border p-2 text-center"></td>
-                <td className="border p-2 text-center"></td>
-                <td className="border p-2 text-center"></td>
-                <td className="border p-2 text-center"></td>
-                <td className="border p-2 text-center"></td>
+                <td className="border p-2 text-center">
+                  {matchById(353)?.detail?.finalResponse}
+                </td>
+                <td className="border p-2 text-center">
+                  {matchById(354)?.detail?.finalResponse}
+                </td>
+                <td className="border p-2 text-center">
+                  {matchById(355)?.detail?.finalResponse}
+                </td>
+                <td className="border p-2 text-center">
+                  {matchById(356)?.detail?.finalResponse}
+                </td>
+                <td className="border p-2 text-center">
+                  {matchById(357)?.detail?.finalResponse}
+                </td>
+                <td className="border p-2 text-center">
+                  {matchById(358)?.detail?.finalResponse}
+                </td>
+                <td className="border p-2 text-center">
+                  {matchById(359)?.detail?.finalResponse}
+                </td>
               </tr>
               <tr>
                 <td className="border p-2">
                   <span className="truncate font-bold">TRUCK</span>
                 </td>
-                <td className="border p-2 text-center"></td>
-                <td className="border p-2 text-center"></td>
-                <td className="border p-2 text-center"></td>
-                <td className="border p-2 text-center"></td>
-                <td className="border p-2 text-center"></td>
-                <td className="border p-2 text-center"></td>
-                <td className="border p-2 text-center"></td>
+                <td className="border p-2 text-center">
+                  {matchById(360)?.detail?.finalResponse}
+                </td>
+                <td className="border p-2 text-center">
+                  {matchById(361)?.detail?.finalResponse}
+                </td>
+                <td className="border p-2 text-center">
+                  {matchById(362)?.detail?.finalResponse}
+                </td>
+                <td className="border p-2 text-center">
+                  {matchById(363)?.detail?.finalResponse}
+                </td>
+                <td className="border p-2 text-center">
+                  {matchById(364)?.detail?.finalResponse}
+                </td>
+                <td className="border p-2 text-center">
+                  {matchById(365)?.detail?.finalResponse}
+                </td>
+                <td className="border p-2 text-center">
+                  {matchById(366)?.detail?.finalResponse}
+                </td>
               </tr>
             </tbody>
           </table>
