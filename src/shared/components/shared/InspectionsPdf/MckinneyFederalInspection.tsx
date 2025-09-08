@@ -137,6 +137,8 @@ const MckinneyFederalInspection: React.FC<PropsPDF> = ({
     const answers = detail.inspectionDetailAnswers ?? [];
     const hasR = answers.some((a) => a.response?.trim().toUpperCase() === "R");
 
+    const normalized = final === "OK" ? "✔" : final;
+
     // Caso 1: Final = R
     if (final === "R") return { left: null, right: "R" };
 
@@ -146,7 +148,7 @@ const MckinneyFederalInspection: React.FC<PropsPDF> = ({
     }
 
     // Caso 3: Final distinto de R y hay R
-    if (final && hasR) return { left: final, right: "R" };
+    if (final && hasR) return { left: normalized, right: "R" };
 
     // Caso 4: No hay final válido
     if (answers.length > 0) {
@@ -160,6 +162,9 @@ const MckinneyFederalInspection: React.FC<PropsPDF> = ({
 
   return (
     <>
+      <h2 className="mx-auto text-center font-bold text-2xl md:text-3xl mb-4">
+        Mckinney Federal Inspection Form
+      </h2>
       <div className="overflow-x-auto">
         <table className="w-full  border-collapse">
           <thead>
@@ -383,14 +388,14 @@ crossmembers above slider rail**`}
           396.17**
         </span>
       </div>
-      <div className="my-5 flex flex-col xl:flex-row gap-5 ">
+      <div className="my-5 flex flex-col gap-5 ">
         <div className="flex flex-col gap-2 ">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 flex-1 gap-2 items-center justify-center">
             <BoxData
               title="RFO"
               label1="Brand:"
               data1={getAnswerValue(40)}
-              label2="32nda:"
+              label2="32nds:"
               data2={getAnswerValue(41)}
               label3="O/C:"
               data3={getAnswerValue(42)}
@@ -401,7 +406,7 @@ crossmembers above slider rail**`}
               title="RCO"
               label1="Brand:"
               data1={getAnswerValue(44)}
-              label2="32nda:"
+              label2="32nds:"
               data2={getAnswerValue(45)}
               label3="O/C:"
               data3={getAnswerValue(46)}
@@ -412,7 +417,7 @@ crossmembers above slider rail**`}
               title="RRO"
               label1="Brand:"
               data1={getAnswerValue(48)}
-              label2="32nda:"
+              label2="32nds:"
               data2={getAnswerValue(49)}
               label3="O/C:"
               data3={getAnswerValue(50)}
@@ -424,7 +429,7 @@ crossmembers above slider rail**`}
               title="RDA"
               label1="Brand:"
               data1={getAnswerValue(52)}
-              label2="32nda:"
+              label2="32nds:"
               data2={getAnswerValue(53)}
               label3="O/C:"
               data3={getAnswerValue(54)}
@@ -436,7 +441,7 @@ crossmembers above slider rail**`}
               title="RFI"
               label1="Brand:"
               data1={getAnswerValue(56)}
-              label2="32nda:"
+              label2="32nds:"
               data2={getAnswerValue(57)}
               label3="O/C:"
               data3={getAnswerValue(58)}
@@ -448,7 +453,7 @@ crossmembers above slider rail**`}
               title="RCI"
               label1="Brand:"
               data1={getAnswerValue(60)}
-              label2="32nda:"
+              label2="32nds:"
               data2={getAnswerValue(61)}
               label3="O/C:"
               data3={getAnswerValue(62)}
@@ -460,7 +465,7 @@ crossmembers above slider rail**`}
               title="RRI"
               label1="Brand:"
               data1={getAnswerValue(64)}
-              label2="32nda:"
+              label2="32nds:"
               data2={getAnswerValue(65)}
               label3="O/C:"
               data3={getAnswerValue(66)}
@@ -479,46 +484,103 @@ crossmembers above slider rail**`}
             <BoxDataSmall label1="LC /8ths" data1={getAnswerValue(73)} />
             <BoxDataSmall label1="LR /8ths" data1={getAnswerValue(74)} />
             <BoxDataSmallLine label="Mileage:" value={getAnswerValue(76)} />
-            <BoxDataSmall label1="LFI Brand" data1={getAnswerValue(77)} />
-            <BoxDataSmall label1="LFI 32nda" data1={getAnswerValue(78)} />
-            <BoxDataSmall label1="LFI O/C" data1={getAnswerValue(79)} />
-            <BoxDataSmall label1="LFI PSI" data1={getAnswerValue(80)} />
-            <BoxDataSmall label1="LCI Brand" data1={getAnswerValue(81)} />
-            <BoxDataSmall label1="LCI 32nda" data1={getAnswerValue(82)} />
-            <BoxDataSmall label1="LCI O/C" data1={getAnswerValue(83)} />
-            <BoxDataSmall label1="LCI PSI" data1={getAnswerValue(84)} />
-            <BoxDataSmall label1="LRI Brand" data1={getAnswerValue(85)} />
-            <BoxDataSmall label1="LRI 32nda" data1={getAnswerValue(86)} />
-            <BoxDataSmall label1="LRI O/C" data1={getAnswerValue(87)} />
-            <BoxDataSmall label1="LRI PSI" data1={getAnswerValue(88)} />
-            <BoxDataSmall label1="LFO Brand" data1={getAnswerValue(89)} />
-            <BoxDataSmall label1="LFO 32nda" data1={getAnswerValue(90)} />
-            <BoxDataSmall label1="LFO O/C" data1={getAnswerValue(91)} />
-            <BoxDataSmall label1="LFO PSI" data1={getAnswerValue(92)} />
-            <BoxDataSmall label1="LCO Brand" data1={getAnswerValue(93)} />
-            <BoxDataSmall label1="LCO 32nda" data1={getAnswerValue(94)} />
-            <BoxDataSmall label1="LCO O/C" data1={getAnswerValue(95)} />
-            <BoxDataSmall label1="LCO PSI" data1={getAnswerValue(96)} />
-            <BoxDataSmall label1="LRO Brand" data1={getAnswerValue(97)} />
-            <BoxDataSmall label1="LRO 32nda" data1={getAnswerValue(98)} />
-            <BoxDataSmall label1="LRO O/C" data1={getAnswerValue(99)} />
-            <BoxDataSmall label1="LRO PSI" data1={getAnswerValue(100)} />
-            <BoxDataSmall label1="LDA Brand" data1={getAnswerValue(101)} />
-            <BoxDataSmall label1="LDA 32nda" data1={getAnswerValue(102)} />
-            <BoxDataSmall label1="LDA O/C" data1={getAnswerValue(103)} />
-            <BoxDataSmall label1="LDA PSI" data1={getAnswerValue(104)} />
+            <BoxData
+              title="LFI"
+              label1="Brand:"
+              data1={getAnswerValue(77)}
+              label2="32nds:"
+              data2={getAnswerValue(78)}
+              label3="O/C:"
+              data3={getAnswerValue(79)}
+              label4="PSI:"
+              data4={getAnswerValue(80)}
+            />
+            <BoxData
+              title="LCI"
+              label1="Brand:"
+              data1={getAnswerValue(81)}
+              label2="32nds:"
+              data2={getAnswerValue(82)}
+              label3="O/C:"
+              data3={getAnswerValue(83)}
+              label4="PSI:"
+              data4={getAnswerValue(84)}
+            />
+            <BoxData
+              title="LRI"
+              label1="Brand:"
+              data1={getAnswerValue(85)}
+              label2="32nds:"
+              data2={getAnswerValue(86)}
+              label3="O/C:"
+              data3={getAnswerValue(87)}
+              label4="PSI:"
+              data4={getAnswerValue(88)}
+            />
+
             <BoxDataSmall label1="LDA /8ths" data1={getAnswerValue(105)} />
+            <BoxData
+              title="LRO"
+              label1="Brand:"
+              data1={getAnswerValue(89)}
+              label2="32nds:"
+              data2={getAnswerValue(90)}
+              label3="O/C:"
+              data3={getAnswerValue(91)}
+              label4="PSI:"
+              data4={getAnswerValue(92)}
+            />
+            <BoxData
+              title="LFO"
+              label1="Brand:"
+              data1={getAnswerValue(89)}
+              label2="32nds:"
+              data2={getAnswerValue(90)}
+              label3="O/C:"
+              data3={getAnswerValue(91)}
+              label4="PSI:"
+              data4={getAnswerValue(92)}
+            />
+            <BoxData
+              title="LCO"
+              label1="Brand:"
+              data1={getAnswerValue(93)}
+              label2="32nds:"
+              data2={getAnswerValue(94)}
+              label3="O/C:"
+              data3={getAnswerValue(95)}
+              label4="PSI:"
+              data4={getAnswerValue(96)}
+            />
+            <BoxData
+              title="LRO"
+              label1="Brand:"
+              data1={getAnswerValue(97)}
+              label2="32nds:"
+              data2={getAnswerValue(98)}
+              label3="O/C:"
+              data3={getAnswerValue(99)}
+              label4="PSI:"
+              data4={getAnswerValue(100)}
+            />
+
+            <BoxData
+              title="LDA"
+              label1="Brand:"
+              data1={getAnswerValue(101)}
+              label2="32nds:"
+              data2={getAnswerValue(102)}
+              label3="O/C:"
+              data3={getAnswerValue(103)}
+              label4="PSI:"
+              data4={getAnswerValue(104)}
+            />
           </div>
         </div>
-        <div className="max-w-[300px]">
+        <div className="min-w-[300px]">
           <div className="border rounded-lg">
-            <p className="font-bold p-2">Comments:</p>
-            <span className="text-[14px] block p-5">
-              {getAnswerValue(106)} Lorem ipsum dolor sit amet consectetur,
-              adipisicing elit. Architecto, placeat eum voluptatem nobis ullam
-              ab ipsa deserunt exercitationem minima molestias quod velit illo
-              illum fuga ea suscipit explicabo laborum assumenda.
-            </span>
+            <p className="font-bold pt-2 pl-2 pr-2">Comments:</p>
+            <span className="text-[14px] block p-2">{getAnswerValue(106)}</span>
           </div>
         </div>
       </div>
