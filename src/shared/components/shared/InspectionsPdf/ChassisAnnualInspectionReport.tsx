@@ -1611,29 +1611,21 @@ const ChassisAnnualInspectionReport: React.FC<PropsPDF> = ({
                 {matchById(233)?.detail?.finalResponse}
               </td>
               <td className="border p-2 text-center">
-                {matchById(234)?.detail?.finalResponse}
+                {matchById(238)?.detail?.finalResponse}
               </td>
             </tr>
 
             <tr className="h-[47px]">
               <td className="border p-2 text-center">
-                {matchById(235)?.detail?.finalResponse}
+                {matchById(234)?.detail?.finalResponse}
               </td>
-              <td className="border p-2 text-center">
-                {matchById(236)?.detail?.finalResponse}
-              </td>
-            </tr>
-            <tr className="h-[47px]">
-              <td className="border p-2 text-center">
-                {matchById(237)?.detail?.finalResponse}
-              </td>
-              <td className="border p-2 text-center">
-                {matchById(238)?.detail?.finalResponse}
-              </td>
-            </tr>
-            <tr className="h-[47px]">
               <td className="border p-2 text-center">
                 {matchById(239)?.detail?.finalResponse}
+              </td>
+            </tr>
+            <tr className="h-[47px]">
+              <td className="border p-2 text-center">
+                {matchById(235)?.detail?.finalResponse}
               </td>
               <td className="border p-2 text-center">
                 {matchById(240)?.detail?.finalResponse}
@@ -1641,7 +1633,15 @@ const ChassisAnnualInspectionReport: React.FC<PropsPDF> = ({
             </tr>
             <tr className="h-[47px]">
               <td className="border p-2 text-center">
+                {matchById(236)?.detail?.finalResponse}
+              </td>
+              <td className="border p-2 text-center">
                 {matchById(241)?.detail?.finalResponse}
+              </td>
+            </tr>
+            <tr className="h-[47px]">
+              <td className="border p-2 text-center">
+                {matchById(237)?.detail?.finalResponse}
               </td>
               <td className="border p-2 text-center">
                 {matchById(242)?.detail?.finalResponse}
@@ -1663,7 +1663,15 @@ Long or Short? (Circle)`}
                 {matchById(243)?.detail?.finalResponse}
               </td>
               <td className="border p-2 text-center">
+                {matchById(248)?.detail?.finalResponse}
+              </td>
+            </tr>
+            <tr className="h-[47px]">
+              <td className="border p-2 text-center">
                 {matchById(244)?.detail?.finalResponse}
+              </td>
+              <td className="border p-2 text-center">
+                {matchById(249)?.detail?.finalResponse}
               </td>
             </tr>
             <tr className="h-[47px]">
@@ -1671,28 +1679,20 @@ Long or Short? (Circle)`}
                 {matchById(245)?.detail?.finalResponse}
               </td>
               <td className="border p-2 text-center">
+                {matchById(250)?.detail?.finalResponse}
+              </td>
+            </tr>
+            <tr className="h-[47px]">
+              <td className="border p-2 text-center">
                 {matchById(246)?.detail?.finalResponse}
               </td>
-            </tr>
-            <tr className="h-[47px]">
               <td className="border p-2 text-center">
-                {matchById(247)?.detail?.finalResponse}
-              </td>
-              <td className="border p-2 text-center">
-                {matchById(248)?.detail?.finalResponse}
-              </td>
-            </tr>
-            <tr className="h-[47px]">
-              <td className="border p-2 text-center">
-                {matchById(249)?.detail?.finalResponse}
-              </td>
-              <td className="border p-2 text-center">
-                {matchById(250)?.detail?.finalResponse}
+                {matchById(251)?.detail?.finalResponse}
               </td>
             </tr>{" "}
             <tr className="h-[47px]">
               <td className="border p-2 text-center">
-                {matchById(251)?.detail?.finalResponse}
+                {matchById(247)?.detail?.finalResponse}
               </td>
               <td className="border p-2 text-center">
                 {matchById(252)?.detail?.finalResponse}

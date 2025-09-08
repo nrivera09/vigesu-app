@@ -33,7 +33,7 @@ type SummaryResult = {
  */
 export const summarizeDetail = (
   detail?: MinimalDetail | null,
-  defectiveCode: string = "D1"
+  defectiveCode: string = "D"
 ): SummaryResult => {
   const norm = (v?: string) => (v ?? "").trim().toUpperCase();
   const code = norm(defectiveCode);

@@ -88,7 +88,7 @@ const GeneratePdfPage = () => {
         <BackButton title={templateData.name} link={`../../`} />
         <div className="flex flex-row gap-2">
           <ActionButton
-            className={`${isEditable ? `!bg-[#60285a]` : `bg-[#7c3174]`} text-white`}
+            className={`${isEditable ? `!bg-[#60285a]` : `bg-[#7c3174]`} text-white !hidden`}
             icon={
               !isEditable ? (
                 <FiEdit className="w-[20px] h-[20px] opacity-70" />
