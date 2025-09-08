@@ -154,7 +154,9 @@ const ChassisAnnualInspectionReport: React.FC<PropsPDF> = ({
                     Lube: Clevis Pins, Drain cocks, Landing gear Slack
                     adjustments, brake cams, & glad hand Ball Valves
                   </TableCell>
-                  <TableCell align="center"></TableCell>
+                  <TableCell align="center">
+                    {matchById(117)?.detail?.finalResponse}
+                  </TableCell>
                 </TableRow>
               </tbody>
             </DynamicTable>
