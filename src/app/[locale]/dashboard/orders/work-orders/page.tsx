@@ -13,7 +13,7 @@ import { axiosInstance } from "@/shared/utils/axiosInstance";
 import {
   WorkOrderStatus,
   WorkOrderStatusLabel,
-} from "@/features/inspections/models/inspections.types";
+} from "@/features/orders/models/workOrder.types";
 import { debounce } from "lodash";
 import AlertInfo from "@/shared/components/shared/AlertInfo";
 import { toast } from "sonner";
@@ -23,6 +23,7 @@ import { useTranslations } from "next-intl";
 interface CustomerOption {
   id: number;
   name: string;
+  
 }
 interface MechanicOption {
   id: number;
@@ -34,6 +35,7 @@ const Page = () => {
   const tAlerts = useTranslations("alerts");
   const t = useTranslations("workorders");
   const tAside = useTranslations("aside");
+  const tGeneral = useTranslations("general");
   const pathname = usePathname();
   const [refreshTable, setRefreshTable] = useState(false);
 
@@ -124,13 +126,13 @@ const Page = () => {
     setShowCustomerDropdown(true);
 
     if (value.length >= 1) {
-      setIsLoadingCustomer(true); // 🔥 Mostrar desde el primer caracter
+      setIsLoadingCustomer(true);
     } else {
-      setIsLoadingCustomer(false); // 🔕 Apagar si el campo queda vacío
+      setIsLoadingCustomer(false);
       setCustomerOptions([]);
     }
 
-    debouncedSearchCustomer(value); // La búsqueda real solo con 3+
+    debouncedSearchCustomer(value);
   };
 
   // Handle Mechanic Input
@@ -141,9 +143,9 @@ const Page = () => {
     setShowMechanicDropdown(true);
 
     if (value.length >= 1) {
-      setIsLoadingMechanic(true); // 🔥 Mostrar desde el primer caracter
+      setIsLoadingMechanic(true);
     } else {
-      setIsLoadingMechanic(false); // 🔕 Apagar si el campo queda vacío
+      setIsLoadingMechanic(false);
       setMechanicOptions([]);
     }
 
@@ -189,13 +191,13 @@ const Page = () => {
             <button className="btn bg-black rounded-full pr-3 py-6  sm:flex items-center justify-center border-none !hidden">
               <IoSearchOutline className="text-xl text-white" />
               <span className="bg-gray-800 py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px] ">
-                Search
+                {tGeneral("btnSearch")}
               </span>
             </button>
             <button className="btn bg-red-600 rounded-full pr-3 py-6 hidden sm:flex items-center justify-center border-none !hidden">
               <FiTrash2 className="text-xl text-white" />
               <span className="bg-red-500 py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px] ">
-                Delete
+                {tGeneral("btnDelete")}
               </span>
             </button>
           </div>
