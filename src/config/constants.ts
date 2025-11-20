@@ -5,4 +5,4 @@ export const COMPANY_INFO = {
   website: "www.visegu.com",
   address: "16198 Via Arriba San Lorezo, CA 94585",
 };
-export const DOMAIN = "https://ronny998909-001-site1.qtempurl.com/";
+export const DOMAIN = "https://ronnyandia-001-site1.jtempurl.com/";
