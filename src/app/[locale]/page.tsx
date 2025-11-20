@@ -15,20 +15,20 @@ import { setCookie, getCookie, deleteCookie } from "cookies-next";
 import { toast } from "sonner";
 import LanguageSwitcher from "@/features/locale/LanguageSwitcher";
 
-const loginSchema = z.object({
-  userName: z.string().min(1, "El usuario es obligatorio"),
-  password: z.string().min(1, "La contraseña es obligatoria"),
-});
 
-const schema = loginSchema;
-
-type LoginData = z.infer<typeof schema>;
 
 export default function Home() {
   const router = useRouter();
   const t = useTranslations("home");
   const tToasts = useTranslations("toast");
   const setAuth = useAuthStore((state) => state.setAuth);
+
+  const loginSchema = z.object({
+    userName: z.string().min(1, t("validations.user_required")),
+    password: z.string().min(1, t("validations.password_required")),
+  });
+
+  type LoginData = z.infer<typeof loginSchema>;
 
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -38,7 +38,7 @@ export default function Home() {
     handleSubmit,
     formState: { errors },
   } = useForm<LoginData>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(loginSchema),
   });
 
   const onSubmit = async (data: LoginData) => {
@@ -115,7 +115,7 @@ export default function Home() {
               onSubmit={handleSubmit(onSubmit)}
             >
               <FormGroup>
-                <label>Email</label>
+                <label>{t("email")}</label>
                 <input
                   type="text"
                   placeholder=""
@@ -130,7 +130,7 @@ export default function Home() {
               </FormGroup>
 
               <FormGroup>
-                <label>Password</label>
+                <label>{t("password")}</label>
                 <input
                   type="password"
                   placeholder=""
@@ -147,10 +147,10 @@ export default function Home() {
               <div className="flex flex-row items-center justify-between gap-2">
                 <label className="label w-full flex items-center gap-2">
                   <input type="checkbox" className="checkbox" />
-                  Remember me
+                  {t("remember-password")}
                 </label>
                 <Link href="#" className="underline min-w-fit">
-                  ¿Olvidaste tu clave?
+                  {t("forgot-password")}
                 </Link>
               </div>
 
@@ -161,14 +161,14 @@ export default function Home() {
                   className="shadow-md btn btn-neutral btn-block min-h-[41px] text-[13px]"
                 >
                   {loading && <span className="loading loading-spinner"></span>}
-                  Acceder
+                  {t("btn-login")}
                 </button>
               </FormGroup>
             </form>
 
             <div className="text-center mt-4 flex items-center justify-center text-gray-400 font-light">
               <Link href="#" className="underline">
-                ¿Tiene problemas para acceder?
+                {t("mistakes-login")}
               </Link>
             </div>
           </div>

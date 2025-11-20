@@ -11,10 +11,13 @@ import React, { useState } from "react";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
 import { IoSearchOutline } from "react-icons/io5";
 import { MdOutlineSettingsBackupRestore } from "react-icons/md";
+import { useTranslations } from "next-intl";
 
 const Page = () => {
   const pathname = usePathname();
   const pageTitle = usePageTitle();
+  const t = useTranslations("groups");
+  const tGeneral = useTranslations("general");
 
   const [showModal, setShowModal] = useState(false);
   const [refreshFlag, setRefreshFlag] = useState(false);
@@ -60,13 +63,13 @@ const Page = () => {
             >
               <FiPlus className="text-xl text-white" />
               <span className="bg-gray-800 py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px]">
-                New
+                {tGeneral("btnNew")}
               </span>
             </button>
-            <button className="btn bg-red-600 rounded-full pr-3 py-6 hidden sm:flex items-center justify-center border-none !hidden !hidden">
+            <button className="btn bg-red-600 rounded-full pr-3 py-6 hidden sm:flex items-center justify-center border-none">
               <FiTrash2 className="text-xl text-white" />
               <span className="bg-red-500 py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px] ">
-                Delete
+                {tGeneral("btnDelete")}
               </span>
             </button>
           </div>
@@ -75,12 +78,12 @@ const Page = () => {
           <div className="container max-w-full mb-5">
             <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
               <legend className="fieldset-legend text-lg">
-                Search options
+                {t("search_options")}
               </legend>
               <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="flex flex-col col-span-1 sm:col-span-1 md:col-span-2">
                   <legend className="fieldset-legend text-lg font-normal">
-                    Customer
+                    {t("customer")}
                   </legend>
                   <input
                     type="text"
@@ -97,7 +100,7 @@ const Page = () => {
                 </div>
                 <div className="flex flex-col">
                   <legend className="fieldset-legend text-lg  font-normal">
-                    Status
+                    {t("status")}
                   </legend>
                   <select
                     value={objFilterForm.status}
@@ -110,7 +113,7 @@ const Page = () => {
                     }
                   >
                     <option disabled={true} value="">
-                      Pick a status
+                      {t("pick_status")}
                     </option>
 
                     {Object.entries(GroupStatusLabel).map(([key, label]) => (
@@ -131,7 +134,7 @@ const Page = () => {
                     >
                       <IoSearchOutline className="text-xl text-white" />
                       <span className=" py-1 px-4 text-white font-normal rounded-full  md:block text-[13px] ">
-                        Search
+                        {tGeneral("btnSearch")}
                       </span>
                     </button>
                     <button

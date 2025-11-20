@@ -15,12 +15,15 @@ import Loading from "@/shared/components/shared/Loading";
 import { useLoadingStore } from "@/shared/stores/useLoadinStore";
 import clsx from "clsx";
 
+import { useTranslations } from "next-intl";
+
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   useSessionValidator();
+  const t = useTranslations("dashboard.header");
 
   const { isLoading, loadingLabel } = useLoadingStore();
   const router = useRouter();
@@ -81,7 +84,7 @@ export default function DashboardLayout({
               <button className="!hidden btn bg-[#60285a] rounded-full pr-3 py-6 sm:flex items-center justify-center border-none">
                 <FaRegBell className="text-xl text-white" />
                 <span className="bg-[#7c3174] py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px]  ">
-                  Messages
+                  {t("messages")}
                 </span>
                 <div className="bubble bg-red-600 text-white rounded-full px-2 hidden sm:block">
                   12
@@ -90,7 +93,7 @@ export default function DashboardLayout({
               <button className="btn bg-[#60285a] rounded-full pr-3 py-6 sm:flex items-center justify-center border-none !hidden">
                 <BiSupport className="text-xl text-white" />
                 <span className="bg-[#7c3174] py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px]  ">
-                  Support
+                  {t("support")}
                 </span>
               </button>
               <button

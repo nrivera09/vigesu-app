@@ -8,6 +8,8 @@ import { deslugify } from "@/shared/utils/utils";
 import { DOMAIN } from "@/config/constants";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
 
+import { useTranslations } from "next-intl";
+
 interface TemplateInspectionItem {
   templateInspectionId: number;
   name: string;
@@ -27,6 +29,8 @@ const Page = () => {
   const pathname = usePathname();
   const params = useParams<{ id: string; slug: string }>();
   const id = Number(params?.id);
+  const t = useTranslations("configurations");
+  const tGeneral = useTranslations("general");
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +51,7 @@ const Page = () => {
         setItems(data.items ?? []);
       } catch {
         if (!isMounted) return;
-        setError("No se pudo cargar la lista de plantillas.");
+        setError(t("error_loading"));
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -56,7 +60,7 @@ const Page = () => {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [t]);
 
   const match = useMemo(
     () => items.find((it) => it.templateInspectionId === id),
@@ -81,10 +85,10 @@ const Page = () => {
       <div className="header-page flex flex-row items-center justify-between min-h-[70px] bg-base-200 px-6 gap-2">
         <BackButton link="../" title={deslugify(params?.slug)} />
         <div className="flex flex-row gap-2">
-          <button className="btn bg-red-600 rounded-full pr-3 py-6 hidden sm:flex items-center justify-center border-none !hidden">
+          <button className="btn bg-red-600 rounded-full pr-3 py-6 hidden sm:flex items-center justify-center border-none">
             <FiTrash2 className="text-xl text-white" />
             <span className="bg-red-500 py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px] ">
-              Delete
+              {tGeneral("btnDelete")}
             </span>
           </button>
         </div>
@@ -93,7 +97,7 @@ const Page = () => {
       <div className="boddy-app overflow-y-auto">
         <div className="container mt-0 max-w-full">
           {loading && (
-            <div className="p-6 text-sm opacity-70">Cargando plantilla…</div>
+            <div className="p-6 text-sm opacity-70">{t("loading_template")}</div>
           )}
 
           {!loading && error && (
@@ -105,7 +109,7 @@ const Page = () => {
           {!loading && !error && !match && (
             <div className="alert my-4">
               <span>
-                No encontré una plantilla con ID <b>{id}</b>.
+                {t("not_found")} <b>{id}</b>.
               </span>
             </div>
           )}

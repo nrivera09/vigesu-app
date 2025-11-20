@@ -5,7 +5,13 @@
     "remember-password": "Remember me",
     "forgot-password": "Recover password?",
     "mistakes-login": "Problems signing in?",
-    "btn-login": "Log in"
+    "btn-login": "Log in",
+    "email": "Email",
+    "password": "Password",
+    "validations": {
+      "user_required": "Username is required",
+      "password_required": "Password is required"
+    }
   },
   "aside": {
     "menus": {
@@ -214,6 +220,61 @@
   "general": {
     "btnWatch": "View",
     "btnPrint": "Print",
-    "btnDelete": "Delete"
+    "btnDelete": "Delete",
+    "btnSearch": "Search",
+    "btnNew": "New"
+  },
+  "dashboard": {
+    "header": {
+      "messages": "Messages",
+      "support": "Support"
+    }
+  },
+  "users": {
+    "title": "Users",
+    "search_options": "Search options",
+    "username": "Username",
+    "employee_name": "Employee Name",
+    "role": "Role",
+    "pick_role": "Pick a role",
+    "edit_title": "Edit user"
+  },
+  "services": {
+    "title": "Services",
+    "customer": "Customer",
+    "status": "Status",
+    "pick_color": "Pick a color",
+    "colors": {
+      "crimson": "Crimson",
+      "amber": "Amber",
+      "velvet": "Velvet"
+    }
+  },
+  "configurations": {
+    "loading_template": "Loading template…",
+    "error_loading": "Could not load template list.",
+    "not_found": "Could not find a template with ID",
+    "search_options": "Search options",
+    "report_form": "Report form",
+    "info_alert": "This is a list of the order formats available. If you need to add a new format, this should be consulted with the developer, since all the data must be configured and mapped."
+  },
+  "groups": {
+    "search_options": "Search options",
+    "customer": "Customer",
+    "status": "Status",
+    "pick_status": "Pick a status"
+  },
+  "inspection_configuration": {
+    "title": "Inspection configuration",
+    "new_title": "New Inspection configuration",
+    "search_options": "Search options",
+    "client": "Client",
+    "status": "Status",
+    "pick_status": "Pick a status",
+    "name": "Name"
+  },
+  "orders_theme": {
+    "search_options": "Search options",
+    "form": "Form"
   }
 }
