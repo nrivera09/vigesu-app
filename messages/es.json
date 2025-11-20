@@ -5,7 +5,13 @@
     "remember-password": "Recuérdame",
     "forgot-password": "¿Recuperar contraseña?",
     "mistakes-login": "¿Problemas para iniciar sesión?",
-    "btn-login": "Iniciar sesión"
+    "btn-login": "Iniciar sesión",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "validations": {
+      "user_required": "El usuario es obligatorio",
+      "password_required": "La contraseña es obligatoria"
+    }
   },
   "aside": {
     "menus": {
@@ -214,6 +220,66 @@
   "general": {
     "btnWatch": "Ver",
     "btnPrint": "Imprimir",
-    "btnDelete": "Eliminar"
+    "btnDelete": "Eliminar",
+    "btnSearch": "Buscar",
+    "btnNew": "Nuevo"
+  },
+  "dashboard": {
+    "header": {
+      "messages": "Mensajes",
+      "support": "Soporte"
+    }
+  },
+  "users": {
+    "title": "Usuarios",
+    "search_options": "Opciones de búsqueda",
+    "username": "Usuario",
+    "employee_name": "Nombre del empleado",
+    "role": "Rol",
+    "pick_role": "Seleccione un rol",
+    "edit_title": "Editar usuario",
+    "colors": {
+      "crimson": "Carmesí",
+      "amber": "Ámbar",
+      "velvet": "Terciopelo"
+    }
+  },
+  "services": {
+    "title": "Servicios",
+    "customer": "Cliente",
+    "status": "Estado",
+    "pick_color": "Seleccione un color",
+    "colors": {
+      "crimson": "Carmesí",
+      "amber": "Ámbar",
+      "velvet": "Terciopelo"
+    }
+  },
+  "configurations": {
+    "loading_template": "Cargando plantilla…",
+    "error_loading": "No se pudo cargar la lista de plantillas.",
+    "not_found": "No encontré una plantilla con ID",
+    "search_options": "Opciones de búsqueda",
+    "report_form": "Formulario de reporte",
+    "info_alert": "Esta es una lista de los formatos de orden disponibles. Si necesita agregar un nuevo formato, esto debe ser consultado con el desarrollador, ya que todos los datos deben ser configurados y mapeados."
+  },
+  "groups": {
+    "search_options": "Opciones de búsqueda",
+    "customer": "Cliente",
+    "status": "Estado",
+    "pick_status": "Seleccionar estado"
+  },
+  "inspection_configuration": {
+    "title": "Configuración de inspección",
+    "new_title": "Nueva configuración de inspección",
+    "search_options": "Opciones de búsqueda",
+    "client": "Cliente",
+    "status": "Estado",
+    "pick_status": "Seleccionar estado",
+    "name": "Nombre"
+  },
+  "orders_theme": {
+    "search_options": "Opciones de búsqueda",
+    "form": "Formulario"
   }
 }

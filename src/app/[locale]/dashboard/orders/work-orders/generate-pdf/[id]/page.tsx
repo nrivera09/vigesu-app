@@ -64,7 +64,7 @@ const GeneratePdfPage = () => {
     printWindow.document.write(`
       <html>
         <head>
-          <title>Preview Work Order</title>
+          <title>${tWorkOrders("print.preview_title")}</title>
           <style>${styles}</style>
           <style>
             body { font-family: sans-serif; padding: 1rem; }
@@ -88,7 +88,7 @@ const GeneratePdfPage = () => {
     /*if (data && contentRef.current) {
       handlePrint?.();
     }*/
-  }, [data, contentRef.current]);
+  }, [data]);
 
   if (!data) return <Loading />;
 

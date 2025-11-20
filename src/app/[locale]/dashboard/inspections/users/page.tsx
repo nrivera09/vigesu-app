@@ -11,9 +11,16 @@ import BackButton from "@/shared/components/shared/BackButton";
 import { UserStatusLabel } from "@/features/inspections/models/UsersTypes";
 import Link from "next/link";
 
+import { useTranslations } from "next-intl";
+
 const Page = () => {
   const pathname = usePathname();
   const pageTitle = usePageTitle();
+  
+      const tAside = useTranslations("aside");
+  const t = useTranslations("users");
+  const tGeneral = useTranslations("general");
+      const [title, setTitle] = useState<string>("");
 
   const [showModal, setShowModal] = useState(false);
   const [refreshFlag, setRefreshFlag] = useState(false);
@@ -46,14 +53,14 @@ const Page = () => {
     <>
       <div className="gap-4 flex flex-col min-h-full">
         <div className="header-page flex items-center justify-between min-h-[70px] bg-base-200 px-6 gap-2">
-          <BackButton disableArrow />
+          <BackButton disableArrow title={!title ? tAside("module2.menu3") : title} />
           <Link
             href={`${pathname}/create`}
             className="btn bg-black rounded-full pr-3 py-6 border-none"
           >
             <FiPlus className="text-xl text-white" />
             <span className="bg-gray-800 py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px]">
-              New
+              {tGeneral("btnNew")}
             </span>
           </Link>
         </div>
@@ -61,11 +68,11 @@ const Page = () => {
         {/* FILTROS */}
         <div className="container max-w-full mb-5">
           <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
-            <legend className="fieldset-legend text-lg">Search options</legend>
+            <legend className="fieldset-legend text-lg">{t("search_options")}</legend>
             <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <label className="fieldset-legend text-lg font-normal">
-                  Username
+                  {t("username")}
                 </label>
                 <input
                   type="text"
@@ -81,7 +88,7 @@ const Page = () => {
               </div>
               <div>
                 <label className="fieldset-legend text-lg font-normal">
-                  Employee Name
+                  {t("employee_name")}
                 </label>
                 <input
                   type="text"
@@ -97,7 +104,7 @@ const Page = () => {
               </div>
               <div>
                 <label className="fieldset-legend text-lg font-normal">
-                  Role
+                  {t("role")}
                 </label>
                 <select
                   className="select input-lg text-lg w-full"
@@ -109,7 +116,7 @@ const Page = () => {
                     })
                   }
                 >
-                  <option value="">Pick a role</option>
+                  <option value="">{t("pick_role")}</option>
                   {Object.entries(UserStatusLabel).map(([key, label]) => (
                     <option key={key} value={label}>
                       {label}
@@ -124,7 +131,7 @@ const Page = () => {
                 >
                   <IoSearchOutline className="text-xl text-white" />
                   <span className=" py-1 px-4 text-white font-normal rounded-full  md:block text-[13px] ">
-                    Search
+                    {tGeneral("btnSearch")}
                   </span>
                 </button>
                 <button

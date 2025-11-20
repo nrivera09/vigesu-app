@@ -7,6 +7,7 @@ import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
 import { CustomerOption } from "@/shared/utils/orderMapper";
 import { debounce } from "lodash";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useRef, useState } from "react";
@@ -17,6 +18,9 @@ import { MdOutlineSettingsBackupRestore } from "react-icons/md";
 const Page = () => {
   const pathname = usePathname();
   const pageTitle = usePageTitle();
+  const t = useTranslations("inspection_configuration");
+  const tGeneral = useTranslations("general");
+
   const [title, setTitle] = useState<string>("");
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
   const [customerOptions, setCustomerOptions] = useState<CustomerOption[]>([]);
@@ -88,7 +92,7 @@ const Page = () => {
       <div className="gap-4 flex flex-col  min-h-full ">
         <div className="header-page flex flex-row items-center justify-between min-h-[70px] bg-base-200 px-6 gap-2">
           <BackButton
-            title={!title ? "New Inspection configuration" : title}
+            title={!title ? t("new_title") : title}
             disableArrow
           />
           <div className="flex flex-row gap-2">
@@ -98,19 +102,19 @@ const Page = () => {
             >
               <FiPlus className="text-xl text-white" />
               <span className="bg-gray-800 py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px]">
-                New
+                {tGeneral("btnNew")}
               </span>
             </Link>
             <button className="btn bg-black rounded-full pr-3 py-6  sm:flex items-center justify-center border-none !hidden">
               <IoSearchOutline className="text-xl text-white" />
               <span className="bg-gray-800 py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px] ">
-                Search
+                {tGeneral("btnSearch")}
               </span>
             </button>
             <button className="btn bg-red-600 rounded-full pr-3 py-6 hidden sm:flex items-center justify-center border-none !hidden">
               <FiTrash2 className="text-xl text-white" />
               <span className="bg-red-500 py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px] ">
-                Delete
+                {tGeneral("btnDelete")}
               </span>
             </button>
           </div>
@@ -119,12 +123,12 @@ const Page = () => {
           <div className="container max-w-full mb-5">
             <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
               <legend className="fieldset-legend text-lg">
-                Search options
+                {t("search_options")}
               </legend>
               <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-3 gap-4">
                 <div className="flex-col !hidden ">
                   <legend className="fieldset-legend text-lg font-normal">
-                    Client
+                    {t("client")}
                   </legend>
                   <div className="relative">
                     <input
@@ -169,7 +173,7 @@ const Page = () => {
                 </div>
                 <div className="flex-col !hidden">
                   <legend className="fieldset-legend text-lg font-normal">
-                    Status
+                    {t("status")}
                   </legend>
                   <select
                     defaultValue="Pick a color"
@@ -182,7 +186,7 @@ const Page = () => {
                     }
                   >
                     <option disabled={true} value="">
-                      Pick a status
+                      {t("pick_status")}
                     </option>
 
                     {Object.entries(InspectionStatusLabel).map(
@@ -196,7 +200,7 @@ const Page = () => {
                 </div>
                 <div className="flex flex-col col-span-2">
                   <legend className="fieldset-legend text-lg font-normal">
-                    Name
+                    {t("name")}
                   </legend>
                   <input
                     type="text"
@@ -222,7 +226,7 @@ const Page = () => {
                     >
                       <IoSearchOutline className="text-xl text-white" />
                       <span className=" py-1 px-4 text-white font-normal rounded-full  md:block text-[13px] ">
-                        Search
+                        {tGeneral("btnSearch")}
                       </span>
                     </button>
                     <button
