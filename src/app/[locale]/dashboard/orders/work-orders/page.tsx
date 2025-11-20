@@ -19,6 +19,7 @@ import AlertInfo from "@/shared/components/shared/AlertInfo";
 import { toast } from "sonner";
 import Loading from "@/shared/components/shared/Loading";
 import { useTranslations } from "next-intl";
+import CaliforniaBitInspection from "@/shared/components/shared/InspectionsPdf/CaliforniaBitInspection";
 
 interface CustomerOption {
   id: number;
