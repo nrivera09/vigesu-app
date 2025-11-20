@@ -17,10 +17,14 @@ const Page = () => {
   const pathname = usePathname();
   const pageTitle = usePageTitle();
   const t = useTranslations("groups");
+  
+    const tAside = useTranslations("aside");
   const tGeneral = useTranslations("general");
 
   const [showModal, setShowModal] = useState(false);
   const [refreshFlag, setRefreshFlag] = useState(false);
+  
+    const [title, setTitle] = useState<string>("");
 
   const handleSuccess = () => {
     setRefreshFlag(!refreshFlag);
@@ -55,7 +59,7 @@ const Page = () => {
     <>
       <div className="gap-4 flex flex-col  min-h-full ">
         <div className="header-page flex flex-row items-center justify-between min-h-[70px] bg-base-200 px-6 gap-2">
-          <BackButton disableArrow />
+          <BackButton disableArrow title={!title ? tAside("module2.menu2") : title} />
           <div className="flex flex-row gap-2">
             <button
               onClick={() => setShowModal(true)}

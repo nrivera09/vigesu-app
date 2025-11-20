@@ -231,6 +231,24 @@
     }
   },
   "users": {
+    "title": "Usuarios",
+    "search_options": "Opciones de búsqueda",
+    "username": "Usuario",
+    "employee_name": "Nombre del empleado",
+    "role": "Rol",
+    "pick_role": "Seleccione un rol",
+    "edit_title": "Editar usuario",
+    "colors": {
+      "crimson": "Carmesí",
+      "amber": "Ámbar",
+      "velvet": "Terciopelo"
+    }
+  },
+  "services": {
+    "title": "Servicios",
+    "customer": "Cliente",
+    "status": "Estado",
+    "pick_color": "Seleccione un color",
     "colors": {
       "crimson": "Carmesí",
       "amber": "Ámbar",

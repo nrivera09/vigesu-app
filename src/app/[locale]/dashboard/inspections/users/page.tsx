@@ -16,8 +16,11 @@ import { useTranslations } from "next-intl";
 const Page = () => {
   const pathname = usePathname();
   const pageTitle = usePageTitle();
+  
+      const tAside = useTranslations("aside");
   const t = useTranslations("users");
   const tGeneral = useTranslations("general");
+      const [title, setTitle] = useState<string>("");
 
   const [showModal, setShowModal] = useState(false);
   const [refreshFlag, setRefreshFlag] = useState(false);
@@ -50,7 +53,7 @@ const Page = () => {
     <>
       <div className="gap-4 flex flex-col min-h-full">
         <div className="header-page flex items-center justify-between min-h-[70px] bg-base-200 px-6 gap-2">
-          <BackButton disableArrow />
+          <BackButton disableArrow title={!title ? tAside("module2.menu3") : title} />
           <Link
             href={`${pathname}/create`}
             className="btn bg-black rounded-full pr-3 py-6 border-none"
